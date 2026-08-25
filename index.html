@@ -36,58 +36,231 @@
         <div class="kh-data-texture"></div>
         <div class="kh-noise-overlay"></div>
 
-        <!-- Navigation Header -->
-        <header class="tw-fixed tw-top-0 tw-z-50 tw-flex tw-h-[70px] tw-w-full tw-items-center tw-justify-between tw-px-[6%] lg:tw-px-[8%]">
-            <!-- Brand Logo -->
-            <a class="tw-flex tw-items-center tw-gap-3 tw-text-decoration-none" href="#">
-                <div class="tw-h-[38px] tw-w-[38px] tw-overflow-hidden tw-rounded-lg tw-bg-[#101010] tw-p-1 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center">
-                    <img
-                        src="./assets/logo/kinetic.png"
-                        alt="KineticHost"
-                        class="tw-h-full tw-w-full tw-object-contain"
-                    />
-                </div>
-                <span class="tw-font-bold tw-text-xl tw-tracking-tight tw-text-white">
-                    Kinetic<span class="tw-font-light tw-text-neutral-400">Host</span>
-                </span>
-            </a>
-
-            <!-- Navigation Links -->
-            <div
-                class="collapsible-header animated-collapse max-lg:tw-shadow-2xl"
-                id="collapsed-header-items"
-            >
-                <div
-                    class="tw-flex tw-h-full tw-w-max tw-gap-2 tw-text-sm max-lg:tw-mt-[20px] max-lg:tw-flex-col max-lg:tw-w-full lg:tw-mx-auto lg:tw-items-center"
-                >
-                    <a class="header-links" href="#hero">Yes, Free</a>
-                    <a class="header-links" href="#features">Features</a>
-                    <a class="header-links" href="#included">Included Specs</a>
-                    <a class="header-links" href="#panel">Control Panel</a>
-                    <a class="header-links" href="#vps">VPS Hosting</a>
-                    <a class="header-links" href="#reviews">Reviews</a>
-                    <a class="header-links" href="#faq">FAQ</a>
-                </div>
-
-                <div class="tw-flex tw-items-center tw-gap-3 max-lg:tw-mt-6 max-lg:tw-w-full">
-                    <a href="/auth/login" class="btn-secondary tw-w-full lg:tw-w-auto text-xs">
-                        <i class="bi bi-person"></i>
-                        <span>Sign In</span>
+        <!-- Navigation Header (Header-3 shadcn style) -->
+        <header id="main-header" class="kh-nav-header tw-fixed tw-top-0 tw-z-50 tw-w-full">
+            <nav class="tw-mx-auto tw-flex tw-h-[70px] tw-w-full tw-max-w-6xl tw-items-center tw-justify-between tw-px-4 lg:tw-px-6">
+                <div class="tw-flex tw-items-center tw-gap-6">
+                    <!-- Brand Wordmark -->
+                    <a class="tw-flex tw-items-center tw-gap-3 tw-text-decoration-none hover:tw-opacity-90 tw-transition-opacity" href="/">
+                        <div class="tw-h-[36px] tw-w-[36px] tw-overflow-hidden tw-rounded-lg tw-bg-[#101010] tw-p-1 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center">
+                            <img
+                                src="./assets/logo/kinetic.png"
+                                alt="KineticHost"
+                                class="tw-h-full tw-w-full tw-object-contain"
+                            />
+                        </div>
+                        <span class="tw-font-bold tw-text-lg tw-tracking-tight tw-text-white">
+                            Kinetic<span class="tw-font-light tw-text-neutral-400">Host</span>
+                        </span>
                     </a>
-                    <a href="/auth/register" class="btn-primary tw-w-full lg:tw-w-auto">
+
+                    <!-- Desktop Navigation Menu -->
+                    <div class="tw-hidden md:tw-flex tw-items-center tw-gap-1">
+                        <!-- 1. Product Dropdown -->
+                        <div class="kh-nav-item">
+                            <button class="kh-nav-trigger" aria-haspopup="true" aria-expanded="false">
+                                <span>Product</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="kh-dropdown-menu tw-w-[580px]">
+                                <div class="tw-grid tw-grid-cols-2 tw-gap-2 tw-p-1">
+                                    <a href="#features" class="kh-dropdown-card">
+                                        <div class="kh-dropdown-icon"><i class="bi bi-globe"></i></div>
+                                        <div>
+                                            <div class="kh-dropdown-title">Website Builder</div>
+                                            <div class="kh-dropdown-desc">Create responsive websites with ease</div>
+                                        </div>
+                                    </a>
+                                    <a href="#vps" class="kh-dropdown-card">
+                                        <div class="kh-dropdown-icon"><i class="bi bi-layers"></i></div>
+                                        <div>
+                                            <div class="kh-dropdown-title">Cloud Platform</div>
+                                            <div class="kh-dropdown-desc">Deploy and scale apps in the cloud</div>
+                                        </div>
+                                    </a>
+                                    <a href="#panel" class="kh-dropdown-card">
+                                        <div class="kh-dropdown-icon"><i class="bi bi-person-plus"></i></div>
+                                        <div>
+                                            <div class="kh-dropdown-title">Team Collaboration</div>
+                                            <div class="kh-dropdown-desc">Tools to help teams work better</div>
+                                        </div>
+                                    </a>
+                                    <a href="#panel" class="kh-dropdown-card">
+                                        <div class="kh-dropdown-icon"><i class="bi bi-bar-chart-line"></i></div>
+                                        <div>
+                                            <div class="kh-dropdown-title">Analytics</div>
+                                            <div class="kh-dropdown-desc">Track and analyze server metrics</div>
+                                        </div>
+                                    </a>
+                                    <a href="#features" class="kh-dropdown-card">
+                                        <div class="kh-dropdown-icon"><i class="bi bi-plug"></i></div>
+                                        <div>
+                                            <div class="kh-dropdown-title">Integrations</div>
+                                            <div class="kh-dropdown-desc">Connect modpacks, bots and apps</div>
+                                        </div>
+                                    </a>
+                                    <a href="#vps" class="kh-dropdown-card">
+                                        <div class="kh-dropdown-icon"><i class="bi bi-code-slash"></i></div>
+                                        <div>
+                                            <div class="kh-dropdown-title">API</div>
+                                            <div class="kh-dropdown-desc">Custom integrations with our API</div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="tw-mt-2 tw-pt-3 tw-border-t tw-border-white/[0.08] tw-px-3 tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-neutral-400">
+                                    <span>Interested in dedicated scaling?</span>
+                                    <a href="/auth/register" class="tw-text-white tw-font-semibold hover:tw-underline tw-flex tw-items-center tw-gap-1">
+                                        Schedule a demo <i class="bi bi-arrow-right tw-text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Company Dropdown -->
+                        <div class="kh-nav-item">
+                            <button class="kh-nav-trigger" aria-haspopup="true" aria-expanded="false">
+                                <span>Company</span>
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
+                            <div class="kh-dropdown-menu tw-w-[540px]">
+                                <div class="tw-grid tw-grid-cols-2 tw-gap-4 tw-p-1">
+                                    <div class="tw-space-y-1">
+                                        <a href="#hero" class="kh-dropdown-card">
+                                            <div class="kh-dropdown-icon"><i class="bi bi-people"></i></div>
+                                            <div>
+                                                <div class="kh-dropdown-title">About Us</div>
+                                                <div class="kh-dropdown-desc">Learn our story and mission</div>
+                                            </div>
+                                        </a>
+                                        <a href="#reviews" class="kh-dropdown-card">
+                                            <div class="kh-dropdown-icon"><i class="bi bi-star"></i></div>
+                                            <div>
+                                                <div class="kh-dropdown-title">Customer Stories</div>
+                                                <div class="kh-dropdown-desc">See how players succeed</div>
+                                            </div>
+                                        </a>
+                                        <a href="#faq" class="kh-dropdown-card">
+                                            <div class="kh-dropdown-icon"><i class="bi bi-diagram-3"></i></div>
+                                            <div>
+                                                <div class="kh-dropdown-title">Partnerships</div>
+                                                <div class="kh-dropdown-desc">Collaborate for growth</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <div class="tw-space-y-0.5 tw-pl-3 tw-border-l tw-border-white/[0.08]">
+                                        <a href="#" class="kh-dropdown-link"><i class="bi bi-file-text"></i> <span>Terms of Service</span></a>
+                                        <a href="#" class="kh-dropdown-link"><i class="bi bi-shield-check"></i> <span>Privacy Policy</span></a>
+                                        <a href="#" class="kh-dropdown-link"><i class="bi bi-arrow-counterclockwise"></i> <span>Refund Policy</span></a>
+                                        <a href="#" class="kh-dropdown-link"><i class="bi bi-journal-text"></i> <span>Blog</span></a>
+                                        <a href="#faq" class="kh-dropdown-link"><i class="bi bi-question-circle"></i> <span>Help Center</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Pricing Link -->
+                        <a class="kh-nav-trigger" href="#vps">
+                            Pricing
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Action Buttons -->
+                <div class="tw-hidden md:tw-flex tw-items-center tw-gap-3">
+                    <a href="/auth/login" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
+                        Sign In
+                    </a>
+                    <a href="/auth/register" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                        <span>Get Started</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button with MenuToggleIcon style -->
+                <button
+                    id="mobile-menu-btn"
+                    class="tw-flex md:tw-hidden tw-items-center tw-justify-center tw-h-9 tw-w-9 tw-rounded-md tw-border tw-border-white/10 tw-bg-white/[0.04] tw-text-white hover:tw-bg-white/10 tw-transition-colors tw-cursor-pointer"
+                    aria-expanded="false"
+                    aria-label="Toggle menu"
+                    onclick="toggleMobileNav()"
+                >
+                    <svg
+                        id="menu-toggle-svg"
+                        viewBox="0 0 32 32"
+                        class="tw-w-5 tw-h-5 tw-transition-transform tw-duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    >
+                        <path
+                            id="menu-toggle-path"
+                            class="tw-transition-all tw-duration-300"
+                            style="stroke-dasharray: 12 63;"
+                            d="M27 10 13 10C10.8 10 9 8.2 9 6 9 3.5 10.8 2 13 2 15.2 2 17 3.8 17 6L17 26C17 28.2 18.8 30 21 30 23.2 30 25 28.2 25 26 25 23.8 23.2 22 21 22L7 22"
+                        />
+                        <path d="M7 16 27 16" />
+                    </svg>
+                </button>
+            </nav>
+
+            <!-- Mobile Slide-Down Menu -->
+            <div id="mobile-menu-drawer" class="kh-mobile-menu">
+                <div class="tw-flex tw-flex-col tw-gap-6 tw-flex-1">
+                    <!-- Product Section -->
+                    <div>
+                        <div class="tw-text-xs tw-font-mono tw-text-neutral-400 tw-uppercase tw-tracking-wider tw-mb-3">Product</div>
+                        <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-2">
+                            <a href="#features" class="kh-dropdown-card" onclick="toggleMobileNav(false)">
+                                <div class="kh-dropdown-icon"><i class="bi bi-globe"></i></div>
+                                <div><div class="kh-dropdown-title">Website Builder</div><div class="kh-dropdown-desc">Responsive websites with ease</div></div>
+                            </a>
+                            <a href="#vps" class="kh-dropdown-card" onclick="toggleMobileNav(false)">
+                                <div class="kh-dropdown-icon"><i class="bi bi-layers"></i></div>
+                                <div><div class="kh-dropdown-title">Cloud Platform</div><div class="kh-dropdown-desc">Deploy and scale in the cloud</div></div>
+                            </a>
+                            <a href="#panel" class="kh-dropdown-card" onclick="toggleMobileNav(false)">
+                                <div class="kh-dropdown-icon"><i class="bi bi-person-plus"></i></div>
+                                <div><div class="kh-dropdown-title">Team Collaboration</div><div class="kh-dropdown-desc">Sub-user permissions</div></div>
+                            </a>
+                            <a href="#panel" class="kh-dropdown-card" onclick="toggleMobileNav(false)">
+                                <div class="kh-dropdown-icon"><i class="bi bi-bar-chart-line"></i></div>
+                                <div><div class="kh-dropdown-title">Analytics</div><div class="kh-dropdown-desc">Real-time metrics</div></div>
+                            </a>
+                            <a href="#features" class="kh-dropdown-card" onclick="toggleMobileNav(false)">
+                                <div class="kh-dropdown-icon"><i class="bi bi-plug"></i></div>
+                                <div><div class="kh-dropdown-title">Integrations</div><div class="kh-dropdown-desc">1-click modpacks & bots</div></div>
+                            </a>
+                            <a href="#vps" class="kh-dropdown-card" onclick="toggleMobileNav(false)">
+                                <div class="kh-dropdown-icon"><i class="bi bi-code-slash"></i></div>
+                                <div><div class="kh-dropdown-title">API</div><div class="kh-dropdown-desc">Full developer API access</div></div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Company Section -->
+                    <div>
+                        <div class="tw-text-xs tw-font-mono tw-text-neutral-400 tw-uppercase tw-tracking-wider tw-mb-3">Company</div>
+                        <div class="tw-grid tw-grid-cols-2 tw-gap-2">
+                            <a href="#hero" class="kh-dropdown-link" onclick="toggleMobileNav(false)"><i class="bi bi-people"></i> <span>About Us</span></a>
+                            <a href="#reviews" class="kh-dropdown-link" onclick="toggleMobileNav(false)"><i class="bi bi-star"></i> <span>Stories</span></a>
+                            <a href="#faq" class="kh-dropdown-link" onclick="toggleMobileNav(false)"><i class="bi bi-question-circle"></i> <span>Help Center</span></a>
+                            <a href="#vps" class="kh-dropdown-link" onclick="toggleMobileNav(false)"><i class="bi bi-tag"></i> <span>Pricing</span></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action CTAs -->
+                <div class="tw-mt-8 tw-flex tw-flex-col tw-gap-3 tw-pt-6 tw-border-t tw-border-white/10">
+                    <a href="/auth/login" class="btn-secondary tw-w-full tw-justify-center">
+                        Sign In
+                    </a>
+                    <a href="/auth/register" class="btn-primary tw-w-full tw-justify-center">
                         <span>Get Started</span>
                         <i class="bi bi-arrow-right"></i>
                     </a>
                 </div>
             </div>
-
-            <!-- Mobile Drawer Toggle -->
-            <button
-                class="bi bi-list tw-text-2xl tw-text-white lg:tw-hidden tw-cursor-pointer tw-p-2 tw-bg-transparent tw-border-none"
-                onclick="toggleHeader()"
-                aria-label="Toggle menu"
-                id="collapse-btn"
-            ></button>
         </header>
 
         <!-- Hero Section (Play.hosting style) -->
@@ -223,66 +396,82 @@
                         </p>
                     </div>
 
-                    <!-- Checklist Grid (Play.hosting style) -->
+                    <!-- Checklist Grid with Dedicated Custom Icons -->
                     <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-4 tw-gap-6">
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-memory tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">4GB DDR5 RAM</div>
                                 <div class="tw-text-xs tw-text-neutral-400">High speed allocation</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-hdd-network-fill tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">25GB NVMe Storage</div>
                                 <div class="tw-text-xs tw-text-neutral-400">Ultra-fast Gen4 NVMe</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-layers-fill tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">Install Any Version</div>
                                 <div class="tw-text-xs tw-text-neutral-400">Paper, Purpur, Fabric</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-controller tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">Bedrock Crossplay</div>
                                 <div class="tw-text-xs tw-text-neutral-400">Play Java & Bedrock</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-ethernet tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">Create Extra Ports</div>
                                 <div class="tw-text-xs tw-text-neutral-400">Free custom allocations</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-people-fill tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">Invite Sub-Users</div>
                                 <div class="tw-text-xs tw-text-neutral-400">Full team permissions</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-infinity tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">Unmetered Slots</div>
                                 <div class="tw-text-xs tw-text-neutral-400">No player limits</div>
                             </div>
                         </div>
 
-                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
-                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4 hover:tw-border-white/20 tw-transition-colors">
+                            <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
+                                <i class="bi bi-shield-check tw-text-white tw-text-lg"></i>
+                            </div>
                             <div>
                                 <div class="tw-font-bold tw-text-white tw-text-base">100% Free Forever</div>
                                 <div class="tw-text-xs tw-text-neutral-400">No credit card needed</div>
