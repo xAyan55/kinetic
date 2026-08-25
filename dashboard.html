@@ -3,45 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KineticHost — Control Center</title>
-    <link rel="stylesheet" href="css/tailwind-build.css?v=1.0.4">
-    <link rel="stylesheet" href="css/index.css?v=1.0.4">
+    <title>Control Panel | KineticHost</title>
+    <link rel="icon" type="image/png" href="assets/logo/kinetic.png">
+    <link rel="stylesheet" href="css/tailwind-build.css?v=1.0.5">
+    <link rel="stylesheet" href="css/index.css?v=1.0.5">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.625rem 0.875rem;
-            border-radius: 0.5rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: #a3a3a3;
-            transition: all 0.15s ease;
-        }
-        .nav-link:hover {
-            color: #ffffff;
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        .nav-link.active {
-            color: #ffffff;
-            background-color: rgba(255, 255, 255, 0.1);
-            font-weight: 600;
-        }
         .kh-status-badge {
             display: inline-flex;
             align-items: center;
             gap: 0.375rem;
-            padding: 0.25rem 0.625rem;
+            padding: 0.2rem 0.55rem;
             border-radius: 9999px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.6875rem;
             font-weight: 600;
             text-transform: uppercase;
             border-width: 1px;
+            line-height: 1;
         }
         .kh-status-badge.online {
             background-color: rgba(16, 185, 129, 0.1);
@@ -64,74 +46,95 @@
             color: #f87171;
         }
         .kh-status-dot {
-            width: 0.45rem;
-            height: 0.45rem;
+            width: 0.4rem;
+            height: 0.4rem;
             border-radius: 9999px;
             background-color: currentColor;
         }
         .console-line {
-            line-height: 1.4;
+            line-height: 1.45;
             word-break: break-all;
             white-space: pre-wrap;
         }
+        @media (max-width: 1024px) {
+            .kh-sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                bottom: 0;
+                z-index: 50;
+            }
+            .kh-sidebar.open {
+                transform: translateX(260px);
+            }
+        }
     </style>
 </head>
-<body class="tw-bg-[#050505] tw-text-white tw-font-sans tw-min-h-screen tw-flex tw-antialiased">
+<body class="tw-bg-[#060606] tw-text-neutral-100 tw-font-sans tw-min-h-screen tw-flex tw-antialiased">
 
-    <!-- Persistent Left Sidebar -->
-    <aside class="tw-w-64 tw-bg-[#080808] tw-border-r tw-border-white/[0.08] tw-flex tw-flex-col tw-justify-between tw-h-screen tw-sticky tw-top-0 tw-z-30 tw-p-4">
+    <!-- Mobile Drawer Backdrop -->
+    <div id="drawer-backdrop" class="kh-drawer-backdrop"></div>
+
+    <!-- Persistent Application Sidebar -->
+    <aside id="panel-sidebar" class="kh-sidebar tw-p-4">
         <div>
-            <!-- Brand -->
-            <a href="/" class="tw-flex tw-items-center tw-gap-3 tw-px-2 tw-py-3 tw-mb-6">
+            <!-- Brand Logo & Wordmark -->
+            <a href="/" class="tw-flex tw-items-center tw-gap-3 tw-px-2 tw-py-3 tw-mb-6 hover:tw-opacity-85 tw-transition-opacity">
                 <img src="assets/logo/kinetic.png" alt="KineticHost" class="tw-h-7 tw-w-auto">
-                <span class="tw-text-lg tw-font-bold tw-tracking-tight tw-text-white">KineticHost</span>
+                <span class="tw-text-base tw-font-bold tw-tracking-tight tw-text-white">KineticHost</span>
             </a>
 
-            <!-- Navigation Links -->
-            <nav class="tw-space-y-1">
-                <a href="#dashboard" class="nav-link" data-route="dashboard">
-                    <i class="bi bi-grid-fill"></i>
-                    <span>Dashboard</span>
-                </a>
-
-                <!-- Admin Group -->
-                <div class="admin-nav-item tw-hidden tw-pt-4 tw-mt-4 tw-border-t tw-border-white/[0.08]">
-                    <div class="tw-px-3 tw-mb-2 tw-text-[11px] tw-font-mono tw-text-neutral-500 tw-uppercase tw-tracking-wider">
-                        Administrator
+            <!-- Navigation Sections -->
+            <nav class="tw-space-y-6">
+                <!-- General Section -->
+                <div>
+                    <div class="kh-nav-section-label">General</div>
+                    <div class="tw-space-y-1 tw-mt-1">
+                        <a href="#dashboard" class="kh-sidebar-link" data-route="dashboard">
+                            <i class="bi bi-grid-1x2-fill"></i>
+                            <span>Dashboard</span>
+                        </a>
                     </div>
-                    <a href="#admin-overview" class="nav-link" data-route="admin-overview">
-                        <i class="bi bi-speedometer2"></i>
-                        <span>Overview</span>
-                    </a>
-                    <a href="#admin-users" class="nav-link" data-route="admin-users">
-                        <i class="bi bi-people-fill"></i>
-                        <span>Users</span>
-                    </a>
-                    <a href="#admin-nodes" class="nav-link" data-route="admin-nodes">
-                        <i class="bi bi-hdd-network-fill"></i>
-                        <span>Nodes</span>
-                    </a>
-                    <a href="#admin-servers" class="nav-link" data-route="admin-servers">
-                        <i class="bi bi-server"></i>
-                        <span>All Servers</span>
-                    </a>
-                    <a href="#admin-settings" class="nav-link" data-route="admin-settings">
-                        <i class="bi bi-sliders"></i>
-                        <span>Settings</span>
-                    </a>
+                </div>
+
+                <!-- Admin Section (Only displayed when user.role === 'admin') -->
+                <div class="admin-nav-item tw-hidden">
+                    <div class="kh-nav-section-label">Administrator</div>
+                    <div class="tw-space-y-1 tw-mt-1">
+                        <a href="#admin-overview" class="kh-sidebar-link" data-route="admin-overview">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Overview</span>
+                        </a>
+                        <a href="#admin-users" class="kh-sidebar-link" data-route="admin-users">
+                            <i class="bi bi-people-fill"></i>
+                            <span>Users</span>
+                        </a>
+                        <a href="#admin-nodes" class="kh-sidebar-link" data-route="admin-nodes">
+                            <i class="bi bi-hdd-network-fill"></i>
+                            <span>Nodes</span>
+                        </a>
+                        <a href="#admin-servers" class="kh-sidebar-link" data-route="admin-servers">
+                            <i class="bi bi-server"></i>
+                            <span>All Servers</span>
+                        </a>
+                        <a href="#admin-settings" class="kh-sidebar-link" data-route="admin-settings">
+                            <i class="bi bi-sliders"></i>
+                            <span>Settings</span>
+                        </a>
+                    </div>
                 </div>
             </nav>
         </div>
 
-        <!-- User Profile & Sign Out Footer -->
+        <!-- Sidebar Profile Card & Sign Out -->
         <div class="tw-pt-4 tw-border-t tw-border-white/[0.08] tw-space-y-2">
             <a href="#profile" class="tw-flex tw-items-center tw-gap-3 tw-p-2 tw-rounded-lg hover:tw-bg-white/[0.04] tw-transition-colors">
                 <div class="tw-w-8 tw-h-8 tw-rounded-full tw-bg-neutral-800 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-bold tw-text-white">
-                    <span id="sidebar-user-avatar">U</span>
+                    <span class="sidebar-user-avatar">U</span>
                 </div>
                 <div class="tw-flex tw-flex-col tw-truncate">
-                    <span id="sidebar-user-name" class="tw-text-xs tw-font-semibold tw-text-white tw-truncate">User</span>
-                    <span id="sidebar-user-role" class="tw-text-[10px] tw-font-mono tw-text-neutral-400">role: user</span>
+                    <span class="sidebar-user-name tw-text-xs tw-font-semibold tw-text-white tw-truncate">User</span>
+                    <span class="sidebar-user-role tw-text-[10px] tw-font-mono tw-text-neutral-400">USER</span>
                 </div>
             </a>
             <button class="btn-logout tw-w-full tw-flex tw-items-center tw-gap-2.5 tw-px-3 tw-py-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-neutral-400 hover:tw-text-red-400 hover:tw-bg-red-500/10 tw-transition-colors">
@@ -141,456 +144,563 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <main class="tw-flex-1 tw-min-h-screen tw-overflow-y-auto tw-p-8 tw-max-w-7xl tw-w-full tw-mx-auto">
+    <!-- Main Content Container with Top Bar -->
+    <div class="tw-flex-1 tw-flex tw-flex-col tw-min-h-screen tw-overflow-x-hidden">
 
-        <!-- ================================================================ -->
-        <!-- VIEW 1: USER DASHBOARD (SERVERS LIST) -->
-        <!-- ================================================================ -->
-        <section id="view-servers" class="panel-view tw-space-y-8">
-            <div class="tw-flex tw-flex-col md:tw-flex-row md:tw-items-center md:tw-justify-between tw-gap-4">
-                <div>
-                    <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">Minecraft Servers</h1>
-                    <p class="tw-text-sm tw-text-neutral-400">Deploy, manage, and configure your dedicated instances.</p>
-                </div>
-                <button onclick="openCreateServerModal()" class="btn-primary">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>Create Server</span>
+        <!-- Top Application Header Bar -->
+        <header class="tw-h-14 tw-border-b tw-border-white/[0.08] tw-bg-[#080808]/80 tw-backdrop-blur-md tw-px-6 tw-flex tw-items-center tw-justify-between tw-sticky tw-top-0 tw-z-30">
+            <div class="tw-flex tw-items-center tw-gap-3">
+                <button id="mobile-menu-toggle" class="lg:tw-hidden tw-p-1.5 tw-rounded-md tw-bg-white/[0.04] hover:tw-bg-white/[0.08] tw-text-neutral-400 hover:tw-text-white">
+                    <i class="bi bi-list tw-text-lg"></i>
                 </button>
-            </div>
-
-            <!-- Loading State -->
-            <div id="servers-loading" class="tw-p-12 tw-text-center tw-text-neutral-500 tw-font-mono tw-text-sm">
-                <i class="bi bi-arrow-repeat tw-animate-spin tw-text-lg"></i>
-                <div class="tw-mt-2">Loading server instances...</div>
-            </div>
-
-            <!-- Empty State -->
-            <div id="servers-empty-state" class="tw-hidden tw-p-12 tw-rounded-2xl tw-border tw-border-white/[0.08] tw-bg-white/[0.01] tw-text-center tw-space-y-4">
-                <div class="tw-w-12 tw-h-12 tw-rounded-full tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-neutral-400 tw-text-xl">
-                    <i class="bi bi-server"></i>
+                <div class="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-mono tw-text-neutral-400">
+                    <span class="tw-text-neutral-600">panel /</span>
+                    <span id="topbar-breadcrumb" class="tw-text-neutral-200 tw-font-medium">Minecraft Servers</span>
                 </div>
-                <div>
-                    <h3 class="tw-text-base tw-font-bold tw-text-white">No servers yet</h3>
-                    <p class="tw-text-sm tw-text-neutral-400 tw-max-w-md tw-mx-auto tw-mt-1">
-                        Create your first Minecraft server instance to get started. High-frequency Ryzen compute ready.
-                    </p>
+            </div>
+
+            <div class="tw-flex tw-items-center tw-gap-4">
+                <!-- System Status Indicator -->
+                <div class="tw-flex tw-items-center tw-gap-2 tw-px-2.5 tw-py-1 tw-rounded-full tw-bg-emerald-500/10 tw-border tw-border-emerald-500/20 tw-text-emerald-400 tw-text-[11px] tw-font-mono">
+                    <span class="tw-w-1.5 tw-h-1.5 tw-rounded-full tw-bg-emerald-400 tw-animate-pulse"></span>
+                    <span>Host Online</span>
                 </div>
-                <button onclick="openCreateServerModal()" class="btn-primary tw-mx-auto">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>Create Server Now</span>
-                </button>
-            </div>
 
-            <!-- Servers Grid -->
-            <div id="servers-grid" class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6 tw-hidden">
-                <!-- Dynamically Rendered -->
+                <!-- User Avatar Quick Link -->
+                <a href="#profile" class="tw-flex tw-items-center tw-gap-2 hover:tw-opacity-80 tw-transition-opacity">
+                    <div class="tw-w-7 tw-h-7 tw-rounded-full tw-bg-neutral-800 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-bold tw-text-white">
+                        <span class="sidebar-user-avatar">U</span>
+                    </div>
+                </a>
             </div>
-        </section>
+        </header>
 
-        <!-- ================================================================ -->
-        <!-- VIEW 2: SERVER DETAIL (OVERVIEW, CONSOLE, SETTINGS) -->
-        <!-- ================================================================ -->
-        <section id="view-server-detail" class="panel-view tw-hidden tw-space-y-6">
-            <!-- Server Header Banner -->
-            <div class="tw-p-6 tw-rounded-2xl tw-bg-neutral-900/60 tw-border tw-border-white/[0.08] tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between tw-gap-4">
-                <div class="tw-flex tw-items-center tw-gap-4">
-                    <a href="#dashboard" class="tw-h-9 tw-w-9 tw-rounded-lg tw-bg-white/[0.05] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
-                        <i class="bi bi-chevron-left"></i>
-                    </a>
+        <!-- Main Page Content -->
+        <main class="tw-flex-1 tw-p-6 lg:tw-p-10 tw-max-w-7xl tw-w-full tw-mx-auto">
+
+            <!-- ================================================================ -->
+            <!-- VIEW 1: USER DASHBOARD (SERVERS LIST) -->
+            <!-- ================================================================ -->
+            <section id="view-servers" class="panel-view tw-space-y-8">
+                <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
                     <div>
-                        <div class="tw-flex tw-items-center tw-gap-3">
-                            <h1 id="detail-server-name" class="tw-text-xl tw-font-bold tw-text-white">Server Name</h1>
-                            <span id="detail-server-status" class="kh-status-badge offline">
-                                <span class="kh-status-dot"></span> <span>OFFLINE</span>
-                            </span>
-                        </div>
-                        <div class="tw-flex tw-items-center tw-gap-2 tw-mt-1 tw-font-mono tw-text-xs tw-text-neutral-400">
-                            <span id="detail-server-software">Paper 1.20.4</span>
-                            <span>•</span>
-                            <span id="detail-server-address">play.kinetichost.pro:25565</span>
-                        </div>
+                        <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Minecraft Servers</h1>
+                        <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Deploy, monitor, and configure your dedicated gaming nodes.</p>
                     </div>
-                </div>
-
-                <!-- Power Action Buttons -->
-                <div class="tw-flex tw-items-center tw-gap-2">
-                    <button id="btn-server-start" class="btn-primary tw-py-1.5 tw-px-3.5 tw-text-xs">
-                        <i class="bi bi-play-fill"></i>
-                        <span>Start</span>
-                    </button>
-                    <button id="btn-server-stop" class="btn-secondary tw-py-1.5 tw-px-3.5 tw-text-xs">
-                        <i class="bi bi-stop-fill"></i>
-                        <span>Stop</span>
-                    </button>
-                    <button id="btn-server-restart" class="btn-secondary tw-py-1.5 tw-px-3.5 tw-text-xs">
-                        <i class="bi bi-arrow-repeat"></i>
-                        <span>Restart</span>
-                    </button>
-                    <button id="btn-server-kill" class="tw-p-2 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/20 tw-text-red-400 tw-text-xs" title="Force Kill">
-                        <i class="bi bi-x-circle-fill"></i>
+                    <button onclick="openCreateServerModal()" class="btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Create Server</span>
                     </button>
                 </div>
-            </div>
 
-            <!-- Sub Navigation Tabs -->
-            <div class="tw-flex tw-items-center tw-gap-2 tw-border-b tw-border-white/[0.08] tw-pb-3">
-                <button onclick="switchServerTab('overview')" class="server-tab-btn tw-px-4 tw-py-2 tw-rounded-lg tw-border tw-text-xs tw-font-mono tw-transition-colors" data-tab="overview">
-                    <i class="bi bi-activity tw-mr-1.5"></i> Overview
-                </button>
-                <button onclick="switchServerTab('console')" class="server-tab-btn tw-px-4 tw-py-2 tw-rounded-lg tw-border tw-text-xs tw-font-mono tw-transition-colors" data-tab="console">
-                    <i class="bi bi-terminal tw-mr-1.5"></i> Console
-                </button>
-                <button onclick="switchServerTab('settings')" class="server-tab-btn tw-px-4 tw-py-2 tw-rounded-lg tw-border tw-text-xs tw-font-mono tw-transition-colors" data-tab="settings">
-                    <i class="bi bi-gear tw-mr-1.5"></i> Settings
-                </button>
-            </div>
+                <!-- Loading State Skeleton -->
+                <div id="servers-loading" class="tw-py-16 tw-text-center tw-space-y-3">
+                    <div class="tw-w-8 tw-h-8 tw-border-2 tw-border-white/20 tw-border-t-white tw-rounded-full tw-animate-spin tw-mx-auto"></div>
+                    <div class="tw-text-xs tw-font-mono tw-text-neutral-500">Connecting to server daemon...</div>
+                </div>
 
-            <!-- Tab: Overview -->
-            <div id="server-tab-overview" class="server-tab-content tw-space-y-6">
-                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
-                    <!-- Memory Card -->
-                    <div class="kh-card">
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
-                            <span class="tw-text-xs tw-font-mono tw-text-neutral-400">RAM USAGE</span>
-                            <i class="bi bi-memory tw-text-neutral-400"></i>
-                        </div>
-                        <div id="stat-ram-used" class="tw-text-lg tw-font-bold tw-font-mono tw-text-white">0 MB / 4096 MB</div>
-                        <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden tw-mt-3">
-                            <div id="stat-ram-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 0%"></div>
-                        </div>
+                <!-- Clean Empty State -->
+                <div id="servers-empty-state" class="tw-hidden kh-panel-card tw-py-16 tw-text-center tw-space-y-4">
+                    <div class="tw-w-12 tw-h-12 tw-rounded-full tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-neutral-400 tw-text-xl">
+                        <i class="bi bi-server"></i>
                     </div>
-
-                    <!-- CPU Card -->
-                    <div class="kh-card">
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
-                            <span class="tw-text-xs tw-font-mono tw-text-neutral-400">CPU LOAD</span>
-                            <i class="bi bi-cpu tw-text-neutral-400"></i>
-                        </div>
-                        <div id="stat-cpu-used" class="tw-text-lg tw-font-bold tw-font-mono tw-text-white">0%</div>
-                        <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden tw-mt-3">
-                            <div id="stat-cpu-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 0%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Storage Card -->
-                    <div class="kh-card">
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
-                            <span class="tw-text-xs tw-font-mono tw-text-neutral-400">DISK ALLOCATION</span>
-                            <i class="bi bi-hdd tw-text-neutral-400"></i>
-                        </div>
-                        <div id="stat-disk-used" class="tw-text-lg tw-font-bold tw-font-mono tw-text-white">0 MB / 25600 MB</div>
-                        <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden tw-mt-3">
-                            <div id="stat-disk-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 1%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tab: Console -->
-            <div id="server-tab-console" class="server-tab-content tw-hidden tw-space-y-3">
-                <div class="tw-flex tw-items-center tw-justify-between tw-text-xs tw-font-mono tw-text-neutral-400">
-                    <span class="tw-flex tw-items-center tw-gap-2">
-                        <span class="kh-dot-active"></span> Live Process Output Stream (SSE)
-                    </span>
-                    <label class="tw-flex tw-items-center tw-gap-1.5 tw-cursor-pointer">
-                        <input type="checkbox" id="console-autoscroll" checked class="tw-rounded tw-bg-neutral-800 tw-border-white/20">
-                        <span>Auto-scroll</span>
-                    </label>
-                </div>
-
-                <div id="console-terminal" class="tw-h-[480px] tw-w-full tw-bg-[#040404] tw-border tw-border-white/[0.08] tw-rounded-xl tw-p-4 tw-font-mono tw-text-xs tw-text-neutral-300 tw-overflow-y-auto tw-space-y-1">
-                    <!-- Live console lines -->
-                </div>
-
-                <!-- Command Input Bar -->
-                <div class="tw-flex tw-items-center tw-gap-2">
-                    <input type="text" id="console-input" placeholder="Type a Minecraft command (e.g. op Player, say Hello, list)..." class="kh-input tw-font-mono tw-text-xs tw-flex-1">
-                    <button id="console-send-btn" class="btn-primary tw-py-2.5 tw-px-5 tw-text-xs">
-                        <span>Send</span>
-                        <i class="bi bi-send-fill"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tab: Settings -->
-            <div id="server-tab-settings" class="server-tab-content tw-hidden tw-space-y-6">
-                <div class="kh-card tw-max-w-2xl tw-space-y-5">
-                    <h3 class="tw-text-base tw-font-bold tw-text-white">Server Configuration</h3>
-
                     <div>
-                        <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1.5">Server Display Name</label>
-                        <input type="text" id="settings-server-name" class="kh-input">
+                        <h3 class="tw-text-lg tw-font-bold tw-text-white">No servers yet</h3>
+                        <p class="tw-text-sm tw-text-neutral-400 tw-max-w-sm tw-mx-auto tw-mt-1">
+                            Create your first Minecraft server and manage it from one place. High-speed Ryzen compute ready.
+                        </p>
                     </div>
+                    <button onclick="openCreateServerModal()" class="btn-primary tw-mx-auto tw-mt-2">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Create Server Now</span>
+                    </button>
+                </div>
 
-                    <div>
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-1.5">
-                            <label class="tw-text-xs tw-font-mono tw-text-neutral-400">RAM Allocation</label>
-                            <span id="settings-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white">4096 MB</span>
-                        </div>
-                        <input type="range" id="settings-server-ram" min="1024" max="8192" step="512" value="4096" class="tw-w-full tw-accent-white">
-                    </div>
+                <!-- Servers Grid -->
+                <div id="servers-grid" class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6 tw-hidden">
+                    <!-- Dynamically Rendered via js/dashboard.js -->
+                </div>
+            </section>
 
-                    <div class="tw-flex tw-items-center tw-justify-between tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/5">
+            <!-- ================================================================ -->
+            <!-- VIEW 2: SERVER DETAIL (OVERVIEW, CONSOLE, SETTINGS) -->
+            <!-- ================================================================ -->
+            <section id="view-server-detail" class="panel-view tw-hidden tw-space-y-6">
+                <!-- Server Header Card -->
+                <div class="kh-panel-card tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between tw-gap-6">
+                    <div class="tw-flex tw-items-center tw-gap-4">
+                        <a href="#dashboard" class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.05] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
+                            <i class="bi bi-arrow-left"></i>
+                        </a>
                         <div>
-                            <div class="tw-text-xs tw-font-bold tw-text-white">Auto-Start on Boot</div>
-                            <div class="tw-text-[11px] tw-text-neutral-400">Automatically launch this instance when Node.js starts</div>
+                            <div class="tw-flex tw-items-center tw-gap-3">
+                                <h1 id="detail-server-name" class="tw-text-xl lg:tw-text-2xl tw-font-bold tw-text-white">Server Name</h1>
+                                <span id="detail-server-status" class="kh-status-badge offline">
+                                    <span class="kh-status-dot"></span> <span>OFFLINE</span>
+                                </span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-2 tw-mt-1 tw-font-mono tw-text-xs tw-text-neutral-400">
+                                <span id="detail-server-software">Paper 1.20.4</span>
+                                <span>•</span>
+                                <span id="detail-server-address">play.kinetichost.pro:25565</span>
+                            </div>
                         </div>
-                        <input type="checkbox" id="settings-server-autostart" class="tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-w-4 tw-h-4 tw-accent-white">
                     </div>
 
-                    <button id="btn-save-server-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                        <span>Save Changes</span>
+                    <!-- Contextual Power Controls Bar -->
+                    <div class="tw-flex tw-items-center tw-gap-2">
+                        <button id="btn-server-start" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                            <i class="bi bi-play-fill tw-text-sm"></i>
+                            <span>Start</span>
+                        </button>
+                        <button id="btn-server-stop" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
+                            <i class="bi bi-stop-fill tw-text-sm"></i>
+                            <span>Stop</span>
+                        </button>
+                        <button id="btn-server-restart" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
+                            <i class="bi bi-arrow-repeat tw-text-sm"></i>
+                            <span>Restart</span>
+                        </button>
+                        <button id="btn-server-kill" class="tw-p-2.5 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/20 tw-text-red-400 tw-text-xs tw-transition-colors" title="Force Kill (Immediate SIGKILL)">
+                            <i class="bi bi-x-circle-fill"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Segmented Tab Navigation -->
+                <div class="kh-segmented-nav">
+                    <button onclick="switchServerTab('overview')" class="kh-segmented-btn server-tab-btn active" data-tab="overview">
+                        <i class="bi bi-activity"></i>
+                        <span>Overview</span>
+                    </button>
+                    <button onclick="switchServerTab('console')" class="kh-segmented-btn server-tab-btn" data-tab="console">
+                        <i class="bi bi-terminal"></i>
+                        <span>Console</span>
+                    </button>
+                    <button onclick="switchServerTab('settings')" class="kh-segmented-btn server-tab-btn" data-tab="settings">
+                        <i class="bi bi-gear"></i>
+                        <span>Settings</span>
                     </button>
                 </div>
 
-                <!-- Danger Zone -->
-                <div class="kh-card tw-max-w-2xl tw-border-red-500/20 tw-space-y-4">
-                    <h3 class="tw-text-base tw-font-bold tw-text-red-400">Danger Zone</h3>
-                    <p class="tw-text-xs tw-text-neutral-400">
-                        Permanently delete this server instance, its world data, files, and database record.
-                    </p>
-                    <button id="btn-delete-server" class="tw-py-2 tw-px-4 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/30 tw-text-red-400 tw-text-xs tw-font-mono tw-font-semibold tw-transition-colors">
-                        <i class="bi bi-trash-fill tw-mr-1"></i> Delete Server Instance
+                <!-- Tab: Overview -->
+                <div id="server-tab-overview" class="server-tab-content tw-space-y-6">
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
+                        <!-- Memory Card -->
+                        <div class="kh-panel-card">
+                            <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
+                                <span class="tw-text-xs tw-font-mono tw-text-neutral-400">MEMORY ALLOCATION</span>
+                                <i class="bi bi-memory tw-text-neutral-500"></i>
+                            </div>
+                            <div id="stat-ram-used" class="tw-text-xl tw-font-bold tw-font-mono tw-text-white">0 MB / 4096 MB</div>
+                            <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden tw-mt-3">
+                                <div id="stat-ram-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- CPU Card -->
+                        <div class="kh-panel-card">
+                            <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
+                                <span class="tw-text-xs tw-font-mono tw-text-neutral-400">CPU LOAD</span>
+                                <i class="bi bi-cpu tw-text-neutral-500"></i>
+                            </div>
+                            <div id="stat-cpu-used" class="tw-text-xl tw-font-bold tw-font-mono tw-text-white">0%</div>
+                            <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden tw-mt-3">
+                                <div id="stat-cpu-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Storage Card -->
+                        <div class="kh-panel-card">
+                            <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
+                                <span class="tw-text-xs tw-font-mono tw-text-neutral-400">DISK USAGE</span>
+                                <i class="bi bi-hdd tw-text-neutral-500"></i>
+                            </div>
+                            <div id="stat-disk-used" class="tw-text-xl tw-font-bold tw-font-mono tw-text-white">0 MB / 25600 MB</div>
+                            <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden tw-mt-3">
+                                <div id="stat-disk-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 1%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Console -->
+                <div id="server-tab-console" class="server-tab-content tw-hidden tw-space-y-3">
+                    <div class="kh-terminal-window">
+                        <!-- Top Console Toolbar -->
+                        <div class="kh-terminal-header">
+                            <div class="tw-flex tw-items-center tw-gap-2.5">
+                                <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-400 tw-animate-pulse"></span>
+                                <span class="tw-text-neutral-300 tw-font-semibold">LIVE PROCESS OUTPUT</span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-4">
+                                <label class="tw-flex tw-items-center tw-gap-1.5 tw-cursor-pointer tw-text-neutral-400 hover:tw-text-neutral-200">
+                                    <input type="checkbox" id="console-autoscroll" checked class="tw-rounded tw-bg-neutral-800 tw-border-white/20">
+                                    <span>Auto-scroll</span>
+                                </label>
+                                <button id="console-clear-btn" class="hover:tw-text-white tw-transition-colors">
+                                    <i class="bi bi-trash tw-mr-1"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terminal Body -->
+                        <div id="console-terminal" class="kh-terminal-body">
+                            <!-- Live SSE lines -->
+                        </div>
+
+                        <!-- Command Bar -->
+                        <div class="tw-p-3 tw-bg-[#080808] tw-border-t tw-border-white/[0.08] tw-flex tw-items-center tw-gap-2">
+                            <span class="tw-font-mono tw-text-xs tw-text-neutral-500 tw-pl-1">&gt;</span>
+                            <input type="text" id="console-input" placeholder="Enter Minecraft command (e.g. say Hello, op Player, list)..." class="kh-field-input tw-font-mono tw-text-xs tw-border-none tw-bg-transparent focus:tw-shadow-none">
+                            <button id="console-send-btn" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                                <span>Send</span>
+                                <i class="bi bi-send-fill"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Settings -->
+                <div id="server-tab-settings" class="server-tab-content tw-hidden tw-space-y-6">
+                    <div class="kh-panel-card tw-max-w-2xl tw-space-y-5">
+                        <h3 class="tw-text-base tw-font-bold tw-text-white">Server Configuration</h3>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Server Display Name</label>
+                            <input type="text" id="settings-server-name" class="kh-field-input">
+                        </div>
+
+                        <div class="kh-field-group">
+                            <div class="tw-flex tw-items-center tw-justify-between">
+                                <label class="kh-field-label">RAM Allocation</label>
+                                <span id="settings-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white">4096 MB</span>
+                            </div>
+                            <input type="range" id="settings-server-ram" min="1024" max="8192" step="512" value="4096" class="tw-w-full tw-accent-white">
+                        </div>
+
+                        <div class="tw-flex tw-items-center tw-justify-between tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                            <div>
+                                <div class="tw-text-xs tw-font-bold tw-text-white">Auto-Start on Boot</div>
+                                <div class="tw-text-[11px] tw-text-neutral-400">Launch instance automatically when Node.js starts</div>
+                            </div>
+                            <input type="checkbox" id="settings-server-autostart" class="tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-w-4 tw-h-4 tw-accent-white">
+                        </div>
+
+                        <button id="btn-save-server-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="kh-panel-card tw-max-w-2xl tw-border-red-500/20 tw-space-y-4">
+                        <h3 class="tw-text-base tw-font-bold tw-text-red-400">Danger Zone</h3>
+                        <p class="tw-text-xs tw-text-neutral-400">
+                            Permanently delete this instance, including all world saves, plugin configs, and database records.
+                        </p>
+                        <button id="btn-delete-server" class="tw-py-2 tw-px-4 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/30 tw-text-red-400 tw-text-xs tw-font-mono tw-font-semibold tw-transition-colors">
+                            <i class="bi bi-trash-fill tw-mr-1"></i> Delete Server Instance
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================ -->
+            <!-- VIEW 3: ADMIN OVERVIEW -->
+            <!-- ================================================================ -->
+            <section id="view-admin-overview" class="panel-view tw-hidden tw-space-y-8">
+                <div>
+                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Platform Overview</h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Real-time statistics across all users, instances, and physical nodes.</p>
+                </div>
+
+                <!-- 4 Stat Cards -->
+                <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-4">
+                    <div class="kh-panel-card">
+                        <span class="tw-text-xs tw-font-mono tw-text-neutral-400">TOTAL USERS</span>
+                        <div id="admin-stat-users" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">0</div>
+                    </div>
+                    <div class="kh-panel-card">
+                        <span class="tw-text-xs tw-font-mono tw-text-neutral-400">TOTAL SERVERS</span>
+                        <div id="admin-stat-servers" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">0</div>
+                    </div>
+                    <div class="kh-panel-card">
+                        <span class="tw-text-xs tw-font-mono tw-text-neutral-400">RUNNING PROCESSES</span>
+                        <div id="admin-stat-running" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">0</div>
+                    </div>
+                    <div class="kh-panel-card">
+                        <span class="tw-text-xs tw-font-mono tw-text-neutral-400">DAEMON NODES</span>
+                        <div id="admin-stat-nodes" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">1</div>
+                    </div>
+                </div>
+
+                <!-- Host Specs Card -->
+                <div class="kh-panel-card tw-space-y-4">
+                    <h3 class="tw-text-base tw-font-bold tw-text-white">Host Infrastructure Specifications</h3>
+                    <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-4 tw-font-mono tw-text-xs">
+                        <div><span class="tw-text-neutral-500">HOSTNAME:</span> <span id="node-hostname" class="tw-text-white">...</span></div>
+                        <div><span class="tw-text-neutral-500">OS / KERNEL:</span> <span id="node-os" class="tw-text-white">...</span></div>
+                        <div><span class="tw-text-neutral-500">CPU:</span> <span id="node-cpu-model" class="tw-text-white">...</span></div>
+                        <div><span class="tw-text-neutral-500">RAM:</span> <span id="node-ram-usage" class="tw-text-white">...</span></div>
+                        <div><span class="tw-text-neutral-500">DISK:</span> <span id="node-disk-usage" class="tw-text-white">...</span></div>
+                    </div>
+                </div>
+
+                <!-- Activity Log Table -->
+                <div class="kh-panel-card tw-p-0 tw-overflow-hidden">
+                    <div class="tw-px-6 tw-py-4 tw-border-b tw-border-white/[0.08] tw-text-sm tw-font-bold tw-text-white">
+                        Real Platform Activity Log
+                    </div>
+                    <div class="tw-overflow-x-auto">
+                        <table class="tw-w-full tw-text-left tw-border-collapse">
+                            <thead>
+                                <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
+                                    <th class="tw-py-3 tw-px-4">Time</th>
+                                    <th class="tw-py-3 tw-px-4">User</th>
+                                    <th class="tw-py-3 tw-px-4">Action</th>
+                                    <th class="tw-py-3 tw-px-4">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-activity-logs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================ -->
+            <!-- VIEW 4: ADMIN USERS DIRECTORY -->
+            <!-- ================================================================ -->
+            <section id="view-admin-users" class="panel-view tw-hidden tw-space-y-6">
+                <div>
+                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">User Directory</h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">All registered accounts stored in the SQLite database.</p>
+                </div>
+                <div class="kh-panel-card tw-p-0 tw-overflow-hidden">
+                    <div class="tw-overflow-x-auto">
+                        <table class="tw-w-full tw-text-left tw-border-collapse">
+                            <thead>
+                                <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
+                                    <th class="tw-py-4 tw-px-6">ID</th>
+                                    <th class="tw-py-4 tw-px-6">Name</th>
+                                    <th class="tw-py-4 tw-px-6">Email</th>
+                                    <th class="tw-py-4 tw-px-6">Role</th>
+                                    <th class="tw-py-4 tw-px-6">Instances</th>
+                                    <th class="tw-py-4 tw-px-6">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-users-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================ -->
+            <!-- VIEW 5: ADMIN NODES -->
+            <!-- ================================================================ -->
+            <section id="view-admin-nodes" class="panel-view tw-hidden tw-space-y-6">
+                <div>
+                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Daemon Nodes</h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Active hosting nodes powering user instances.</p>
+                </div>
+                <div id="admin-nodes-grid" class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6"></div>
+            </section>
+
+            <!-- ================================================================ -->
+            <!-- VIEW 6: ADMIN ALL SERVERS -->
+            <!-- ================================================================ -->
+            <section id="view-admin-servers" class="panel-view tw-hidden tw-space-y-6">
+                <div>
+                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">All Platform Instances</h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Full cross-user server inventory with administrative oversight.</p>
+                </div>
+                <div class="kh-panel-card tw-p-0 tw-overflow-hidden">
+                    <div class="tw-overflow-x-auto">
+                        <table class="tw-w-full tw-text-left tw-border-collapse">
+                            <thead>
+                                <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
+                                    <th class="tw-py-4 tw-px-6">ID</th>
+                                    <th class="tw-py-4 tw-px-6">Server Name</th>
+                                    <th class="tw-py-4 tw-px-6">Owner</th>
+                                    <th class="tw-py-4 tw-px-6">Software</th>
+                                    <th class="tw-py-4 tw-px-6">Port</th>
+                                    <th class="tw-py-4 tw-px-6">Status</th>
+                                    <th class="tw-py-4 tw-px-6">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-servers-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ================================================================ -->
+            <!-- VIEW 7: ADMIN SETTINGS -->
+            <!-- ================================================================ -->
+            <section id="view-admin-settings" class="panel-view tw-hidden tw-space-y-6">
+                <div>
+                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Platform Settings</h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Manage global resource limits and default instance parameters.</p>
+                </div>
+                <div class="kh-panel-card tw-max-w-2xl tw-space-y-5">
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Panel Brand Name</label>
+                        <input type="text" id="setting-panel-name" class="kh-field-input">
+                    </div>
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Public Connection Hostname</label>
+                        <input type="text" id="setting-public-host" class="kh-field-input">
+                    </div>
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Default Server RAM (MB)</label>
+                        <input type="number" id="setting-default-ram" class="kh-field-input">
+                    </div>
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Max Servers Per Normal User</label>
+                        <input type="number" id="setting-max-servers" class="kh-field-input">
+                    </div>
+                    <button id="btn-save-admin-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                        <span>Save Platform Settings</span>
                     </button>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- ================================================================ -->
-        <!-- VIEW 3: ADMIN OVERVIEW -->
-        <!-- ================================================================ -->
-        <section id="view-admin-overview" class="panel-view tw-hidden tw-space-y-8">
-            <div>
-                <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">Platform Overview</h1>
-                <p class="tw-text-sm tw-text-neutral-400">Real-time statistics across all users, servers, and nodes.</p>
-            </div>
-
-            <!-- Stats Grid -->
-            <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-4 tw-gap-4">
-                <div class="kh-card">
-                    <span class="tw-text-xs tw-font-mono tw-text-neutral-400">TOTAL USERS</span>
-                    <div id="admin-stat-users" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">0</div>
-                </div>
-                <div class="kh-card">
-                    <span class="tw-text-xs tw-font-mono tw-text-neutral-400">TOTAL SERVERS</span>
-                    <div id="admin-stat-servers" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">0</div>
-                </div>
-                <div class="kh-card">
-                    <span class="tw-text-xs tw-font-mono tw-text-neutral-400">RUNNING PROCESSES</span>
-                    <div id="admin-stat-running" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">0</div>
-                </div>
-                <div class="kh-card">
-                    <span class="tw-text-xs tw-font-mono tw-text-neutral-400">NODES</span>
-                    <div id="admin-stat-nodes" class="tw-text-2xl tw-font-bold tw-text-white tw-mt-1">1</div>
-                </div>
-            </div>
-
-            <!-- Primary Node Specs -->
-            <div class="kh-card tw-space-y-4">
-                <h3 class="tw-text-base tw-font-bold tw-text-white">Host Infrastructure Specs</h3>
-                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-4 tw-font-mono tw-text-xs">
-                    <div><span class="tw-text-neutral-500">HOSTNAME:</span> <span id="node-hostname" class="tw-text-white">...</span></div>
-                    <div><span class="tw-text-neutral-500">OS / KERNEL:</span> <span id="node-os" class="tw-text-white">...</span></div>
-                    <div><span class="tw-text-neutral-500">CPU:</span> <span id="node-cpu-model" class="tw-text-white">...</span></div>
-                    <div><span class="tw-text-neutral-500">RAM:</span> <span id="node-ram-usage" class="tw-text-white">...</span></div>
-                    <div><span class="tw-text-neutral-500">DISK:</span> <span id="node-disk-usage" class="tw-text-white">...</span></div>
-                </div>
-            </div>
-
-            <!-- Real Activity Log -->
-            <div class="kh-card tw-p-0 tw-overflow-hidden">
-                <div class="tw-px-6 tw-py-4 tw-border-b tw-border-white/[0.08] tw-text-sm tw-font-bold tw-text-white">
-                    Real Platform Activity Log
-                </div>
-                <div class="tw-overflow-x-auto">
-                    <table class="tw-w-full tw-text-left tw-border-collapse">
-                        <thead>
-                            <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
-                                <th class="tw-py-3 tw-px-4">Time</th>
-                                <th class="tw-py-3 tw-px-4">User</th>
-                                <th class="tw-py-3 tw-px-4">Action</th>
-                                <th class="tw-py-3 tw-px-4">Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-activity-logs">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================================================================ -->
-        <!-- VIEW 4: ADMIN USERS DIRECTORY -->
-        <!-- ================================================================ -->
-        <section id="view-admin-users" class="panel-view tw-hidden tw-space-y-6">
-            <div>
-                <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">User Accounts</h1>
-                <p class="tw-text-sm tw-text-neutral-400">All registered KineticHost users in SQLite database.</p>
-            </div>
-            <div class="kh-card tw-p-0 tw-overflow-hidden">
-                <div class="tw-overflow-x-auto">
-                    <table class="tw-w-full tw-text-left tw-border-collapse">
-                        <thead>
-                            <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
-                                <th class="tw-py-4 tw-px-6">ID</th>
-                                <th class="tw-py-4 tw-px-6">Name</th>
-                                <th class="tw-py-4 tw-px-6">Email</th>
-                                <th class="tw-py-4 tw-px-6">Role</th>
-                                <th class="tw-py-4 tw-px-6">Instances</th>
-                                <th class="tw-py-4 tw-px-6">Created</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-users-table"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================================================================ -->
-        <!-- VIEW 5: ADMIN NODES -->
-        <!-- ================================================================ -->
-        <section id="view-admin-nodes" class="panel-view tw-hidden tw-space-y-6">
-            <div>
-                <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">Physical Nodes</h1>
-                <p class="tw-text-sm tw-text-neutral-400">Server hosting daemon nodes running on this infrastructure.</p>
-            </div>
-            <div id="admin-nodes-grid" class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6"></div>
-        </section>
-
-        <!-- ================================================================ -->
-        <!-- VIEW 6: ADMIN ALL SERVERS -->
-        <!-- ================================================================ -->
-        <section id="view-admin-servers" class="panel-view tw-hidden tw-space-y-6">
-            <div>
-                <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">All Platform Servers</h1>
-                <p class="tw-text-sm tw-text-neutral-400">All Minecraft instances deployed across all user accounts.</p>
-            </div>
-            <div class="kh-card tw-p-0 tw-overflow-hidden">
-                <div class="tw-overflow-x-auto">
-                    <table class="tw-w-full tw-text-left tw-border-collapse">
-                        <thead>
-                            <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
-                                <th class="tw-py-4 tw-px-6">ID</th>
-                                <th class="tw-py-4 tw-px-6">Server Name</th>
-                                <th class="tw-py-4 tw-px-6">Owner</th>
-                                <th class="tw-py-4 tw-px-6">Software</th>
-                                <th class="tw-py-4 tw-px-6">Port</th>
-                                <th class="tw-py-4 tw-px-6">Status</th>
-                                <th class="tw-py-4 tw-px-6">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-servers-table"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================================================================ -->
-        <!-- VIEW 7: ADMIN SETTINGS -->
-        <!-- ================================================================ -->
-        <section id="view-admin-settings" class="panel-view tw-hidden tw-space-y-6">
-            <div>
-                <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">Platform Settings</h1>
-                <p class="tw-text-sm tw-text-neutral-400">Manage global limits and default configuration values.</p>
-            </div>
-            <div class="kh-card tw-max-w-2xl tw-space-y-4">
+            <!-- ================================================================ -->
+            <!-- VIEW 8: USER PROFILE (MAJOR OVERHAUL) -->
+            <!-- ================================================================ -->
+            <section id="view-profile" class="panel-view tw-hidden tw-space-y-8">
                 <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Panel Brand Title</label>
-                    <input type="text" id="setting-panel-name" class="kh-input">
-                </div>
-                <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Public Connection Hostname</label>
-                    <input type="text" id="setting-public-host" class="kh-input">
-                </div>
-                <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Default Server RAM (MB)</label>
-                    <input type="number" id="setting-default-ram" class="kh-input">
-                </div>
-                <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Max Servers Per Normal User</label>
-                    <input type="number" id="setting-max-servers" class="kh-input">
-                </div>
-                <button id="btn-save-admin-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                    <span>Save Platform Settings</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- ================================================================ -->
-        <!-- VIEW 8: USER PROFILE -->
-        <!-- ================================================================ -->
-        <section id="view-profile" class="panel-view tw-hidden tw-space-y-6">
-            <div>
-                <h1 class="tw-text-2xl tw-font-extrabold tw-tracking-tight tw-text-white">Account Profile</h1>
-                <p class="tw-text-sm tw-text-neutral-400">Your authenticated credentials and quota limits.</p>
-            </div>
-            <div class="kh-card tw-max-w-xl tw-space-y-4">
-                <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Full Name</label>
-                    <input type="text" id="profile-name" class="kh-input">
-                </div>
-                <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Email Address</label>
-                    <input type="email" id="profile-email" disabled class="kh-input tw-opacity-60 tw-cursor-not-allowed">
-                </div>
-                <div class="tw-grid tw-grid-cols-2 tw-gap-4 tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/5 tw-font-mono tw-text-xs">
-                    <div><span class="tw-text-neutral-500">ROLE:</span> <span id="profile-role" class="tw-text-white">USER</span></div>
-                    <div><span class="tw-text-neutral-500">JOINED:</span> <span id="profile-created" class="tw-text-white">...</span></div>
-                    <div><span class="tw-text-neutral-500">SERVERS:</span> <span id="profile-quota-servers" class="tw-text-white">...</span></div>
-                    <div><span class="tw-text-neutral-500">RAM:</span> <span id="profile-quota-ram" class="tw-text-white">...</span></div>
+                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Account Profile</h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Manage your KineticHost account details and security settings.</p>
                 </div>
 
-                <div class="tw-pt-3 tw-border-t tw-border-white/5 tw-space-y-3">
-                    <h4 class="tw-text-xs tw-font-bold tw-text-white">Change Password</h4>
-                    <div>
-                        <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">Current Password</label>
-                        <input type="password" id="profile-curr-pass" placeholder="••••••••" class="kh-input">
+                <!-- Profile Hero Banner Card -->
+                <div class="kh-panel-card tw-p-0 tw-overflow-hidden">
+                    <div class="tw-h-32 tw-w-full tw-bg-gradient-to-r tw-from-neutral-900 tw-to-neutral-800 tw-relative">
+                        <img src="assets/images/control-panel/acc-banner.jpeg" alt="Banner" class="tw-w-full tw-h-full tw-object-cover tw-opacity-30">
                     </div>
-                    <div>
-                        <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1">New Password</label>
-                        <input type="password" id="profile-new-pass" placeholder="••••••••" class="kh-input">
+                    <div class="tw-p-6 tw-pt-0 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-end sm:tw-justify-between tw-gap-4 tw-relative -tw-mt-12">
+                        <div class="tw-flex tw-items-end tw-gap-4">
+                            <div class="tw-w-20 tw-h-20 tw-rounded-2xl tw-bg-[#090909] tw-border-2 tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-2xl tw-font-extrabold tw-text-white tw-shadow-2xl">
+                                <span id="profile-card-avatar">U</span>
+                            </div>
+                            <div class="tw-mb-1">
+                                <div class="tw-flex tw-items-center tw-gap-2.5">
+                                    <h2 id="profile-card-name" class="tw-text-xl tw-font-bold tw-text-white">User Name</h2>
+                                    <span id="profile-card-role" class="tw-px-2 tw-py-0.5 tw-rounded tw-bg-white/10 tw-border tw-border-white/20 tw-text-[10px] tw-font-mono tw-text-white">USER</span>
+                                </div>
+                                <span id="profile-card-email" class="tw-text-xs tw-text-neutral-400">user@example.com</span>
+                            </div>
+                        </div>
+                        <div class="tw-text-xs tw-font-mono tw-text-neutral-500 tw-mb-1">
+                            Member since: <span id="profile-joined-date" class="tw-text-neutral-300">...</span>
+                        </div>
                     </div>
                 </div>
 
-                <button id="btn-save-profile" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                    <span>Update Account</span>
-                </button>
-            </div>
-        </section>
+                <!-- 2-Column Profile Configuration Grid -->
+                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 tw-gap-6">
+                    <!-- Left: Account & Quota Info -->
+                    <div class="kh-panel-card tw-space-y-6">
+                        <h3 class="tw-text-base tw-font-bold tw-text-white">Account Information</h3>
 
-    </main>
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Full Name</label>
+                            <input type="text" id="profile-name" class="kh-field-input">
+                        </div>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Email Address</label>
+                            <input type="email" id="profile-email" disabled class="kh-field-input">
+                        </div>
+
+                        <!-- Resource Quotas Breakdown -->
+                        <div class="tw-pt-4 tw-border-t tw-border-white/[0.08] tw-space-y-4">
+                            <h4 class="tw-text-xs tw-font-mono tw-text-neutral-400 tw-uppercase">Resource Quota Utilization</h4>
+
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-text-xs tw-font-mono tw-mb-1.5">
+                                    <span class="tw-text-neutral-400">SERVERS ALLOCATED</span>
+                                    <span id="profile-quota-servers" class="tw-text-white">0 / 3</span>
+                                </div>
+                                <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden">
+                                    <div id="profile-quota-servers-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="tw-flex tw-items-center tw-justify-between tw-text-xs tw-font-mono tw-mb-1.5">
+                                    <span class="tw-text-neutral-400">RAM ALLOCATED</span>
+                                    <span id="profile-quota-ram" class="tw-text-white">0 MB / 8192 MB</span>
+                                </div>
+                                <div class="tw-w-full tw-h-2 tw-bg-white/[0.06] tw-rounded-full tw-overflow-hidden">
+                                    <div id="profile-quota-ram-bar" class="tw-h-full tw-bg-white tw-transition-all tw-duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="btn-save-profile" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                            <span>Update Profile</span>
+                        </button>
+                    </div>
+
+                    <!-- Right: Security & Password -->
+                    <div class="kh-panel-card tw-space-y-6">
+                        <h3 class="tw-text-base tw-font-bold tw-text-white">Security & Password</h3>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Current Password</label>
+                            <input type="password" id="profile-curr-pass" placeholder="••••••••" class="kh-field-input">
+                        </div>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">New Password</label>
+                            <input type="password" id="profile-new-pass" placeholder="••••••••" class="kh-field-input">
+                        </div>
+
+                        <div class="tw-p-4 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] tw-space-y-2">
+                            <div class="tw-text-xs tw-font-bold tw-text-neutral-300">Password Requirements:</div>
+                            <ul class="tw-text-[11px] tw-text-neutral-500 tw-space-y-1 tw-list-disc tw-list-inside">
+                                <li>Minimum 8 characters long</li>
+                                <li>Must differ from your current password</li>
+                                <li>Encrypted securely with bcrypt hashing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
 
     <!-- ================================================================ -->
     <!-- MODAL: CREATE SERVER -->
     <!-- ================================================================ -->
     <div id="modal-create-server" class="tw-fixed tw-inset-0 tw-z-50 tw-bg-black/80 tw-backdrop-blur-sm tw-flex tw-items-center tw-justify-center tw-p-4 tw-hidden">
-        <div class="kh-card tw-max-w-lg tw-w-full tw-p-6 tw-space-y-5">
+        <div class="kh-panel-card tw-max-w-lg tw-w-full tw-p-6 tw-space-y-5 tw-shadow-2xl">
             <div class="tw-flex tw-items-center tw-justify-between">
-                <h3 class="tw-text-lg tw-font-bold tw-text-white">Create Minecraft Server</h3>
-                <button onclick="closeCreateServerModal()" class="tw-text-neutral-400 hover:tw-text-white">
+                <h3 class="tw-text-lg tw-font-bold tw-text-white">Deploy Minecraft Instance</h3>
+                <button onclick="closeCreateServerModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
 
             <form id="create-server-form" onsubmit="handleCreateServerSubmit(event)" class="tw-space-y-4">
-                <div>
-                    <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1.5">Server Name</label>
-                    <input type="text" id="create-server-name" required placeholder="e.g. My Survival World" class="kh-input">
+                <div class="kh-field-group">
+                    <label class="kh-field-label">Server Display Name</label>
+                    <input type="text" id="create-server-name" required placeholder="e.g. Survival SMP World" class="kh-field-input">
                 </div>
 
                 <div class="tw-grid tw-grid-cols-2 tw-gap-3">
-                    <div>
-                        <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1.5">Software</label>
-                        <select id="create-server-software" class="kh-input tw-font-mono tw-text-xs">
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Software</label>
+                        <select id="create-server-software" class="kh-field-input tw-font-mono tw-text-xs">
                             <option value="paper">PaperMC (Recommended)</option>
                             <option value="vanilla">Vanilla Mojang</option>
                         </select>
                     </div>
-                    <div>
-                        <label class="tw-block tw-text-xs tw-font-mono tw-text-neutral-400 tw-mb-1.5">Version</label>
-                        <select id="create-server-version" class="kh-input tw-font-mono tw-text-xs">
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Minecraft Version</label>
+                        <select id="create-server-version" class="kh-field-input tw-font-mono tw-text-xs">
                             <option value="1.20.4">1.20.4 (Latest)</option>
                             <option value="1.20.2">1.20.2</option>
                             <option value="1.19.4">1.19.4</option>
@@ -598,23 +708,23 @@
                     </div>
                 </div>
 
-                <div>
-                    <div class="tw-flex tw-items-center tw-justify-between tw-mb-1.5">
-                        <label class="tw-text-xs tw-font-mono tw-text-neutral-400">RAM Allocation</label>
+                <div class="kh-field-group">
+                    <div class="tw-flex tw-items-center tw-justify-between">
+                        <label class="kh-field-label">RAM Allocation</label>
                         <span id="create-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white">4096 MB</span>
                     </div>
                     <input type="range" id="create-server-ram" min="1024" max="8192" step="512" value="4096" oninput="document.getElementById('create-server-ram-val').textContent = this.value + ' MB'" class="tw-w-full tw-accent-white">
                 </div>
 
                 <!-- EULA Agreement -->
-                <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/5 tw-flex tw-items-start tw-gap-2.5">
+                <div class="tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] tw-flex tw-items-start tw-gap-2.5">
                     <input type="checkbox" id="create-server-eula" required class="tw-mt-0.5 tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-accent-white">
                     <label for="create-server-eula" class="tw-text-[11px] tw-text-neutral-300">
                         I explicitly agree to the <a href="https://aka.ms/MinecraftEULA" target="_blank" class="tw-text-white tw-underline">Minecraft End User License Agreement (EULA)</a>.
                     </label>
                 </div>
 
-                <div id="create-server-status-msg" class="tw-hidden tw-text-xs tw-font-mono tw-text-neutral-300"></div>
+                <div id="create-server-status-msg" class="tw-hidden tw-p-3 tw-rounded-lg tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-text-xs tw-font-mono tw-text-neutral-300"></div>
 
                 <div class="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-2">
                     <button type="button" onclick="closeCreateServerModal()" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
@@ -630,6 +740,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/dashboard.js?v=1.0.4"></script>
+    <script src="js/dashboard.js?v=1.0.5"></script>
 </body>
 </html>

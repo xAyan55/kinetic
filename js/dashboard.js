@@ -1,4 +1,4 @@
-// KineticHost Real Control Panel Frontend Engine
+// KineticHost Real Control Panel Frontend Engine — UI/UX Overhaul Edition
 
 let currentUser = null;
 let currentServer = null;
@@ -9,7 +9,43 @@ let commandHistory = [];
 let historyIndex = -1;
 let statsInterval = null;
 
-// Initialize Dashboard
+// ==========================================================================
+// Toast Notification Engine
+// ==========================================================================
+function showToast(message, type = 'info') {
+  let container = document.getElementById('kh-toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'kh-toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `kh-toast ${type}`;
+
+  const iconClass = type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill');
+
+  toast.innerHTML = `
+    <div class="kh-toast-icon">
+      <i class="bi ${iconClass}"></i>
+    </div>
+    <div class="tw-flex-1 tw-font-medium">${escapeHtml(message)}</div>
+    <button class="tw-text-neutral-500 hover:tw-text-white tw-transition-colors tw-text-xs" onclick="this.parentElement.remove()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 200);
+  }, 4000);
+}
+
+// ==========================================================================
+// Dashboard Initialization & Authentication
+// ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const authRes = await fetch('/api/auth/me');
@@ -22,8 +58,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     currentUser = authData.user;
     initSidebar();
+    initMobileDrawer();
     handleHashNavigation();
     window.addEventListener('hashchange', handleHashNavigation);
+
+    // Escape key closes modals
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCreateServerModal();
+      }
+    });
 
     // Global logout buttons
     document.querySelectorAll('.btn-logout').forEach(btn => {
@@ -38,25 +82,59 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Setup responsive sidebar and user identity
+// Setup sidebar & user profile identity
 function initSidebar() {
-  document.getElementById('sidebar-user-name').textContent = currentUser.name;
-  document.getElementById('sidebar-user-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
-  document.getElementById('sidebar-user-role').textContent = `Role: ${currentUser.role}`;
+  const nameEls = document.querySelectorAll('.sidebar-user-name');
+  const avatarEls = document.querySelectorAll('.sidebar-user-avatar');
+  const roleEls = document.querySelectorAll('.sidebar-user-role');
+
+  nameEls.forEach(el => el.textContent = currentUser.name);
+  avatarEls.forEach(el => el.textContent = currentUser.name.charAt(0).toUpperCase());
+  roleEls.forEach(el => el.textContent = currentUser.role.toUpperCase());
 
   if (currentUser.role === 'admin') {
     document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('tw-hidden'));
   }
 }
 
-// Router for hash-based navigation
+// Setup mobile sidebar drawer
+function initMobileDrawer() {
+  const btnToggle = document.getElementById('mobile-menu-toggle');
+  const sidebar = document.getElementById('panel-sidebar');
+  const backdrop = document.getElementById('drawer-backdrop');
+
+  if (btnToggle && sidebar && backdrop) {
+    const toggle = (open) => {
+      if (open) {
+        sidebar.classList.add('open');
+        backdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      } else {
+        sidebar.classList.remove('open');
+        backdrop.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+    };
+
+    btnToggle.addEventListener('click', () => toggle(true));
+    backdrop.addEventListener('click', () => toggle(false));
+
+    document.querySelectorAll('.kh-sidebar-link').forEach(link => {
+      link.addEventListener('click', () => toggle(false));
+    });
+  }
+}
+
+// ==========================================================================
+// Hash Router
+// ==========================================================================
 function handleHashNavigation() {
   const hash = window.location.hash.replace('#', '') || 'dashboard';
   const parts = hash.split('/');
   const mainRoute = parts[0];
 
-  // Highlight active sidebar item
-  document.querySelectorAll('.nav-link').forEach(link => {
+  // Update active sidebar item
+  document.querySelectorAll('.kh-sidebar-link').forEach(link => {
     if (link.dataset.route === mainRoute) {
       link.classList.add('active');
     } else {
@@ -64,8 +142,30 @@ function handleHashNavigation() {
     }
   });
 
-  // Switch views
+  // Update breadcrumb
+  const breadcrumb = document.getElementById('topbar-breadcrumb');
+  if (breadcrumb) {
+    const routeTitles = {
+      'dashboard': 'Minecraft Servers',
+      'server': 'Server Console',
+      'admin-overview': 'Platform Overview',
+      'admin-users': 'User Directory',
+      'admin-nodes': 'Infrastructure Nodes',
+      'admin-servers': 'All Instances',
+      'admin-settings': 'Platform Settings',
+      'profile': 'Account Profile'
+    };
+    breadcrumb.textContent = routeTitles[mainRoute] || 'Dashboard';
+  }
+
+  // Hide all views
   document.querySelectorAll('.panel-view').forEach(v => v.classList.add('tw-hidden'));
+
+  // Clean active SSE & stats intervals on view transition
+  if (mainRoute !== 'server') {
+    if (sseSource) { sseSource.close(); sseSource = null; }
+    if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
+  }
 
   if (mainRoute === 'server' && parts[1]) {
     loadServerDetail(parts[1]);
@@ -86,9 +186,9 @@ function handleHashNavigation() {
   }
 }
 
-// --------------------------------------------------------------------------
+// ==========================================================================
 // 1. User Servers List View
-// --------------------------------------------------------------------------
+// ==========================================================================
 async function loadUserServers() {
   const view = document.getElementById('view-servers');
   view.classList.remove('tw-hidden');
@@ -112,74 +212,113 @@ async function loadUserServers() {
     }
 
     container.classList.remove('tw-hidden');
-    container.innerHTML = data.servers.map(s => `
-      <div class="kh-card tw-flex tw-flex-col tw-justify-between hover:tw-border-white/20 tw-transition-colors">
-        <div>
-          <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
-            <div class="tw-flex tw-items-center tw-gap-3">
-              <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.06] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-shrink-0">
-                <i class="bi bi-box-seam tw-text-white tw-text-lg"></i>
-              </div>
-              <div>
-                <h3 class="tw-text-base tw-font-bold tw-text-white">${escapeHtml(s.name)}</h3>
-                <span class="tw-text-xs tw-font-mono tw-text-neutral-400">
-                  ${escapeHtml(s.software)} ${escapeHtml(s.version)} • ${s.ram_mb}MB RAM
-                </span>
+    container.innerHTML = data.servers.map(s => {
+      const isOnline = s.status === 'running';
+      const isStarting = s.status === 'starting';
+      const isCrashed = s.status === 'crashed';
+      const statusClass = isOnline ? 'online' : (isStarting ? 'starting' : (isCrashed ? 'crashed' : 'offline'));
+
+      return `
+        <div class="kh-panel-card interactive tw-flex tw-flex-col tw-justify-between">
+          <div>
+            <!-- Top Status & Software Bar -->
+            <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+              <span class="kh-status-badge ${statusClass}">
+                <span class="kh-status-dot"></span>
+                <span>${s.status.toUpperCase()}</span>
+              </span>
+              <span class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-white/[0.04] tw-border tw-border-white/[0.06] tw-text-xs tw-font-mono tw-text-neutral-400">
+                ${escapeHtml(s.software)} ${escapeHtml(s.version)}
+              </span>
+            </div>
+
+            <!-- Server Title & Port -->
+            <div class="tw-mb-4">
+              <h3 class="tw-text-base tw-font-bold tw-text-white tw-tracking-tight tw-mb-1">${escapeHtml(s.name)}</h3>
+              <div class="tw-flex tw-items-center tw-gap-2">
+                <span class="tw-text-xs tw-font-mono tw-text-neutral-400 tw-truncate">${s.public_connection}</span>
+                <button class="tw-text-neutral-500 hover:tw-text-white tw-transition-colors tw-text-xs" title="Copy Address" onclick="copyText('${s.public_connection}')">
+                  <i class="bi bi-copy"></i>
+                </button>
               </div>
             </div>
-            <span class="kh-status-badge ${s.status === 'running' ? 'online' : (s.status === 'starting' ? 'starting' : (s.status === 'crashed' ? 'crashed' : 'offline'))}">
-              <span class="kh-status-dot"></span>
-              ${s.status.toUpperCase()}
-            </span>
+
+            <!-- Resource Allocation Breakdown -->
+            <div class="tw-grid tw-grid-cols-3 tw-gap-2 tw-py-3 tw-px-3 tw-rounded-lg tw-bg-white/[0.02] tw-border tw-border-white/[0.04] tw-font-mono tw-text-[11px] tw-mb-4">
+              <div>
+                <div class="tw-text-neutral-500 tw-text-[10px]">MEMORY</div>
+                <div class="tw-text-neutral-200 tw-font-semibold">${s.used_memory_mb || 0} / ${s.ram_mb}M</div>
+              </div>
+              <div>
+                <div class="tw-text-neutral-500 tw-text-[10px]">CPU</div>
+                <div class="tw-text-neutral-200 tw-font-semibold">${s.used_cpu_percent || 0}%</div>
+              </div>
+              <div>
+                <div class="tw-text-neutral-500 tw-text-[10px]">STORAGE</div>
+                <div class="tw-text-neutral-200 tw-font-semibold">25.6 GB</div>
+              </div>
+            </div>
           </div>
 
-          <div class="tw-py-2.5 tw-px-3.5 tw-rounded-xl tw-bg-black/50 tw-border tw-border-white/5 tw-font-mono tw-text-xs tw-text-neutral-300 tw-flex tw-items-center tw-justify-between tw-mb-4">
-            <span class="tw-truncate">${s.public_connection}</span>
-            <button class="hover:tw-text-white tw-transition-colors tw-ml-2" title="Copy Address" onclick="copyText('${s.public_connection}')">
-              <i class="bi bi-copy"></i>
-            </button>
-          </div>
-        </div>
+          <!-- Bottom Action Controls -->
+          <div class="tw-flex tw-items-center tw-justify-between tw-pt-3 tw-border-t tw-border-white/[0.06]">
+            <div class="tw-flex tw-items-center tw-gap-1.5">
+              ${isOnline ? `
+                <a href="#server/${s.id}" class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-white/[0.04] hover:tw-bg-white/[0.08] tw-border tw-border-white/[0.08] tw-text-xs tw-font-mono tw-text-neutral-300 hover:tw-text-white tw-transition-colors">
+                  <i class="bi bi-terminal tw-mr-1"></i> Console
+                </a>
+              ` : `
+                <button onclick="quickStartServer(${s.id})" class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-emerald-500/10 hover:tw-bg-emerald-500/20 tw-border tw-border-emerald-500/25 tw-text-xs tw-font-mono tw-text-emerald-400 tw-transition-colors">
+                  <i class="bi bi-play-fill tw-mr-0.5"></i> Start
+                </button>
+              `}
+            </div>
 
-        <div class="tw-flex tw-items-center tw-justify-between tw-pt-4 tw-border-t tw-border-white/[0.08]">
-          <div class="tw-text-xs tw-text-neutral-400 tw-font-mono">
-            <span>Port: ${s.port}</span>
+            <a href="#server/${s.id}" class="tw-inline-flex tw-items-center tw-gap-1 tw-text-xs tw-font-semibold tw-text-white hover:tw-underline">
+              <span>Manage</span>
+              <i class="bi bi-arrow-right tw-text-neutral-400"></i>
+            </a>
           </div>
-          <a href="#server/${s.id}" class="btn-primary tw-py-1.5 tw-px-4 tw-text-xs">
-            <span>Manage</span>
-            <i class="bi bi-arrow-right"></i>
-          </a>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (err) {
     loading.classList.add('tw-hidden');
-    console.error('Failed to load servers:', err);
+    showToast('Failed to load server instances', 'error');
   }
 }
 
-// --------------------------------------------------------------------------
+async function quickStartServer(serverId) {
+  try {
+    const res = await fetch(`/api/servers/${serverId}/start`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      showToast('Server process starting...', 'success');
+      setTimeout(loadUserServers, 1000);
+    } else {
+      showToast(data.error || 'Failed to start server', 'error');
+    }
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+// ==========================================================================
 // 2. Server Detail View (Overview, Console, Settings)
-// --------------------------------------------------------------------------
+// ==========================================================================
 async function loadServerDetail(serverId) {
   const view = document.getElementById('view-server-detail');
   view.classList.remove('tw-hidden');
 
-  if (sseSource) {
-    sseSource.close();
-    sseSource = null;
-  }
-  if (statsInterval) {
-    clearInterval(statsInterval);
-    statsInterval = null;
-  }
+  if (sseSource) { sseSource.close(); sseSource = null; }
+  if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
 
   try {
     const res = await fetch(`/api/servers/${serverId}`);
     const data = await res.json();
 
     if (!data.success || !data.server) {
-      alert(data.error || 'Server not found');
+      showToast(data.error || 'Server not found', 'error');
       window.location.hash = 'dashboard';
       return;
     }
@@ -187,14 +326,12 @@ async function loadServerDetail(serverId) {
     currentServer = data.server;
     renderServerHeader(currentServer);
     switchServerTab('overview');
-
-    // Attach power actions
     setupServerPowerButtons(serverId);
 
-    // Setup live stats poll every 3 seconds
+    // Live refresh every 3 seconds
     statsInterval = setInterval(() => refreshServerStats(serverId), 3000);
   } catch (err) {
-    console.error('Failed to load server details:', err);
+    showToast('Failed to load server details', 'error');
     window.location.hash = 'dashboard';
   }
 }
@@ -204,8 +341,13 @@ function renderServerHeader(s) {
   document.getElementById('detail-server-software').textContent = `${s.software} ${s.version}`;
   document.getElementById('detail-server-address').textContent = s.public_connection;
 
+  const isOnline = s.status === 'running';
+  const isStarting = s.status === 'starting';
+  const isCrashed = s.status === 'crashed';
+  const statusClass = isOnline ? 'online' : (isStarting ? 'starting' : (isCrashed ? 'crashed' : 'offline'));
+
   const statusBadge = document.getElementById('detail-server-status');
-  statusBadge.className = `kh-status-badge ${s.status === 'running' ? 'online' : (s.status === 'starting' ? 'starting' : (s.status === 'crashed' ? 'crashed' : 'offline'))}`;
+  statusBadge.className = `kh-status-badge ${statusClass}`;
   statusBadge.innerHTML = `<span class="kh-status-dot"></span> <span>${s.status.toUpperCase()}</span>`;
 }
 
@@ -213,11 +355,9 @@ function switchServerTab(tab) {
   currentServerTab = tab;
   document.querySelectorAll('.server-tab-btn').forEach(btn => {
     if (btn.dataset.tab === tab) {
-      btn.classList.add('tw-bg-white/10', 'tw-text-white', 'tw-border-white/20');
-      btn.classList.remove('tw-text-neutral-400', 'tw-border-transparent');
+      btn.classList.add('active');
     } else {
-      btn.classList.remove('tw-bg-white/10', 'tw-text-white', 'tw-border-white/20');
-      btn.classList.add('tw-text-neutral-400', 'tw-border-transparent');
+      btn.classList.remove('active');
     }
   });
 
@@ -243,8 +383,12 @@ function setupServerPowerButtons(serverId) {
     try {
       const res = await fetch(`/api/servers/${serverId}/start`, { method: 'POST' });
       const data = await res.json();
-      if (!data.success) alert(data.error);
-    } catch (e) { alert(e.message); }
+      if (data.success) {
+        showToast('Server process launched successfully', 'success');
+      } else {
+        showToast(data.error, 'error');
+      }
+    } catch (e) { showToast(e.message, 'error'); }
     btnStart.disabled = false;
     refreshServerStats(serverId);
   };
@@ -254,8 +398,12 @@ function setupServerPowerButtons(serverId) {
     try {
       const res = await fetch(`/api/servers/${serverId}/stop`, { method: 'POST' });
       const data = await res.json();
-      if (!data.success) alert(data.error);
-    } catch (e) { alert(e.message); }
+      if (data.success) {
+        showToast('Graceful stop signal sent', 'info');
+      } else {
+        showToast(data.error, 'error');
+      }
+    } catch (e) { showToast(e.message, 'error'); }
     btnStop.disabled = false;
     refreshServerStats(serverId);
   };
@@ -265,25 +413,33 @@ function setupServerPowerButtons(serverId) {
     try {
       const res = await fetch(`/api/servers/${serverId}/restart`, { method: 'POST' });
       const data = await res.json();
-      if (!data.success) alert(data.error);
-    } catch (e) { alert(e.message); }
+      if (data.success) {
+        showToast('Server restart sequence initiated', 'info');
+      } else {
+        showToast(data.error, 'error');
+      }
+    } catch (e) { showToast(e.message, 'error'); }
     btnRestart.disabled = false;
     refreshServerStats(serverId);
   };
 
   btnKill.onclick = async () => {
-    if (!confirm('Are you sure you want to force kill this server process immediately?')) return;
+    if (!confirm('Force kill immediately terminates the Java PID without saving chunks. Proceed?')) return;
     try {
       const res = await fetch(`/api/servers/${serverId}/kill`, { method: 'POST' });
       const data = await res.json();
-      if (!data.success) alert(data.error);
-    } catch (e) { alert(e.message); }
+      if (data.success) {
+        showToast('Server process terminated', 'info');
+      } else {
+        showToast(data.error, 'error');
+      }
+    } catch (e) { showToast(e.message, 'error'); }
     refreshServerStats(serverId);
   };
 }
 
 async function refreshServerStats(serverId) {
-  if (currentView !== 'dashboard' && window.location.hash.indexOf('#server/') === -1) return;
+  if (window.location.hash.indexOf('#server/') === -1) return;
   try {
     const res = await fetch(`/api/servers/${serverId}`);
     const data = await res.json();
@@ -306,16 +462,17 @@ async function refreshServerStats(serverId) {
   } catch (err) {}
 }
 
-// --------------------------------------------------------------------------
+// ==========================================================================
 // 3. Live SSE Console Streaming
-// --------------------------------------------------------------------------
+// ==========================================================================
 function initConsoleStream(serverId) {
   const terminal = document.getElementById('console-terminal');
   const input = document.getElementById('console-input');
   const btnSend = document.getElementById('console-send-btn');
+  const btnClear = document.getElementById('console-clear-btn');
   const autoScrollCheckbox = document.getElementById('console-autoscroll');
 
-  terminal.innerHTML = '<div class="tw-text-neutral-500">[KineticHost] Connecting to live server console stream...</div>';
+  terminal.innerHTML = '<div class="tw-text-neutral-500">[KineticHost] Establishing live server console stream...</div>';
 
   if (sseSource) {
     sseSource.close();
@@ -342,9 +499,15 @@ function initConsoleStream(serverId) {
   sseSource.onerror = () => {
     const errorEl = document.createElement('div');
     errorEl.className = 'tw-text-neutral-500 tw-italic';
-    errorEl.textContent = '[KineticHost] Reconnecting to console...';
+    errorEl.textContent = '[KineticHost] Console stream reconnecting...';
     terminal.appendChild(errorEl);
   };
+
+  if (btnClear) {
+    btnClear.onclick = () => {
+      terminal.innerHTML = '<div class="tw-text-neutral-500">[KineticHost] Console cleared.</div>';
+    };
+  }
 
   const sendCmd = async () => {
     const command = input.value.trim();
@@ -361,7 +524,7 @@ function initConsoleStream(serverId) {
         body: JSON.stringify({ command })
       });
     } catch (err) {
-      console.error('Failed to send command:', err);
+      showToast('Failed to send command', 'error');
     }
   };
 
@@ -386,9 +549,9 @@ function initConsoleStream(serverId) {
   };
 }
 
-// --------------------------------------------------------------------------
+// ==========================================================================
 // 4. Server Settings & Deletion
-// --------------------------------------------------------------------------
+// ==========================================================================
 function initServerSettings(s) {
   document.getElementById('settings-server-name').value = s.name;
   document.getElementById('settings-server-ram').value = s.ram_mb;
@@ -412,18 +575,18 @@ function initServerSettings(s) {
       });
       const data = await res.json();
       if (data.success) {
-        alert(data.message);
+        showToast(data.message, 'success');
         loadServerDetail(s.id);
       } else {
-        alert(data.error);
+        showToast(data.error, 'error');
       }
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
   };
 
   document.getElementById('btn-delete-server').onclick = async () => {
     const confirmation = prompt(`To permanently delete this server, please type its exact name "${s.name}":`);
     if (confirmation !== s.name) {
-      alert('Server name confirmation did not match. Deletion cancelled.');
+      showToast('Server name confirmation did not match. Deletion cancelled.', 'info');
       return;
     }
 
@@ -431,23 +594,24 @@ function initServerSettings(s) {
       const res = await fetch(`/api/servers/${s.id}`, { method: 'DELETE' });
       const data = await res.json();
       if (data.success) {
-        alert(data.message);
+        showToast(data.message, 'success');
         window.location.hash = 'dashboard';
       } else {
-        alert(data.error);
+        showToast(data.error, 'error');
       }
-    } catch (err) { alert(err.message); }
+    } catch (err) { showToast(err.message, 'error'); }
   };
 }
 
-// --------------------------------------------------------------------------
+// ==========================================================================
 // 5. Create Server Modal Workflow
-// --------------------------------------------------------------------------
+// ==========================================================================
 function openCreateServerModal() {
   document.getElementById('modal-create-server').classList.remove('tw-hidden');
   document.getElementById('create-server-form').reset();
   document.getElementById('create-server-ram-val').textContent = '4096 MB';
   document.getElementById('create-server-status-msg').classList.add('tw-hidden');
+  document.getElementById('btn-create-server-submit').disabled = false;
 }
 
 function closeCreateServerModal() {
@@ -467,7 +631,7 @@ async function handleCreateServerSubmit(e) {
 
   btnSubmit.disabled = true;
   statusMsg.classList.remove('tw-hidden');
-  statusMsg.innerHTML = '<i class="bi bi-arrow-repeat tw-animate-spin"></i> Reserving resources and downloading server JAR...';
+  statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2"><i class="bi bi-arrow-repeat tw-animate-spin"></i> Allocating port, isolated directory, and downloading server binary...</span>';
 
   try {
     const res = await fetch('/api/servers', {
@@ -478,24 +642,27 @@ async function handleCreateServerSubmit(e) {
     const data = await res.json();
 
     if (data.success && data.server) {
-      statusMsg.innerHTML = '<span class="tw-text-emerald-400">✓ Server deployed successfully!</span>';
+      statusMsg.innerHTML = '<span class="tw-text-emerald-400">✓ Instance deployed successfully! Redirecting...</span>';
+      showToast('Server created successfully!', 'success');
       setTimeout(() => {
         closeCreateServerModal();
         window.location.hash = `server/${data.server.id}`;
-      }, 800);
+      }, 600);
     } else {
       statusMsg.innerHTML = `<span class="tw-text-red-400">✗ ${data.error}</span>`;
+      showToast(data.error || 'Failed to create server', 'error');
       btnSubmit.disabled = false;
     }
   } catch (err) {
     statusMsg.innerHTML = `<span class="tw-text-red-400">✗ ${err.message}</span>`;
+    showToast(err.message, 'error');
     btnSubmit.disabled = false;
   }
 }
 
-// --------------------------------------------------------------------------
+// ==========================================================================
 // 6. Admin Panel Views
-// --------------------------------------------------------------------------
+// ==========================================================================
 async function loadAdminOverview() {
   const view = document.getElementById('view-admin-overview');
   view.classList.remove('tw-hidden');
@@ -519,19 +686,19 @@ async function loadAdminOverview() {
 
     const logsContainer = document.getElementById('admin-activity-logs');
     if (data.recent_activity.length === 0) {
-      logsContainer.innerHTML = '<tr><td colspan="4" class="tw-p-4 tw-text-neutral-500 tw-text-center">No recent activity records.</td></tr>';
+      logsContainer.innerHTML = '<tr><td colspan="4" class="tw-p-4 tw-text-neutral-500 tw-text-center">No platform activity recorded yet.</td></tr>';
     } else {
       logsContainer.innerHTML = data.recent_activity.map(l => `
         <tr class="tw-border-b tw-border-white/[0.04] tw-text-xs">
           <td class="tw-py-3 tw-px-4 tw-font-mono tw-text-neutral-400">${l.created_at}</td>
-          <td class="tw-py-3 tw-px-4 tw-text-white tw-font-medium">${l.user_name || 'System'}</td>
-          <td class="tw-py-3 tw-px-4"><span class="kh-badge tw-text-[10px]">${l.action}</span></td>
-          <td class="tw-py-3 tw-px-4 tw-text-neutral-300">${l.details || ''}</td>
+          <td class="tw-py-3 tw-px-4 tw-text-white tw-font-medium">${escapeHtml(l.user_name || 'System')}</td>
+          <td class="tw-py-3 tw-px-4"><span class="tw-px-2 tw-py-0.5 tw-rounded tw-bg-white/5 tw-border tw-border-white/10 tw-text-[10px] tw-font-mono">${l.action}</span></td>
+          <td class="tw-py-3 tw-px-4 tw-text-neutral-300">${escapeHtml(l.details || '')}</td>
         </tr>
       `).join('');
     }
   } catch (err) {
-    console.error('Failed to load admin overview:', err);
+    showToast('Failed to load admin metrics', 'error');
   }
 }
 
@@ -548,20 +715,25 @@ async function loadAdminUsers() {
     tbody.innerHTML = data.users.map(u => `
       <tr class="tw-border-b tw-border-white/[0.04] hover:tw-bg-white/[0.01] tw-text-sm">
         <td class="tw-py-4 tw-px-6 tw-font-mono tw-text-neutral-400">#${u.id}</td>
-        <td class="tw-py-4 tw-px-6 tw-font-semibold tw-text-white">${escapeHtml(u.name)}</td>
+        <td class="tw-py-4 tw-px-6">
+          <div class="tw-flex tw-items-center tw-gap-2.5">
+            <div class="tw-w-7 tw-h-7 tw-rounded-full tw-bg-neutral-800 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-bold tw-text-white">
+              ${u.name.charAt(0).toUpperCase()}
+            </div>
+            <span class="tw-font-semibold tw-text-white">${escapeHtml(u.name)}</span>
+          </div>
+        </td>
         <td class="tw-py-4 tw-px-6 tw-text-neutral-300">${escapeHtml(u.email)}</td>
         <td class="tw-py-4 tw-px-6">
-          <span class="tw-px-2 tw-py-0.5 tw-rounded tw-text-xs tw-font-mono ${u.role === 'admin' ? 'tw-bg-white/10 tw-text-white tw-border tw-border-white/20' : 'tw-bg-neutral-800 tw-text-neutral-300'}">
+          <span class="tw-px-2.5 tw-py-1 tw-rounded-full tw-text-xs tw-font-mono ${u.role === 'admin' ? 'tw-bg-white/10 tw-text-white tw-border tw-border-white/20' : 'tw-bg-neutral-800 tw-text-neutral-300'}">
             ${u.role}
           </span>
         </td>
-        <td class="tw-py-4 tw-px-6 tw-font-mono tw-text-xs">${u.servers_count} servers (${u.allocated_ram_mb} MB)</td>
+        <td class="tw-py-4 tw-px-6 tw-font-mono tw-text-xs">${u.servers_count} instances (${u.allocated_ram_mb} MB)</td>
         <td class="tw-py-4 tw-px-6 tw-font-mono tw-text-xs tw-text-neutral-400">${u.created_at}</td>
       </tr>
     `).join('');
-  } catch (err) {
-    console.error('Failed to load admin users:', err);
-  }
+  } catch (err) {}
 }
 
 async function loadAdminNodes() {
@@ -575,7 +747,7 @@ async function loadAdminNodes() {
 
     const grid = document.getElementById('admin-nodes-grid');
     grid.innerHTML = data.nodes.map(n => `
-      <div class="kh-card">
+      <div class="kh-panel-card">
         <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
           <div class="tw-flex tw-items-center tw-gap-3">
             <div class="tw-h-10 tw-w-10 tw-rounded-lg tw-bg-white/[0.06] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center">
@@ -600,7 +772,7 @@ async function loadAdminNodes() {
           </div>
         </div>
 
-        <div class="tw-pt-3 tw-border-t tw-border-white/5 tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-neutral-400">
+        <div class="tw-pt-3 tw-border-t tw-border-white/5 tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-neutral-400 font-mono">
           <span>Port Range: ${n.port_range_start} - ${n.port_range_end}</span>
           <span>Instances: ${n.running_count} running / ${n.server_count} total</span>
         </div>
@@ -667,16 +839,16 @@ async function loadAdminSettings() {
           body: JSON.stringify(payload)
         });
         const patchData = await patchRes.json();
-        if (patchData.success) alert(patchData.message);
-        else alert(patchData.error);
+        if (patchData.success) showToast(patchData.message, 'success');
+        else showToast(patchData.error, 'error');
       };
     }
   } catch (err) {}
 }
 
-// --------------------------------------------------------------------------
-// 7. Profile View
-// --------------------------------------------------------------------------
+// ==========================================================================
+// 7. Profile View Overhaul
+// ==========================================================================
 async function loadProfile() {
   const view = document.getElementById('view-profile');
   view.classList.remove('tw-hidden');
@@ -689,11 +861,21 @@ async function loadProfile() {
     const u = data.user;
     document.getElementById('profile-name').value = u.name;
     document.getElementById('profile-email').value = u.email;
-    document.getElementById('profile-role').textContent = u.role.toUpperCase();
-    document.getElementById('profile-created').textContent = u.created_at;
+
+    document.getElementById('profile-card-name').textContent = u.name;
+    document.getElementById('profile-card-email').textContent = u.email;
+    document.getElementById('profile-card-role').textContent = u.role.toUpperCase();
+    document.getElementById('profile-card-avatar').textContent = u.name.charAt(0).toUpperCase();
 
     document.getElementById('profile-quota-servers').textContent = `${u.servers_count} / ${u.max_servers}`;
+    const serverPercent = Math.min(100, Math.round((u.servers_count / (u.max_servers || 1)) * 100));
+    document.getElementById('profile-quota-servers-bar').style.width = `${serverPercent}%`;
+
     document.getElementById('profile-quota-ram').textContent = `${u.used_ram_mb} MB / ${u.max_ram_mb} MB`;
+    const ramPercent = Math.min(100, Math.round((u.used_ram_mb / (u.max_ram_mb || 1)) * 100));
+    document.getElementById('profile-quota-ram-bar').style.width = `${ramPercent}%`;
+
+    document.getElementById('profile-joined-date').textContent = u.created_at;
 
     document.getElementById('btn-save-profile').onclick = async () => {
       const name = document.getElementById('profile-name').value;
@@ -708,24 +890,26 @@ async function loadProfile() {
         });
         const pData = await pRes.json();
         if (pData.success) {
-          alert(pData.message);
+          showToast(pData.message, 'success');
           document.getElementById('profile-curr-pass').value = '';
           document.getElementById('profile-new-pass').value = '';
+          currentUser.name = name;
           initSidebar();
+          loadProfile();
         } else {
-          alert(pData.error);
+          showToast(pData.error, 'error');
         }
-      } catch (err) { alert(err.message); }
+      } catch (err) { showToast(err.message, 'error'); }
     };
   } catch (err) {}
 }
 
-// --------------------------------------------------------------------------
+// ==========================================================================
 // Helpers
-// --------------------------------------------------------------------------
+// ==========================================================================
 function copyText(text) {
   navigator.clipboard.writeText(text);
-  alert(`Copied "${text}" to clipboard.`);
+  showToast(`Copied "${text}" to clipboard`, 'info');
 }
 
 function escapeHtml(str) {
