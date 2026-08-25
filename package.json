@@ -1,28 +1,32 @@
 {
-    "name": "landing-pages",
-    "version": "1.0.0",
-    "description": "beautiful landing pages",
-    "main": "index.js",
-    "scripts": {
-      "start:tailwind": "cross-env NODE_ENV=development tailwindcss --postcss -i tailwind.css -o tailwind-runtime.css -w",
-      "build:tailwind": "cross-env NODE_ENV=production tailwindcss --postcss -i tailwind.css -o tailwind-build.css --minify",
-      "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [
-      "landing",
-      "pages",
-      "motion",
-      "design",
-      "websites"
-    ],
-    "author": "Paul",
-    "license": "MIT",
-    "devDependencies": {
-      "tailwindcss": "^3.4.1"
-    },
-    "dependencies": {
-      "postcss": "^8.4.33",
-      "postcss-simple-vars": "^7.0.1"
-    }
+  "name": "kinetic-host",
+  "version": "1.0.0",
+  "description": "KineticHost — 100% Free Minecraft & VPS Hosting Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build:tailwind": "tailwindcss -i css/tailwind.css -o css/tailwind-build.css --minify"
+  },
+  "keywords": [
+    "minecraft",
+    "vps",
+    "hosting",
+    "kinetichost"
+  ],
+  "author": "xAyan55",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.8.1",
+    "connect-sqlite3": "^0.9.15",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
   }
-  
+}

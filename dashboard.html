@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | KineticHost — Control Center</title>
+    <link rel="stylesheet" href="css/tailwind-build.css">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body class="tw-bg-[#050505] tw-text-white tw-font-sans tw-min-h-screen tw-flex tw-flex-col tw-antialiased">
+    <!-- Navbar -->
+    <header class="tw-sticky tw-top-0 tw-z-50 tw-w-full tw-border-b tw-border-white/[0.08] tw-bg-[#050505]/80 tw-backdrop-blur-md">
+        <div class="tw-max-w-[1300px] tw-mx-auto tw-flex tw-items-center tw-justify-between tw-py-4 tw-px-6">
+            <a href="/" class="tw-flex tw-items-center tw-gap-3">
+                <img src="assets/logo/logo.svg" alt="KineticHost" class="tw-h-8 tw-w-auto">
+                <span class="tw-text-xl tw-font-bold tw-tracking-tight tw-text-white">KineticHost</span>
+            </a>
+
+            <div class="tw-flex tw-items-center tw-gap-4">
+                <div id="admin-badge-container" class="tw-hidden">
+                    <a href="/admin" class="tw-py-1.5 tw-px-3 tw-rounded-lg tw-bg-white/10 hover:tw-bg-white/20 tw-border tw-border-white/20 tw-text-xs tw-font-mono tw-text-white tw-transition-colors tw-flex tw-items-center tw-gap-2">
+                        <i class="bi bi-shield-lock-fill tw-text-white"></i> Admin Panel
+                    </a>
+                </div>
+                <div class="tw-flex tw-items-center tw-gap-3 tw-px-3 tw-py-1.5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08]">
+                    <div class="tw-w-7 tw-h-7 tw-rounded-full tw-bg-neutral-800 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-bold tw-text-white">
+                        <span id="user-avatar">U</span>
+                    </div>
+                    <div class="tw-flex tw-flex-col">
+                        <span id="user-name" class="tw-text-xs tw-font-semibold tw-text-white">User</span>
+                        <span id="user-role" class="tw-text-[10px] tw-font-mono tw-text-neutral-400">role: user</span>
+                    </div>
+                </div>
+                <button id="logout-btn" class="tw-p-2 tw-rounded-xl tw-bg-white/[0.03] hover:tw-bg-white/[0.08] tw-border tw-border-white/[0.08] tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="tw-flex-1 tw-max-w-[1300px] tw-w-full tw-mx-auto tw-py-10 tw-px-6">
+        <!-- Welcome Banner -->
+        <div class="tw-mb-10 tw-p-8 tw-rounded-2xl tw-bg-neutral-900/60 tw-border tw-border-white/[0.08] tw-relative tw-overflow-hidden">
+            <div class="tw-relative tw-z-10 tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between tw-gap-6">
+                <div>
+                    <div class="kh-badge tw-mb-3">
+                        <span class="kh-dot-active"></span>
+                        <span id="role-display-badge">Authenticated Account</span>
+                    </div>
+                    <h1 class="tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white tw-mb-2">
+                        Welcome back, <span id="welcome-user-name">User</span>!
+                    </h1>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-max-w-[600px]">
+                        Your KineticHost instances are active. Select a server to open the browser control panel.
+                    </p>
+                </div>
+                <div class="tw-flex tw-items-center tw-gap-3">
+                    <a href="#servers" class="btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Deploy New Server</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Server Instances Grid -->
+        <div id="servers" class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6 tw-mb-12">
+            <!-- Minecraft Instance Card -->
+            <div class="kh-card tw-flex tw-flex-col tw-justify-between">
+                <div>
+                    <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+                        <div class="tw-flex tw-items-center tw-gap-3">
+                            <img src="assets/icons/minecraft.png" alt="Minecraft" class="tw-w-10 tw-h-10">
+                            <div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-white">Survival SMP Server</h3>
+                                <span class="tw-text-xs tw-font-mono tw-text-neutral-400">Paper 1.20.4 • 4GB DDR5</span>
+                            </div>
+                        </div>
+                        <span class="tw-px-2.5 tw-py-1 tw-rounded-full tw-bg-emerald-500/10 tw-border tw-border-emerald-500/20 tw-text-emerald-400 tw-text-xs tw-font-mono">
+                            Online
+                        </span>
+                    </div>
+                    <div class="tw-py-3 tw-px-4 tw-rounded-xl tw-bg-black/50 tw-border tw-border-white/5 tw-font-mono tw-text-xs tw-text-neutral-300 tw-flex tw-items-center tw-justify-between tw-mb-4">
+                        <span>play.kinetichost.me:25565</span>
+                        <button class="hover:tw-text-white tw-transition-colors" onclick="navigator.clipboard.writeText('play.kinetichost.me:25565')">
+                            <i class="bi bi-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="tw-flex tw-items-center tw-justify-between tw-pt-4 tw-border-t tw-border-white/5">
+                    <span class="tw-text-xs tw-text-neutral-400 tw-font-mono">Slots: Unmetered</span>
+                    <a href="/#panel" class="tw-text-xs tw-font-semibold tw-text-white hover:tw-underline tw-flex tw-items-center tw-gap-1">
+                        Open Panel <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Linux VPS Instance Card -->
+            <div class="kh-card tw-flex tw-flex-col tw-justify-between">
+                <div>
+                    <div class="tw-flex tw-items-center tw-justify-between tw-mb-4">
+                        <div class="tw-flex tw-items-center tw-gap-3">
+                            <img src="assets/images/os/ubuntu.png" alt="Ubuntu" class="tw-w-10 tw-h-10">
+                            <div>
+                                <h3 class="tw-text-base tw-font-bold tw-text-white">Cloud KVM VPS</h3>
+                                <span class="tw-text-xs tw-font-mono tw-text-neutral-400">Ubuntu 22.04 LTS • 2 vCPU</span>
+                            </div>
+                        </div>
+                        <span class="tw-px-2.5 tw-py-1 tw-rounded-full tw-bg-emerald-500/10 tw-border tw-border-emerald-500/20 tw-text-emerald-400 tw-text-xs tw-font-mono">
+                            Running
+                        </span>
+                    </div>
+                    <div class="tw-py-3 tw-px-4 tw-rounded-xl tw-bg-black/50 tw-border tw-border-white/5 tw-font-mono tw-text-xs tw-text-neutral-300 tw-flex tw-items-center tw-justify-between tw-mb-4">
+                        <span>vps-01.kinetichost.me (SSH)</span>
+                        <button class="hover:tw-text-white tw-transition-colors" onclick="navigator.clipboard.writeText('ssh root@vps-01.kinetichost.me')">
+                            <i class="bi bi-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="tw-flex tw-items-center tw-justify-between tw-pt-4 tw-border-t tw-border-white/5">
+                    <span class="tw-text-xs tw-text-neutral-400 tw-font-mono">IP: 100.70.215.110</span>
+                    <a href="/#vps" class="tw-text-xs tw-font-semibold tw-text-white hover:tw-underline tw-flex tw-items-center tw-gap-1">
+                        SSH Details <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const res = await fetch('/api/auth/me');
+                const data = await res.json();
+
+                if (!data.authenticated || !data.user) {
+                    window.location.href = '/auth/login';
+                    return;
+                }
+
+                const u = data.user;
+                document.getElementById('user-name').textContent = u.name;
+                document.getElementById('welcome-user-name').textContent = u.name;
+                document.getElementById('user-avatar').textContent = u.name.charAt(0).toUpperCase();
+                document.getElementById('user-role').textContent = `role: ${u.role}`;
+
+                if (u.role === 'admin') {
+                    document.getElementById('admin-badge-container').classList.remove('tw-hidden');
+                    document.getElementById('role-display-badge').textContent = 'Administrator Account';
+                }
+
+                document.getElementById('logout-btn').addEventListener('click', async () => {
+                    await fetch('/api/auth/logout', { method: 'POST' });
+                    window.location.href = '/auth/login';
+                });
+            } catch (err) {
+                console.error('Failed to load dashboard auth:', err);
+                window.location.href = '/auth/login';
+            }
+        });
+    </script>
+</body>
+</html>
