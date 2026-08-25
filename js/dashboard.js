@@ -85,16 +85,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Setup sidebar & user profile identity
 function initSidebar() {
   const nameEls = document.querySelectorAll('.sidebar-user-name');
-  const avatarEls = document.querySelectorAll('.sidebar-user-avatar');
+  const avatarEls = document.querySelectorAll('.sidebar-user-avatar-img');
   const roleEls = document.querySelectorAll('.sidebar-user-role');
 
+  const avatarSrc = currentUser.avatar_url || 'assets/images/control-panel/avatar-1.png';
+
   nameEls.forEach(el => el.textContent = currentUser.name);
-  avatarEls.forEach(el => el.textContent = currentUser.name.charAt(0).toUpperCase());
+  avatarEls.forEach(el => el.src = avatarSrc);
   roleEls.forEach(el => el.textContent = currentUser.role.toUpperCase());
 
   if (currentUser.role === 'admin') {
     document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('tw-hidden'));
-    document.querySelectorAll('.admin-only-btn').forEach(el => el.classList.remove('tw-hidden'));
+    document.querySelectorAll('.admin-only-btn').forEach(el => el.style.display = '');
+  } else {
+    document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.add('tw-hidden'));
+    document.querySelectorAll('.admin-only-btn').forEach(el => el.style.display = 'none');
   }
 }
 
@@ -926,7 +931,18 @@ async function loadProfile() {
     document.getElementById('profile-card-name').textContent = u.name;
     document.getElementById('profile-card-email').textContent = u.email;
     document.getElementById('profile-card-role').textContent = u.role.toUpperCase();
-    document.getElementById('profile-card-avatar').textContent = u.name.charAt(0).toUpperCase();
+
+    const avatarUrl = u.avatar_url || 'assets/images/control-panel/avatar-1.png';
+    const heroAvatar = document.getElementById('profile-card-avatar-img');
+    if (heroAvatar) heroAvatar.src = avatarUrl;
+
+    if (avatarUrl.includes('avatar-2')) {
+      const opt2 = document.getElementById('avatar-opt-2');
+      if (opt2) opt2.checked = true;
+    } else {
+      const opt1 = document.getElementById('avatar-opt-1');
+      if (opt1) opt1.checked = true;
+    }
 
     document.getElementById('profile-quota-servers').textContent = `${u.servers_count} / ${u.max_servers}`;
     const serverPercent = Math.min(100, Math.round((u.servers_count / (u.max_servers || 1)) * 100));
@@ -943,18 +959,22 @@ async function loadProfile() {
       const currentPassword = document.getElementById('profile-curr-pass').value;
       const newPassword = document.getElementById('profile-new-pass').value;
 
+      const selectedAvatarRadio = document.querySelector('input[name="profile_avatar_opt"]:checked');
+      const avatarUrl = selectedAvatarRadio ? selectedAvatarRadio.value : undefined;
+
       try {
         const pRes = await fetch('/api/account/profile', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, currentPassword, newPassword })
+          body: JSON.stringify({ name, avatarUrl, currentPassword, newPassword })
         });
         const pData = await pRes.json();
         if (pData.success) {
           showToast(pData.message, 'success');
           document.getElementById('profile-curr-pass').value = '';
           document.getElementById('profile-new-pass').value = '';
-          currentUser.name = name;
+          currentUser.name = pData.user.name;
+          currentUser.avatar_url = pData.user.avatar_url;
           initSidebar();
           loadProfile();
         } else {

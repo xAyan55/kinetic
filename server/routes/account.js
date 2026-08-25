@@ -14,7 +14,7 @@ function requireAuth(req, res, next) {
 router.get('/profile', requireAuth, (req, res) => {
   const userId = req.session.user.id;
   const user = db.prepare(`
-    SELECT id, name, email, role, max_servers, max_ram_mb, created_at
+    SELECT id, name, email, role, avatar_url, max_servers, max_ram_mb, created_at
     FROM users WHERE id = ?
   `).get(userId);
 
@@ -32,6 +32,7 @@ router.get('/profile', requireAuth, (req, res) => {
     success: true,
     user: {
       ...user,
+      avatar_url: user.avatar_url || 'assets/images/control-panel/avatar-1.png',
       servers_count: serverStats.total_servers,
       used_ram_mb: serverStats.used_ram_mb
     }
@@ -42,7 +43,7 @@ router.get('/profile', requireAuth, (req, res) => {
 router.patch('/profile', requireAuth, (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { name, currentPassword, newPassword } = req.body;
+    const { name, avatarUrl, currentPassword, newPassword } = req.body;
 
     const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
@@ -52,6 +53,19 @@ router.patch('/profile', requireAuth, (req, res) => {
       updatedName = name.trim();
       db.prepare(`UPDATE users SET name = ?, updated_at = datetime('now') WHERE id = ?`).run(updatedName, userId);
       req.session.user.name = updatedName;
+    }
+
+    let updatedAvatar = user.avatar_url || 'assets/images/control-panel/avatar-1.png';
+    if (avatarUrl && typeof avatarUrl === 'string') {
+      const allowedAvatars = [
+        'assets/images/control-panel/avatar-1.png',
+        'assets/images/control-panel/avatar-2.jpg'
+      ];
+      if (allowedAvatars.includes(avatarUrl)) {
+        updatedAvatar = avatarUrl;
+        db.prepare(`UPDATE users SET avatar_url = ?, updated_at = datetime('now') WHERE id = ?`).run(updatedAvatar, userId);
+        req.session.user.avatar_url = updatedAvatar;
+      }
     }
 
     if (newPassword) {
@@ -77,7 +91,8 @@ router.patch('/profile', requireAuth, (req, res) => {
         id: user.id,
         name: updatedName,
         email: user.email,
-        role: user.role
+        role: user.role,
+        avatar_url: updatedAvatar
       }
     });
   } catch (err) {

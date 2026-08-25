@@ -129,9 +129,7 @@
         <!-- Sidebar Profile Card & Sign Out -->
         <div class="tw-pt-4 tw-border-t tw-border-white/[0.08] tw-space-y-2">
             <a href="#profile" class="tw-flex tw-items-center tw-gap-3 tw-p-2 tw-rounded-lg hover:tw-bg-white/[0.04] tw-transition-colors">
-                <div class="tw-w-8 tw-h-8 tw-rounded-full tw-bg-neutral-800 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-bold tw-text-white">
-                    <span class="sidebar-user-avatar">U</span>
-                </div>
+                <img src="assets/images/control-panel/avatar-1.png" alt="Avatar" class="sidebar-user-avatar-img tw-w-8 tw-h-8 tw-rounded-full tw-object-cover tw-border tw-border-white/10">
                 <div class="tw-flex tw-flex-col tw-truncate">
                     <span class="sidebar-user-name tw-text-xs tw-font-semibold tw-text-white tw-truncate">User</span>
                     <span class="sidebar-user-role tw-text-[10px] tw-font-mono tw-text-neutral-400">USER</span>
@@ -168,9 +166,7 @@
 
                 <!-- User Avatar Quick Link -->
                 <a href="#profile" class="tw-flex tw-items-center tw-gap-2 hover:tw-opacity-80 tw-transition-opacity">
-                    <div class="tw-w-7 tw-h-7 tw-rounded-full tw-bg-neutral-800 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-bold tw-text-white">
-                        <span class="sidebar-user-avatar">U</span>
-                    </div>
+                    <img src="assets/images/control-panel/avatar-1.png" alt="Avatar" class="sidebar-user-avatar-img tw-w-7 tw-h-7 tw-rounded-full tw-object-cover tw-border tw-border-white/10">
                 </a>
             </div>
         </header>
@@ -187,7 +183,7 @@
                         <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Minecraft Servers</h1>
                         <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Monitor, configure, and control your active server instances.</p>
                     </div>
-                    <button onclick="openCreateServerModal()" class="btn-primary admin-only-btn tw-hidden">
+                    <button id="btn-dashboard-create" onclick="openCreateServerModal()" class="btn-primary admin-only-btn" style="display: none;">
                         <i class="bi bi-plus-lg"></i>
                         <span>Create Server</span>
                     </button>
@@ -574,8 +570,8 @@
                     </div>
                     <div class="tw-p-6 tw-pt-0 tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-end sm:tw-justify-between tw-gap-4 tw-relative -tw-mt-12">
                         <div class="tw-flex tw-items-end tw-gap-4">
-                            <div class="tw-w-20 tw-h-20 tw-rounded-2xl tw-bg-[#090909] tw-border-2 tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-2xl tw-font-extrabold tw-text-white tw-shadow-2xl">
-                                <span id="profile-card-avatar">U</span>
+                            <div class="tw-w-20 tw-h-20 tw-rounded-2xl tw-bg-[#090909] tw-border-2 tw-border-white/10 tw-overflow-hidden tw-shadow-2xl tw-flex-shrink-0">
+                                <img id="profile-card-avatar-img" src="assets/images/control-panel/avatar-1.png" alt="Avatar" class="tw-w-full tw-h-full tw-object-cover">
                             </div>
                             <div class="tw-mb-1">
                                 <div class="tw-flex tw-items-center tw-gap-2.5">
@@ -596,6 +592,22 @@
                     <!-- Left: Account & Quota Info -->
                     <div class="kh-panel-card tw-space-y-6">
                         <h3 class="tw-text-base tw-font-bold tw-text-white">Account Information</h3>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Profile Avatar</label>
+                            <div class="tw-flex tw-items-center tw-gap-4 tw-mt-1">
+                                <label class="tw-cursor-pointer tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-rounded-xl tw-border tw-border-white/10 hover:tw-border-white/30 tw-transition-colors">
+                                    <input type="radio" name="profile_avatar_opt" value="assets/images/control-panel/avatar-1.png" id="avatar-opt-1" class="tw-accent-white">
+                                    <img src="assets/images/control-panel/avatar-1.png" alt="Avatar 1" class="tw-w-9 tw-h-9 tw-rounded-lg tw-object-cover">
+                                    <span class="tw-text-xs tw-font-mono tw-text-neutral-300">Avatar 1</span>
+                                </label>
+                                <label class="tw-cursor-pointer tw-flex tw-items-center tw-gap-2.5 tw-p-2 tw-rounded-xl tw-border tw-border-white/10 hover:tw-border-white/30 tw-transition-colors">
+                                    <input type="radio" name="profile_avatar_opt" value="assets/images/control-panel/avatar-2.jpg" id="avatar-opt-2" class="tw-accent-white">
+                                    <img src="assets/images/control-panel/avatar-2.jpg" alt="Avatar 2" class="tw-w-9 tw-h-9 tw-rounded-lg tw-object-cover">
+                                    <span class="tw-text-xs tw-font-mono tw-text-neutral-300">Avatar 2</span>
+                                </label>
+                            </div>
+                        </div>
 
                         <div class="kh-field-group">
                             <label class="kh-field-label">Full Name</label>

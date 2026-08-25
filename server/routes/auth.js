@@ -113,7 +113,8 @@ router.post('/login', authLimiter, (req, res) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      role: user.role
+      role: user.role,
+      avatar_url: user.avatar_url || 'assets/images/control-panel/avatar-1.png'
     };
 
     return res.json({

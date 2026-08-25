@@ -213,6 +213,16 @@ function runMigrations() {
           dbInstance.exec("ALTER TABLE users ADD COLUMN max_ram_mb INTEGER DEFAULT 8192");
         }
       }
+    },
+    {
+      version: 4,
+      name: 'add_avatar_url_to_users',
+      up: (dbInstance) => {
+        const userCols = dbInstance.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+        if (!userCols.includes('avatar_url')) {
+          dbInstance.exec("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT 'assets/images/control-panel/avatar-1.png'");
+        }
+      }
     }
   ];
 
