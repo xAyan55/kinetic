@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en" class="tw-dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>KineticHost | Minecraft Servers & VPS — 100% Free, Forever</title>
+        <meta name="description" content="Instantly create a powerful free Minecraft server, in minutes, to play with friends. 100% free forever with DDR5 RAM and NVMe storage." />
+        <link
+            rel="shortcut icon"
+            href="./assets/logo/kinetic.png"
+            type="image/png"
+        />
+
+        <!-- Open Graph -->
+        <meta property="og:title" content="KineticHost | Minecraft Servers & VPS — 100% Free, Forever" />
+        <meta property="og:description" content="Instantly create a powerful free Minecraft server, in minutes, to play with friends." />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="./assets/logo/kinetic.png" />
+
+        <!-- Stylesheets -->
+        <link rel="stylesheet" href="./css/tailwind-build.css" />
+        <link rel="stylesheet" href="./css/index.css" />
+
+        <!-- Icons -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
+            integrity="sha512-dPXYcDub/aeb08c63jRq/k6GaKccl256JQy/AnOq7CAnEZ9FzSL9wSbcZkMp4R26vBsMLFYH4kQ67/bbV8XaCQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
+    </head>
+    <body class="kh-bg-system tw-flex tw-min-h-[100vh] tw-flex-col tw-bg-[#050505] tw-text-[#F5F5F5] tw-relative tw-antialiased">
+        
+        <!-- Multi-Layer Atmospheric Texture Overlays -->
+        <div class="kh-data-texture"></div>
+        <div class="kh-noise-overlay"></div>
+
+        <!-- Navigation Header -->
+        <header class="tw-fixed tw-top-0 tw-z-50 tw-flex tw-h-[70px] tw-w-full tw-items-center tw-justify-between tw-px-[6%] lg:tw-px-[8%]">
+            <!-- Brand Logo -->
+            <a class="tw-flex tw-items-center tw-gap-3 tw-text-decoration-none" href="#">
+                <div class="tw-h-[38px] tw-w-[38px] tw-overflow-hidden tw-rounded-lg tw-bg-[#101010] tw-p-1 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center">
+                    <img
+                        src="./assets/logo/kinetic.png"
+                        alt="KineticHost"
+                        class="tw-h-full tw-w-full tw-object-contain"
+                    />
+                </div>
+                <span class="tw-font-bold tw-text-xl tw-tracking-tight tw-text-white">
+                    Kinetic<span class="tw-font-light tw-text-neutral-400">Host</span>
+                </span>
+            </a>
+
+            <!-- Navigation Links -->
+            <div
+                class="collapsible-header animated-collapse max-lg:tw-shadow-2xl"
+                id="collapsed-header-items"
+            >
+                <div
+                    class="tw-flex tw-h-full tw-w-max tw-gap-2 tw-text-sm max-lg:tw-mt-[20px] max-lg:tw-flex-col max-lg:tw-w-full lg:tw-mx-auto lg:tw-items-center"
+                >
+                    <a class="header-links" href="#hero">Yes, Free</a>
+                    <a class="header-links" href="#features">Features</a>
+                    <a class="header-links" href="#included">Included Specs</a>
+                    <a class="header-links" href="#panel">Control Panel</a>
+                    <a class="header-links" href="#vps">VPS Hosting</a>
+                    <a class="header-links" href="#reviews">Reviews</a>
+                    <a class="header-links" href="#faq">FAQ</a>
+                </div>
+
+                <div class="tw-flex tw-items-center tw-gap-3 max-lg:tw-mt-6 max-lg:tw-w-full">
+                    <a href="#panel" class="btn-secondary tw-w-full lg:tw-w-auto text-xs">
+                        <i class="bi bi-display"></i>
+                        <span>Panel Demo</span>
+                    </a>
+                    <a href="#hero" class="btn-primary tw-w-full lg:tw-w-auto">
+                        <span>Create your server</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Drawer Toggle -->
+            <button
+                class="bi bi-list tw-text-2xl tw-text-white lg:tw-hidden tw-cursor-pointer tw-p-2 tw-bg-transparent tw-border-none"
+                onclick="toggleHeader()"
+                aria-label="Toggle menu"
+                id="collapse-btn"
+            ></button>
+        </header>
+
+        <!-- Hero Section (Play.hosting style) -->
+        <section
+            id="hero"
+            class="tw-relative tw-flex tw-min-h-[100vh] tw-w-full tw-flex-col tw-items-center tw-justify-center tw-pt-[140px] tw-pb-[70px] tw-px-[6%]"
+        >
+            <div class="tw-relative tw-z-10 tw-flex tw-max-w-[920px] tw-flex-col tw-items-center tw-text-center tw-gap-6">
+                <!-- Status Badge -->
+                <div class="kh-badge">
+                    <span class="kh-dot-active"></span>
+                    <span>100% Free, Forever</span>
+                </div>
+
+                <!-- Main Bold Play.hosting Headline -->
+                <h1 class="tw-text-5xl lg:tw-text-7xl tw-font-extrabold tw-tracking-tight tw-leading-[1.1] tw-text-white">
+                    Yes, it’s 100% free.
+                </h1>
+
+                <!-- Supporting Copy -->
+                <p class="tw-text-lg lg:tw-text-xl tw-text-neutral-300 tw-max-w-[650px] tw-font-normal tw-leading-relaxed">
+                    Instantly create a powerful free Minecraft server, in minutes, to play with friends. No credit card required.
+                </p>
+
+                <!-- CTAs -->
+                <div class="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
+                    <a href="#included" class="btn-primary">
+                        <span>Create your server</span>
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                    <a href="#panel" class="btn-secondary">
+                        <i class="bi bi-sliders tw-text-neutral-400"></i>
+                        <span>Explore Control Panel</span>
+                    </a>
+                </div>
+
+                <!-- Hardware Specifications Status Bar -->
+                <div class="tw-mt-12 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-3 tw-py-3 tw-px-6 tw-rounded-2xl tw-bg-white/[0.02] tw-border tw-border-white/[0.08] tw-backdrop-blur-md">
+                    <div class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1 tw-text-xs tw-font-mono tw-text-neutral-300">
+                        <i class="bi bi-cpu tw-text-neutral-400"></i> High-Freq CPUs
+                    </div>
+                    <div class="tw-h-3 tw-w-[1px] tw-bg-white/10 max-sm:tw-hidden"></div>
+                    <div class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1 tw-text-xs tw-font-mono tw-text-neutral-300">
+                        <i class="bi bi-memory tw-text-neutral-400"></i> DDR5 ECC Memory
+                    </div>
+                    <div class="tw-h-3 tw-w-[1px] tw-bg-white/10 max-sm:tw-hidden"></div>
+                    <div class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1 tw-text-xs tw-font-mono tw-text-neutral-300">
+                        <i class="bi bi-hdd-network tw-text-neutral-400"></i> NVMe Gen 4 Storage
+                    </div>
+                    <div class="tw-h-3 tw-w-[1px] tw-bg-white/10 max-sm:tw-hidden"></div>
+                    <div class="tw-flex tw-items-center tw-gap-2 tw-px-3 tw-py-1 tw-text-xs tw-font-mono tw-text-neutral-300">
+                        <i class="bi bi-reception-4 tw-text-neutral-400"></i> 10Gbps Uplink
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feature Highlights Section ("All the features you could possibly need...") -->
+        <section id="features" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1200px] tw-mx-auto">
+                <div class="tw-text-center tw-max-w-[700px] tw-mx-auto tw-mb-16">
+                    <div class="kh-badge tw-mb-4">Everything You Need</div>
+                    <h2 class="tw-text-3xl lg:tw-text-5xl tw-font-bold tw-text-white tw-tracking-tight">
+                        All the features you could possibly need...
+                    </h2>
+                </div>
+
+                <!-- Feature Grid Cards -->
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-8">
+                    <!-- Feature 1: Modpack Installer -->
+                    <div class="kh-card tw-p-8 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="tw-h-12 tw-w-12 tw-rounded-xl tw-bg-white/[0.05] tw-border tw-border-white/[0.1] tw-flex tw-items-center tw-justify-center tw-text-white tw-text-2xl tw-mb-6">
+                                <i class="bi bi-box-seam-fill"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold tw-text-white tw-mb-3">
+                                Modpack Installer
+                            </h3>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                Install and update packs from CurseForge, Modrinth, FTB, and Technic with ease and in seconds, or upload your custom mods through our control panel.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 2: One-Click Features & Bedrock Crossplay -->
+                    <div class="kh-card tw-p-8 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="tw-h-12 tw-w-12 tw-rounded-xl tw-bg-white/[0.05] tw-border tw-border-white/[0.1] tw-flex tw-items-center tw-justify-center tw-text-white tw-text-2xl tw-mb-6">
+                                <i class="bi bi-controller"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold tw-text-white tw-mb-3">
+                                One-Click Features
+                            </h3>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                Features available with all free servers include Bedrock crossplay support (Geyser/Floodgate), additional ports, and no player slot limits for groups of friends.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Feature 3: Web Console & Team Access -->
+                    <div class="kh-card tw-p-8 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="tw-h-12 tw-w-12 tw-rounded-xl tw-bg-white/[0.05] tw-border tw-border-white/[0.1] tw-flex tw-items-center tw-justify-center tw-text-white tw-text-2xl tw-mb-6">
+                                <i class="bi bi-terminal-fill"></i>
+                            </div>
+                            <h3 class="tw-text-xl tw-font-bold tw-text-white tw-mb-3">
+                                Full Control & Sub-Users
+                            </h3>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                Invite friends to manage your server with sub-user permissions, access live console logs, edit files directly, and manage backups with ease.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- "Included with every server" Checklist Matrix -->
+        <section id="included" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1200px] tw-mx-auto">
+                <div class="kh-card-featured tw-p-8 lg:tw-p-14">
+                    <div class="tw-text-center tw-max-w-[700px] tw-mx-auto tw-mb-12">
+                        <div class="kh-badge tw-mb-3">Zero Costs</div>
+                        <h2 class="tw-text-3xl lg:tw-text-5xl tw-font-bold tw-text-white tw-tracking-tight">
+                            Included with every server
+                        </h2>
+                        <p class="tw-text-neutral-400 tw-text-base tw-mt-3">
+                            Everything you need to host a smooth Minecraft server for you and your friends.
+                        </p>
+                    </div>
+
+                    <!-- Checklist Grid (Play.hosting style) -->
+                    <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 md:tw-grid-cols-4 tw-gap-6">
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">4GB DDR5 RAM</div>
+                                <div class="tw-text-xs tw-text-neutral-400">High speed allocation</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">25GB NVMe Storage</div>
+                                <div class="tw-text-xs tw-text-neutral-400">Ultra-fast Gen4 NVMe</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">Install Any Version</div>
+                                <div class="tw-text-xs tw-text-neutral-400">Paper, Purpur, Fabric</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">Bedrock Crossplay</div>
+                                <div class="tw-text-xs tw-text-neutral-400">Play Java & Bedrock</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">Create Extra Ports</div>
+                                <div class="tw-text-xs tw-text-neutral-400">Free custom allocations</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">Invite Sub-Users</div>
+                                <div class="tw-text-xs tw-text-neutral-400">Full team permissions</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">Unmetered Slots</div>
+                                <div class="tw-text-xs tw-text-neutral-400">No player limits</div>
+                            </div>
+                        </div>
+
+                        <div class="tw-p-5 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-flex tw-items-center tw-gap-4">
+                            <i class="bi bi-check-circle-fill tw-text-white tw-text-xl"></i>
+                            <div>
+                                <div class="tw-font-bold tw-text-white tw-text-base">100% Free Forever</div>
+                                <div class="tw-text-xs tw-text-neutral-400">No credit card needed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tw-mt-10 tw-text-center">
+                        <a href="#hero" class="btn-primary">
+                            <span>Create your server now</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Control Panel Showcase Section -->
+        <section id="panel" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1200px] tw-mx-auto">
+                <div class="tw-text-center tw-max-w-[700px] tw-mx-auto tw-mb-12">
+                    <div class="kh-badge tw-mb-3">Management Suite</div>
+                    <h2 class="tw-text-3xl lg:tw-text-5xl tw-font-bold tw-text-white tw-tracking-tight">
+                        Free Web Control Panel
+                    </h2>
+                    <p class="tw-mt-4 tw-text-neutral-400 tw-text-base">
+                        Experience real-time server console control, instant file editing, 1-click modpack installs, and team access permissions directly from your browser.
+                    </p>
+                </div>
+
+                <!-- Control Panel Shell Frame -->
+                <div class="kh-card tw-p-4 lg:tw-p-6 tw-rounded-2xl tw-overflow-hidden">
+                    <!-- Server Control Top Header Bar -->
+                    <div class="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4 tw-px-5 tw-py-4 tw-bg-[#0A0A0A] tw-rounded-xl tw-border tw-border-white/[0.08] tw-mb-4">
+                        <!-- Left Info -->
+                        <div class="tw-flex tw-items-center tw-gap-3">
+                            <span id="server-status-dot" class="kh-dot-active"></span>
+                            <div>
+                                <div class="tw-text-sm tw-font-bold tw-text-white tw-flex tw-items-center tw-gap-2">
+                                    <span>srv-free-mc01.kinetichost.net</span>
+                                    <span class="tw-text-[10px] tw-bg-white/10 tw-px-2 tw-py-0.5 tw-rounded tw-text-neutral-300 font-mono">Paper 1.20.4</span>
+                                </div>
+                                <div id="server-status-badge" class="tw-text-xs tw-font-mono tw-text-neutral-200 tw-font-semibold">
+                                    ONLINE (PORT 25565)
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Center Resource Gauges -->
+                        <div class="tw-flex tw-items-center tw-gap-6 tw-text-xs tw-font-mono tw-text-neutral-400 max-md:tw-hidden">
+                            <div class="tw-flex tw-items-center tw-gap-2">
+                                <i class="bi bi-cpu tw-text-neutral-500"></i>
+                                <span>CPU: <strong class="tw-text-white">14.2%</strong></span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-2">
+                                <i class="bi bi-memory tw-text-neutral-500"></i>
+                                <span>RAM: <strong class="tw-text-white">2.4 / 4 GB</strong></span>
+                            </div>
+                            <div class="tw-flex tw-items-center tw-gap-2">
+                                <i class="bi bi-hdd tw-text-neutral-500"></i>
+                                <span>Disk: <strong class="tw-text-white">12.1 GB</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Right Power Action Buttons (Restrained Neutral Styling) -->
+                        <div class="tw-flex tw-items-center tw-gap-2">
+                            <button onclick="simulateServerAction('start')" class="tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-white/[0.06] tw-border tw-border-white/[0.12] tw-text-neutral-200 tw-text-xs tw-font-semibold hover:tw-bg-white/[0.12] tw-transition-colors tw-cursor-pointer">
+                                <i class="bi bi-play-fill"></i> Start
+                            </button>
+                            <button onclick="simulateServerAction('restart')" class="tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-white/[0.04] tw-border tw-border-white/[0.08] tw-text-neutral-300 tw-text-xs tw-font-semibold hover:tw-bg-white/[0.08] tw-transition-colors tw-cursor-pointer">
+                                <i class="bi bi-arrow-clockwise"></i> Restart
+                            </button>
+                            <button onclick="simulateServerAction('stop')" class="tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-white/[0.04] tw-border tw-border-white/[0.08] tw-text-neutral-400 tw-text-xs tw-font-semibold hover:tw-bg-white/[0.08] tw-transition-colors tw-cursor-pointer">
+                                <i class="bi bi-stop-fill"></i> Stop
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Panel Section Navigation Tabs -->
+                    <div class="tw-flex tw-items-center tw-gap-2 tw-mb-4 tw-overflow-x-auto tw-pb-2">
+                        <button data-tab="console" class="kh-panel-tab tw-px-4 tw-py-2 tw-rounded-lg tw-bg-white/10 tw-text-white tw-border tw-border-white/20 tw-text-xs tw-font-semibold tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-transition-all">
+                            <i class="bi bi-terminal-fill"></i>
+                            <span>Live Console</span>
+                        </button>
+                        <button data-tab="files" class="kh-panel-tab tw-px-4 tw-py-2 tw-rounded-lg tw-bg-transparent tw-text-neutral-400 tw-border tw-border-transparent hover:tw-text-white tw-text-xs tw-font-semibold tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-transition-all">
+                            <i class="bi bi-folder-fill"></i>
+                            <span>File Manager</span>
+                        </button>
+                        <button data-tab="mods" class="kh-panel-tab tw-px-4 tw-py-2 tw-rounded-lg tw-bg-transparent tw-text-neutral-400 tw-border tw-border-transparent hover:tw-text-white tw-text-xs tw-font-semibold tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-transition-all">
+                            <i class="bi bi-box-seam-fill"></i>
+                            <span>1-Click Mod Installer</span>
+                        </button>
+                        <button data-tab="users" class="kh-panel-tab tw-px-4 tw-py-2 tw-rounded-lg tw-bg-transparent tw-text-neutral-400 tw-border tw-border-transparent hover:tw-text-white tw-text-xs tw-font-semibold tw-flex tw-items-center tw-gap-2 tw-cursor-pointer tw-transition-all">
+                            <i class="bi bi-people-fill"></i>
+                            <span>Sub-User Permissions</span>
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Panel Image Container -->
+                    <div class="tw-relative tw-w-full tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/[0.1] tw-bg-[#0A0A0A]">
+                        <img
+                            id="panel-display-img"
+                            src="./assets/images/panels/console.jpg"
+                            alt="KineticHost Panel Showcase"
+                            class="tw-w-full tw-h-auto tw-object-cover tw-opacity-95 tw-transition-opacity tw-duration-200"
+                        />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Affordable KVM VPS Section (Play.hosting style) -->
+        <section id="vps" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1200px] tw-mx-auto">
+                <div class="kh-card tw-p-8 lg:tw-p-12 tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between tw-gap-8">
+                    <div class="tw-max-w-[650px]">
+                        <div class="kh-badge tw-mb-4">KVM Compute</div>
+                        <h2 class="tw-text-3xl lg:tw-text-4xl tw-font-bold tw-text-white tw-tracking-tight tw-mb-4">
+                            Affordable KVM VPS hosting, built for anything
+                        </h2>
+                        <p class="tw-text-neutral-400 tw-text-base tw-leading-relaxed">
+                            Create a flexible virtual private server (VPS) for game servers, websites, Discord bots, or any self-hosted software with full SSH root access and custom OS installations.
+                        </p>
+                    </div>
+
+                    <div class="tw-flex tw-flex-col tw-items-center sm:tw-items-start tw-gap-4">
+                        <div class="tw-text-center sm:tw-text-left">
+                            <span class="tw-text-neutral-400 tw-text-xs tw-font-mono uppercase tw-block">Free & Affordable Compute</span>
+                            <span class="tw-text-3xl lg:tw-text-4xl tw-font-extrabold tw-text-white">Free / $3.99</span>
+                            <span class="tw-text-neutral-400 tw-text-xs"> / month</span>
+                        </div>
+                        <a href="#hero" class="btn-primary">
+                            <span>Deploy VPS Server</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Player Reviews / Social Proof Section ("Five stars from players like you") -->
+        <section id="reviews" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1200px] tw-mx-auto">
+                <div class="tw-text-center tw-max-w-[700px] tw-mx-auto tw-mb-16">
+                    <div class="kh-badge tw-mb-4">Community Feedback</div>
+                    <h2 class="tw-text-3xl lg:tw-text-5xl tw-font-bold tw-text-white tw-tracking-tight">
+                        Five stars from players like you
+                    </h2>
+                    <p class="tw-mt-4 tw-text-neutral-400 tw-text-base">
+                        Over thousands of Minecraft servers and friend groups trust KineticHost. Don't just take our word for it:
+                    </p>
+                </div>
+
+                <!-- Reviews Grid -->
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
+                    <!-- Review 1 -->
+                    <div class="kh-card tw-p-6 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="kh-stars tw-mb-3">★★★★★</div>
+                            <h4 class="tw-text-base tw-font-bold tw-text-white tw-mb-2">The best free hosting ever</h4>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                "KineticHost is by far the best free hosting ever. It gives great specs for free, has smooth chunk loading, and anti-bot protection so I can play with my friends seamlessly."
+                            </p>
+                        </div>
+                        <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-white/[0.08] tw-text-xs tw-font-semibold tw-text-neutral-300">
+                            — Verified Player Review
+                        </div>
+                    </div>
+
+                    <!-- Review 2 -->
+                    <div class="kh-card tw-p-6 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="kh-stars tw-mb-3">★★★★★</div>
+                            <h4 class="tw-text-base tw-font-bold tw-text-white tw-mb-2">Better Than Aternos</h4>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                "I came from Aternos because I had no freedom to edit mods and config files. KineticHost gives full file editing and modpack installs for free. Unbelievable performance!"
+                            </p>
+                        </div>
+                        <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-white/[0.08] tw-text-xs tw-font-semibold tw-text-neutral-300">
+                            — Verified Community Member
+                        </div>
+                    </div>
+
+                    <!-- Review 3 -->
+                    <div class="kh-card tw-p-6 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="kh-stars tw-mb-3">★★★★★</div>
+                            <h4 class="tw-text-base tw-font-bold tw-text-white tw-mb-2">Fast and Reliable</h4>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                "Fast server creation, fast file uploading, and overall a pleasant experience. For a free host it really does tick every single box for friend groups!"
+                            </p>
+                        </div>
+                        <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-white/[0.08] tw-text-xs tw-font-semibold tw-text-neutral-300">
+                            — Server Administrator
+                        </div>
+                    </div>
+
+                    <!-- Review 4 -->
+                    <div class="kh-card tw-p-6 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="kh-stars tw-mb-3">★★★★★</div>
+                            <h4 class="tw-text-base tw-font-bold tw-text-white tw-mb-2">Zero lag for modded servers</h4>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                "Helped me host modded Minecraft servers that ran smoothly for months. The render times and loading speeds are incredible for a free host."
+                            </p>
+                        </div>
+                        <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-white/[0.08] tw-text-xs tw-font-semibold tw-text-neutral-300">
+                            — Modded MC Host
+                        </div>
+                    </div>
+
+                    <!-- Review 5 -->
+                    <div class="kh-card tw-p-6 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="kh-stars tw-mb-3">★★★★★</div>
+                            <h4 class="tw-text-base tw-font-bold tw-text-white tw-mb-2">Bedrock Crossplay works great</h4>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                "One-click Bedrock crossplay is a lifesaver. My console and mobile friends joined my Java server with zero port issues."
+                            </p>
+                        </div>
+                        <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-white/[0.08] tw-text-xs tw-font-semibold tw-text-neutral-300">
+                            — Bedrock & Java Player
+                        </div>
+                    </div>
+
+                    <!-- Review 6 -->
+                    <div class="kh-card tw-p-6 tw-flex tw-flex-col tw-justify-between">
+                        <div>
+                            <div class="kh-stars tw-mb-3">★★★★★</div>
+                            <h4 class="tw-text-base tw-font-bold tw-text-white tw-mb-2">Flawless service</h4>
+                            <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed">
+                                "No issues at all. Works flawlessly. Best option for Minecraft and VPS server hosting out there."
+                            </p>
+                        </div>
+                        <div class="tw-mt-6 tw-pt-4 tw-border-t tw-border-white/[0.08] tw-text-xs tw-font-semibold tw-text-neutral-300">
+                            — Verified Player Review
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ Section -->
+        <section id="faq" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[900px] tw-mx-auto">
+                <div class="tw-text-center tw-mb-16">
+                    <div class="kh-badge tw-mb-4">Documentation & FAQ</div>
+                    <h2 class="tw-text-3xl lg:tw-text-5xl tw-font-bold tw-text-white tw-tracking-tight">
+                        Frequently Asked Questions
+                    </h2>
+                </div>
+
+                <div class="tw-space-y-4">
+                    <!-- FAQ 1 -->
+                    <div class="kh-faq-item">
+                        <button class="kh-faq-btn">
+                            <span>Is KineticHost really 100% free?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="kh-faq-content">
+                            Yes! KineticHost offers 100% free Minecraft server hosting and free KVM VPS compute instances with zero hidden charges and no credit card required.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="kh-faq-item">
+                        <button class="kh-faq-btn">
+                            <span>How can KineticHost provide free hosting?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="kh-faq-content">
+                            Our free tier is supported through efficient infrastructure automation, server resource optimization, and optional supporter upgrades for power users who want extra RAM and priority backups.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="kh-faq-item">
+                        <button class="kh-faq-btn">
+                            <span>How fast are free servers provisioned?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="kh-faq-content">
+                            All free Minecraft servers and KVM VPS instances are automatically provisioned in minutes after signup. Login credentials and connection details are immediately available in your control panel.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="kh-faq-item">
+                        <button class="kh-faq-btn">
+                            <span>What DDoS protection is included with my free server?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="kh-faq-content">
+                            Every free KineticHost server includes automated hardware DDoS protection at no extra cost to prevent downtime from network attacks.
+                        </div>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="kh-faq-item">
+                        <button class="kh-faq-btn">
+                            <span>Can I upgrade my free server resources later?</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                        <div class="kh-faq-content">
+                            Yes. You can scale CPU, RAM, and NVMe storage through the control panel anytime with zero data loss or reinstallations.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA & Status Section -->
+        <section id="status" class="tw-relative tw-z-10 tw-py-20 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1000px] tw-mx-auto tw-text-center">
+                <div class="kh-card tw-p-10 lg:tw-p-16 tw-relative tw-overflow-hidden">
+                    <div class="tw-inline-flex tw-items-center tw-gap-2.5 tw-px-4 tw-py-1.5 tw-rounded-full tw-bg-white/[0.04] tw-border tw-border-white/[0.08] tw-text-xs tw-font-mono tw-text-neutral-300 tw-mb-6">
+                        <span class="kh-dot-active"></span>
+                        <span>All KineticHost Global Infrastructure Systems Operational</span>
+                    </div>
+
+                    <h2 class="tw-text-3xl lg:tw-text-5xl tw-font-bold tw-text-white tw-tracking-tight tw-mb-4">
+                        Ready to Create Your Free Server?
+                    </h2>
+
+                    <p class="tw-text-neutral-400 tw-text-base lg:tw-text-lg tw-max-w-[600px] tw-mx-auto tw-mb-8">
+                        Get high-performance free Minecraft server hosting and KVM VPS instances online in minutes. No credit card required.
+                    </p>
+
+                    <div class="tw-flex tw-justify-center">
+                        <a href="#hero" class="btn-primary">
+                            <span>Create your server now</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="tw-relative tw-z-10 tw-bg-[#060606] tw-border-t tw-border-white/[0.08] tw-pt-16 tw-pb-12 tw-px-[6%] lg:tw-px-[8%]">
+            <div class="tw-max-w-[1200px] tw-mx-auto">
+                <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-5 tw-gap-10 tw-mb-12">
+                    
+                    <!-- Column 1: Brand -->
+                    <div class="lg:tw-col-span-2">
+                        <a class="tw-flex tw-items-center tw-gap-3 tw-mb-4 tw-text-decoration-none" href="#">
+                            <div class="tw-h-[34px] tw-w-[34px] tw-overflow-hidden tw-rounded-lg tw-bg-[#101010] tw-p-1 tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center">
+                                <img
+                                    src="./assets/logo/kinetic.png"
+                                    alt="KineticHost"
+                                    class="tw-h-full tw-w-full tw-object-contain"
+                                />
+                            </div>
+                            <span class="tw-font-bold tw-text-lg tw-tracking-tight tw-text-white">
+                                Kinetic<span class="tw-font-light tw-text-neutral-400">Host</span>
+                            </span>
+                        </a>
+                        <p class="tw-text-neutral-400 tw-text-sm tw-leading-relaxed tw-max-w-[320px] tw-mb-6">
+                            100% free Minecraft server hosting & enterprise KVM VPS infrastructure platform with integrated control panel.
+                        </p>
+                        <div class="tw-flex tw-gap-4 tw-text-xl tw-text-neutral-400">
+                            <a href="#" class="hover:tw-text-white tw-transition-colors" aria-label="GitHub"><i class="bi bi-github"></i></a>
+                            <a href="#" class="hover:tw-text-white tw-transition-colors" aria-label="Discord"><i class="bi bi-discord"></i></a>
+                            <a href="#" class="hover:tw-text-white tw-transition-colors" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Free Hosting -->
+                    <div>
+                        <h4 class="tw-text-sm tw-font-semibold tw-text-white tw-uppercase tw-tracking-wider tw-mb-4">Free Hosting</h4>
+                        <ul class="tw-space-y-2.5 tw-text-sm tw-text-neutral-400">
+                            <li><a href="#included" class="hover:tw-text-white tw-transition-colors">Free Minecraft Server</a></li>
+                            <li><a href="#vps" class="hover:tw-text-white tw-transition-colors">Free KVM VPS</a></li>
+                            <li><a href="#features" class="hover:tw-text-white tw-transition-colors">Modpack Installer</a></li>
+                            <li><a href="#features" class="hover:tw-text-white tw-transition-colors">Bedrock Crossplay</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Column 3: Platform -->
+                    <div>
+                        <h4 class="tw-text-sm tw-font-semibold tw-text-white tw-uppercase tw-tracking-wider tw-mb-4">Control Panel</h4>
+                        <ul class="tw-space-y-2.5 tw-text-sm tw-text-neutral-400">
+                            <li><a href="#panel" class="hover:tw-text-white tw-transition-colors">Live Web Console</a></li>
+                            <li><a href="#panel" class="hover:tw-text-white tw-transition-colors">File Manager</a></li>
+                            <li><a href="#panel" class="hover:tw-text-white tw-transition-colors">1-Click Mod Installer</a></li>
+                            <li><a href="#panel" class="hover:tw-text-white tw-transition-colors">Sub-User Management</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Column 4: Legal & Support -->
+                    <div>
+                        <h4 class="tw-text-sm tw-font-semibold tw-text-white tw-uppercase tw-tracking-wider tw-mb-4">Company</h4>
+                        <ul class="tw-space-y-2.5 tw-text-sm tw-text-neutral-400">
+                            <li><a href="#" class="hover:tw-text-white tw-transition-colors">About KineticHost</a></li>
+                            <li><a href="#" class="hover:tw-text-white tw-transition-colors">Privacy Policy</a></li>
+                            <li><a href="#" class="hover:tw-text-white tw-transition-colors">Terms of Service</a></li>
+                            <li><a href="#" class="hover:tw-text-white tw-transition-colors">Contact Support</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Bottom Bar -->
+                <div class="tw-pt-8 tw-border-t tw-border-white/[0.08] tw-flex tw-flex-col sm:tw-flex-row tw-items-center tw-justify-between tw-gap-4 tw-text-xs tw-text-neutral-500">
+                    <div>© 2026 KineticHost. All rights reserved.</div>
+                    <div class="tw-flex tw-items-center tw-gap-2 font-mono">
+                        <span class="kh-dot-active"></span> All Systems Operational
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script src="./index.js"></script>
+    </body>
+</html>

@@ -1,0 +1,339 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --bg-black: #050505;
+    --bg-dark: #0A0A0A;
+    --bg-surface: #111111;
+    --bg-elevated: #161616;
+    --border-subtle: rgba(255, 255, 255, 0.07);
+    --border-hover: rgba(255, 255, 255, 0.16);
+    --text-primary: #F5F5F5;
+    --text-secondary: #9E9E9E;
+    --text-muted: #666666;
+    --accent-white: #FFFFFF;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg-black);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    min-height: 100vh;
+    background-color: var(--bg-black);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* ==========================================================================
+   Atmospheric Layered Background System (Recreating kinetic.png character)
+   ========================================================================== */
+
+/* Layer 1 & 2: Base Dark Charcoal + Soft Radial Illumination */
+.kh-bg-system {
+    position: relative;
+    background-color: var(--bg-black);
+}
+
+.kh-bg-system::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 0;
+    background: 
+        /* Upper-Right Soft Charcoal Illumination */
+        radial-gradient(circle at 75% 15%, rgba(65, 65, 75, 0.14) 0%, rgba(35, 35, 42, 0.06) 40%, transparent 75%),
+        /* Subtle Central Depth Glow */
+        radial-gradient(circle at 50% 25%, rgba(45, 45, 52, 0.10) 0%, transparent 65%),
+        /* Smooth Edge Vignette */
+        radial-gradient(ellipse at 50% 50%, transparent 45%, rgba(5, 5, 5, 0.88) 100%);
+}
+
+/* Layer 3: Fine Alphanumeric Data Texture */
+.kh-data-texture {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.032;
+    background-image: url("data:image/svg+xml,%3Csvg width='380' height='280' viewBox='0 0 380 280' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='15' y='22' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3E8 8 2 8 8 2 8 8 X 8 2 8 8 8 2 8%3E%3C/text%3E%3Ctext x='15' y='52' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3E8 1 E R 2 8 8 B 3 0 4 2 8 2 8 1%3E%3C/text%3E%3Ctext x='15' y='82' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3ER 6 B 1 X R E X X 8 2 8 A B 3 0%3E%3C/text%3E%3Ctext x='15' y='112' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3E8 7 H S E A 0 A 2 R 8 B 2 8 R 7%3E%3C/text%3E%3Ctext x='15' y='142' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='4'%3E0x4A 0xFF KH_SYS EPYC_9004 128.0.0.1%3E%3C/text%3E%3Ctext x='15' y='172' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3E8 B 8 Y R E 2 X 8 8 8 2 8 B 8 Y%3E%3C/text%3E%3Ctext x='15' y='202' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3EZ 3 6 S 8 Z 2 8 8 8 8 2 1 8 Z 3%3E%3C/text%3E%3Ctext x='15' y='232' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3E2 8 7 X 8 2 8 2 2 2 8 8 2 8 X 2%3E%3C/text%3E%3Ctext x='15' y='262' fill='%23ffffff' font-family='monospace' font-size='9' letter-spacing='5'%3E8 2 8 A B 3 0 8 7 H S E A 0 A 2%3E%3C/text%3E%3C/svg%3E");
+    background-repeat: repeat;
+}
+
+/* Layer 4: Fine Atmospheric Grain */
+.kh-noise-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.02;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* Section Background Hierarchy */
+#hero {
+    position: relative;
+    z-index: 10;
+    background-image: 
+        linear-gradient(to bottom, rgba(5, 5, 5, 0.70) 0%, rgba(5, 5, 5, 0.85) 60%, rgba(5, 5, 5, 1) 100%),
+        url('../assets/images/home/bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#features, #included, #panel, #vps, #reviews {
+    position: relative;
+    z-index: 10;
+}
+
+#faq {
+    position: relative;
+    z-index: 10;
+    background-color: rgba(5, 5, 5, 0.6);
+}
+
+#status {
+    position: relative;
+    z-index: 10;
+}
+
+footer {
+    position: relative;
+    z-index: 10;
+    background-color: #060606;
+}
+
+/* Header Navbar Styles */
+header {
+    background: rgba(8, 8, 8, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+header > .collapsible-header {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
+    background-color: transparent;
+    place-content: center;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.header-links {
+    display: flex;
+    align-items: center;
+    min-width: fit-content;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.header-links:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Buttons System */
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 24px;
+    border-radius: 9999px;
+    background-color: var(--accent-white);
+    color: #050505;
+    font-weight: 600;
+    font-size: 0.925rem;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid transparent;
+}
+
+.btn-primary:hover {
+    background-color: #E5E5E5;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 24px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.925rem;
+    border: 1px solid var(--border-subtle);
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.07);
+    border-color: var(--border-hover);
+    color: #FFFFFF;
+    transform: translateY(-1px);
+}
+
+/* Cards & Surfaces */
+.kh-card {
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
+    transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+
+.kh-card:hover {
+    border-color: var(--border-hover);
+    background-color: rgba(255, 255, 255, 0.035);
+}
+
+.kh-card-featured {
+    background-color: var(--bg-surface);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    border-radius: 16px;
+    position: relative;
+}
+
+/* Technical Badges */
+.kh-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* Live Restrained Status Indicator Dot */
+.kh-dot-active {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #E5E5E5;
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.4);
+}
+
+/* Star Ratings for Reviews */
+.kh-stars {
+    color: #F5F5F5;
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+}
+
+/* FAQ Accordion Item Styling */
+.kh-faq-item {
+    background-color: rgba(255, 255, 255, 0.018);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+}
+
+.kh-faq-item:hover {
+    border-color: var(--border-hover);
+}
+
+.kh-faq-btn {
+    width: 100%;
+    padding: 16px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.kh-faq-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0, 1, 0, 1), padding 0.3s ease;
+    padding: 0 22px;
+    color: var(--text-secondary);
+    font-size: 0.925rem;
+    line-height: 1.6;
+}
+
+.kh-faq-item.active .kh-faq-content {
+    max-height: 350px;
+    padding-bottom: 18px;
+    transition: max-height 0.3s cubic-bezier(1, 0, 1, 0), padding 0.3s ease;
+}
+
+.kh-faq-item.active .bi-chevron-down {
+    transform: rotate(180deg);
+}
+
+.bi-chevron-down {
+    transition: transform 0.3s ease;
+}
+
+/* Mobile Drawer Responsive Adjustments */
+@media not all and (min-width: 1024px) {
+    header .collapsible-header {
+        position: fixed;
+        right: 0px;
+        top: 0px;
+        flex-direction: column;
+        opacity: 0;
+        height: 100vh;
+        height: 100dvh;
+        width: 0vw;
+        justify-content: flex-start;
+        padding: 80px 24px 40px 24px;
+        place-items: flex-start;
+        background-color: var(--bg-dark);
+        border-left: 1px solid var(--border-subtle);
+        color: var(--text-primary);
+        overflow-y: auto;
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .header-links {
+        color: var(--text-primary);
+        font-size: 1rem;
+        padding: 10px 14px;
+        width: 100%;
+    }
+}
