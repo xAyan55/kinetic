@@ -76,9 +76,10 @@ app.use('/api/account', require('./server/routes/account'));
 app.use('/api/servers', require('./server/routes/servers'));
 app.use('/api/admin', require('./server/routes/admin'));
 
-// Public Static Assets (CSS, JS, Assets)
+// Public Static Assets (CSS, JS, Assets, Auth)
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
+app.use('/auth', express.static(path.join(__dirname, 'auth')));
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 app.use('/components', express.static(path.join(__dirname, 'components')));
 
