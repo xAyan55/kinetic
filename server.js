@@ -19,6 +19,9 @@ const PORT = process.env.PORT || 3000;
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const dataDir = path.join(__dirname, 'data');
 
+// Trust Cloudflare Reverse Proxy
+app.set('trust proxy', 1);
+
 // Middleware & Security Headers
 app.use(helmet({
   contentSecurityPolicy: false // Allow inline scripts/styles and Bootstrap icons CDN

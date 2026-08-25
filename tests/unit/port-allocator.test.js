@@ -1,9 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert');
+const { runMigrations, db } = require('../../server/db');
 const { allocatePort, isPortAvailable } = require('../../server/port-allocator');
-const { db } = require('../../server/db');
 
 test('Port Allocator — verifies port availability and allocation within range', async (t) => {
+  runMigrations();
   // Test local port availability check on an unassigned port
   const available = await isPortAvailable(25599);
   assert.strictEqual(typeof available, 'boolean');
