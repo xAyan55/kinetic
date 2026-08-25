@@ -75,6 +75,15 @@ function runMigrations() {
             updated_at TEXT NOT NULL
           );
 
+          -- Ensure columns exist if table already existed previously
+          const userCols = dbInstance.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+          if (!userCols.includes('max_servers')) {
+            dbInstance.exec("ALTER TABLE users ADD COLUMN max_servers INTEGER DEFAULT 3");
+          }
+          if (!userCols.includes('max_ram_mb')) {
+            dbInstance.exec("ALTER TABLE users ADD COLUMN max_ram_mb INTEGER DEFAULT 8192");
+          }
+
           -- Nodes Table (Physical VPS Nodes)
           CREATE TABLE IF NOT EXISTS nodes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,6 +198,19 @@ function runMigrations() {
             )
           `).run(hostname, publicAddress, totalRamMb, totalCpuCores, totalStorageMb);
           console.log(`[Database] Seeded Local Node with ${totalCpuCores} cores and ${totalRamMb} MB RAM.`);
+        }
+      }
+    },
+    {
+      version: 3,
+      name: 'add_user_quota_columns',
+      up: (dbInstance) => {
+        const userCols = dbInstance.prepare("PRAGMA table_info(users)").all().map(c => c.name);
+        if (!userCols.includes('max_servers')) {
+          dbInstance.exec("ALTER TABLE users ADD COLUMN max_servers INTEGER DEFAULT 3");
+        }
+        if (!userCols.includes('max_ram_mb')) {
+          dbInstance.exec("ALTER TABLE users ADD COLUMN max_ram_mb INTEGER DEFAULT 8192");
         }
       }
     }
