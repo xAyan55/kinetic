@@ -122,30 +122,23 @@ footer {
     background-color: #060606;
 }
 
-/* Header Navbar Styles */
-header {
-    background: rgba(8, 8, 8, 0.82);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--border-subtle);
-    transition: background-color 0.3s ease, border-color 0.3s ease;
-}
-
-header > .collapsible-header {
 /* ==========================================================================
    Header 3 Navigation System (shadcn-inspired mega menu)
    ========================================================================== */
 
 header.kh-nav-header {
+    background-color: rgba(8, 8, 8, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transition: background-color 0.25s ease, border-color 0.25s ease, backdrop-filter 0.25s ease;
-    border-bottom: 1px solid transparent;
 }
 
 header.kh-nav-header.kh-header-scrolled {
-    background-color: rgba(5, 5, 5, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(5, 5, 5, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
 }
 
 .kh-nav-item {
@@ -171,7 +164,7 @@ header.kh-nav-header.kh-header-scrolled {
 .kh-nav-trigger:hover,
 .kh-nav-item:hover .kh-nav-trigger {
     color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.06);
 }
 
 .kh-nav-trigger .bi-chevron-down {
@@ -185,6 +178,7 @@ header.kh-nav-header.kh-header-scrolled {
 
 /* Dropdown Menu Popover */
 .kh-dropdown-menu {
+    display: none;
     position: absolute;
     top: calc(100% + 8px);
     left: 0;
@@ -193,17 +187,18 @@ header.kh-nav-header.kh-header-scrolled {
     transform: translateY(8px) scale(0.98);
     transform-origin: top left;
     transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.2s ease;
-    background-color: #0A0A0A;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #0c0c0c;
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 12px;
     padding: 12px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05);
     z-index: 60;
     pointer-events: none;
 }
 
 .kh-nav-item:hover .kh-dropdown-menu,
 .kh-nav-item:focus-within .kh-dropdown-menu {
+    display: block;
     opacity: 1;
     visibility: visible;
     transform: translateY(0) scale(1);
@@ -286,16 +281,16 @@ header.kh-nav-header.kh-header-scrolled {
 
 /* Mobile Menu Slide-Down */
 .kh-mobile-menu {
+    display: none;
     position: fixed;
     top: 70px;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(5, 5, 5, 0.96);
+    background-color: rgba(5, 5, 5, 0.98);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    display: flex;
     flex-direction: column;
     padding: 24px;
     overflow-y: auto;
@@ -307,6 +302,7 @@ header.kh-nav-header.kh-header-scrolled {
 }
 
 .kh-mobile-menu.open {
+    display: flex;
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
