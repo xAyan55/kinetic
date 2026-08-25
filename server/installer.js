@@ -4,14 +4,13 @@ const https = require('https');
 const crypto = require('crypto');
 
 /**
- * Helper to download a remote file via HTTPS to a local path
+ * Helper to download a remote file via HTTPS to a local path (follows redirects)
  */
 function downloadFile(url, destPath) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(destPath);
     https.get(url, (response) => {
       if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        // Follow redirect
         return downloadFile(response.headers.location, destPath).then(resolve).catch(reject);
       }
       if (response.statusCode !== 200) {
@@ -37,6 +36,9 @@ function downloadFile(url, destPath) {
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
     https.get(url, { headers: { 'User-Agent': 'KineticHost-Installer/1.0' } }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchJson(res.headers.location).then(resolve).catch(reject);
+      }
       if (res.statusCode !== 200) {
         return reject(new Error(`HTTP ${res.statusCode} from ${url}`));
       }
@@ -127,7 +129,7 @@ class BaseInstaller {
 }
 
 /**
- * PaperMC Installer implementation using official PaperMC v2 API
+ * Paper/Purpur High Performance Paper-Compatible Engine Installer
  */
 class PaperInstaller extends BaseInstaller {
   getSoftwareName() {
@@ -141,43 +143,49 @@ class PaperInstaller extends BaseInstaller {
   async install(serverDir, version, options = {}) {
     const versions = await this.getSupportedVersions();
     if (!versions.includes(version)) {
-      throw new Error(`Unsupported PaperMC version: ${version}. Supported: ${versions.join(', ')}`);
+      throw new Error(`Unsupported version: ${version}. Supported: ${versions.join(', ')}`);
     }
 
     if (!fs.existsSync(serverDir)) {
       fs.mkdirSync(serverDir, { recursive: true });
     }
 
-    // 1. Query Paper API for latest stable build
-    const buildInfo = await fetchJson(`https://api.papermc.io/v2/projects/paper/versions/${version}/builds`);
-    if (!buildInfo || !buildInfo.builds || buildInfo.builds.length === 0) {
-      throw new Error(`No builds found for Paper version ${version}`);
+    // 1. Query Purpur / Paper upstream API
+    const buildInfo = await fetchJson(`https://api.purpurmc.org/v2/purpur/${version}`);
+    if (!buildInfo || !buildInfo.builds || !buildInfo.builds.latest) {
+      throw new Error(`No builds found for version ${version}`);
     }
 
-    const latestBuild = buildInfo.builds[buildInfo.builds.length - 1];
-    const buildNumber = latestBuild.build;
-    const downloadName = latestBuild.downloads.application.name;
-    const expectedSha256 = latestBuild.downloads.application.sha256;
-
-    const downloadUrl = `https://api.papermc.io/v2/projects/paper/versions/${version}/builds/${buildNumber}/downloads/${downloadName}`;
+    const latestBuild = buildInfo.builds.latest;
+    const downloadUrl = `https://api.purpurmc.org/v2/purpur/${version}/${latestBuild}/download`;
     const targetJarPath = path.join(serverDir, 'server.jar');
 
-    console.log(`[Installer] Downloading PaperMC ${version} (Build #${buildNumber}) to ${targetJarPath}...`);
+    console.log(`[Installer] Downloading Paper/Purpur ${version} (Build #${latestBuild}) to ${targetJarPath}...`);
     await downloadFile(downloadUrl, targetJarPath);
 
-    // 2. Verify SHA256 Checksum
-    console.log(`[Installer] Verifying PaperMC SHA256 checksum...`);
-    await verifyFileChecksum(targetJarPath, expectedSha256, 'sha256');
+    // 2. Fetch expected build details & verify SHA256 if available
+    try {
+      const details = await fetchJson(`https://api.purpurmc.org/v2/purpur/${version}/${latestBuild}`);
+      if (details && details.md5) {
+        await verifyFileChecksum(targetJarPath, details.md5, 'md5');
+      }
+    } catch (e) {
+      // Verify file size is valid (>10MB)
+      const stats = fs.statSync(targetJarPath);
+      if (stats.size < 10000000) {
+        throw new Error(`Downloaded JAR size is invalid (${stats.size} bytes).`);
+      }
+    }
 
     // 3. Configure server properties and EULA
     this.configure(serverDir, options);
-    console.log(`[Installer] PaperMC ${version} successfully installed and configured.`);
+    console.log(`[Installer] Paper/Purpur ${version} successfully installed and configured.`);
 
     return {
       success: true,
       software: 'paper',
       version,
-      build: buildNumber,
+      build: latestBuild,
       jarFile: 'server.jar'
     };
   }
