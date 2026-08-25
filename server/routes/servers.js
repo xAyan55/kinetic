@@ -84,10 +84,19 @@ router.get('/', requireAuth, (req, res) => {
   return res.json({ success: true, servers: enriched });
 });
 
-// POST /api/servers — Create a new Minecraft server instance
+// POST /api/servers — Create a new Minecraft server instance (Admin Only)
 router.post('/', requireAuth, async (req, res) => {
   const user = req.session.user;
-  const { name, software = 'paper', version = '1.20.4', ramMb = 4096, eulaAccepted } = req.body;
+
+  // STRICT REQUIREMENT: Normal users cannot create servers; only admins can create & assign servers
+  if (user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      error: 'Only administrators can create and deploy servers. Please contact an administrator to have a server assigned to your account.'
+    });
+  }
+
+  const { name, software = 'paper', version = '1.20.4', ramMb = 4096, eulaAccepted, ownerId } = req.body;
 
   try {
     // 1. Validate basic input
@@ -99,7 +108,19 @@ router.post('/', requireAuth, async (req, res) => {
       return res.status(400).json({ success: false, error: 'You must accept the Minecraft EULA to create a server.' });
     }
 
-    // 2. Validate software & version
+    // 2. Determine and validate target owner
+    let targetOwnerId = user.id;
+    if (ownerId) {
+      const parsedOwner = parseInt(ownerId, 10);
+      if (!isNaN(parsedOwner)) {
+        const ownerCheck = db.prepare('SELECT id FROM users WHERE id = ?').get(parsedOwner);
+        if (ownerCheck) {
+          targetOwnerId = ownerCheck.id;
+        }
+      }
+    }
+
+    // 3. Validate software & version
     const installer = getInstaller(software);
     const supportedVersions = await installer.getSupportedVersions();
     if (!supportedVersions.includes(version)) {
@@ -109,26 +130,7 @@ router.post('/', requireAuth, async (req, res) => {
       });
     }
 
-    // 3. User Quota Validation
-    const userRow = db.prepare('SELECT max_servers, max_ram_mb FROM users WHERE id = ?').get(user.id);
-    const serverCount = db.prepare('SELECT COUNT(*) AS count FROM servers WHERE owner_id = ?').get(user.id).count;
-    const currentRam = db.prepare('SELECT COALESCE(SUM(ram_mb), 0) AS total FROM servers WHERE owner_id = ?').get(user.id).total;
-
     const requestedRam = Math.max(1024, Math.min(16384, parseInt(ramMb, 10) || 4096));
-
-    if (serverCount >= (userRow.max_servers || 3) && user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: `Server quota reached (maximum ${userRow.max_servers || 3} servers). Delete an existing server or upgrade.`
-      });
-    }
-
-    if ((currentRam + requestedRam) > (userRow.max_ram_mb || 8192) && user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: `RAM quota exceeded. Maximum ${userRow.max_ram_mb || 8192} MB total allocation per user.`
-      });
-    }
 
     // 4. Determine base directory & allocate port
     const settingsDir = db.prepare("SELECT value FROM platform_settings WHERE key = 'servers_base_dir'").get();
@@ -159,7 +161,7 @@ router.post('/', requireAuth, async (req, res) => {
     `);
 
     const insertResult = reserveStmt.run(
-      user.id,
+      targetOwnerId,
       name.trim(),
       uniqueSlug,
       software.toLowerCase(),

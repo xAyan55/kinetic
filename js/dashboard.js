@@ -94,6 +94,7 @@ function initSidebar() {
 
   if (currentUser.role === 'admin') {
     document.querySelectorAll('.admin-nav-item').forEach(el => el.classList.remove('tw-hidden'));
+    document.querySelectorAll('.admin-only-btn').forEach(el => el.classList.remove('tw-hidden'));
   }
 }
 
@@ -207,6 +208,41 @@ async function loadUserServers() {
     loading.classList.add('tw-hidden');
 
     if (!data.success || !data.servers || data.servers.length === 0) {
+      if (currentUser.role === 'admin') {
+        emptyState.innerHTML = `
+          <div class="tw-w-12 tw-h-12 tw-rounded-full tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-neutral-400 tw-text-xl">
+            <i class="bi bi-server"></i>
+          </div>
+          <div>
+            <h3 class="tw-text-lg tw-font-bold tw-text-white">No servers created yet</h3>
+            <p class="tw-text-sm tw-text-neutral-400 tw-max-w-sm tw-mx-auto tw-mt-1">
+              Deploy your first Minecraft instance and allocate it to any user on the platform.
+            </p>
+          </div>
+          <button onclick="openCreateServerModal()" class="btn-primary tw-mx-auto tw-mt-2">
+            <i class="bi bi-plus-lg"></i>
+            <span>Create &amp; Assign Server</span>
+          </button>
+        `;
+      } else {
+        emptyState.innerHTML = `
+          <div class="tw-w-12 tw-h-12 tw-rounded-full tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-neutral-500 tw-text-xl">
+            <i class="bi bi-shield-slash"></i>
+          </div>
+          <div>
+            <h3 class="tw-text-lg tw-font-bold tw-text-white">No servers assigned yet</h3>
+            <p class="tw-text-sm tw-text-neutral-400 tw-max-w-md tw-mx-auto tw-mt-1">
+              You do not currently have any active Minecraft servers. Servers are provisioned and allocated directly by platform administrators.
+            </p>
+          </div>
+          <div class="tw-pt-2">
+            <a href="https://discord.gg/kinetichost" target="_blank" class="tw-inline-flex tw-items-center tw-gap-2 tw-px-4 tw-py-2 tw-rounded-xl tw-bg-white/[0.04] hover:tw-bg-white/[0.08] tw-border tw-border-white/10 tw-text-xs tw-font-mono tw-text-neutral-300 hover:tw-text-white tw-transition-colors">
+              <i class="bi bi-discord"></i>
+              <span>Join Discord for Support</span>
+            </a>
+          </div>
+        `;
+      }
       emptyState.classList.remove('tw-hidden');
       return;
     }
@@ -606,12 +642,36 @@ function initServerSettings(s) {
 // ==========================================================================
 // 5. Create Server Modal Workflow
 // ==========================================================================
-function openCreateServerModal() {
+async function openCreateServerModal() {
+  if (currentUser.role !== 'admin') {
+    showToast('Only administrators can create and assign servers.', 'error');
+    return;
+  }
+
   document.getElementById('modal-create-server').classList.remove('tw-hidden');
   document.getElementById('create-server-form').reset();
   document.getElementById('create-server-ram-val').textContent = '4096 MB';
   document.getElementById('create-server-status-msg').classList.add('tw-hidden');
   document.getElementById('btn-create-server-submit').disabled = false;
+
+  // Populate users dropdown
+  const ownerSelect = document.getElementById('create-server-owner');
+  ownerSelect.innerHTML = '<option value="">Loading registered users...</option>';
+  try {
+    const res = await fetch('/api/admin/users');
+    const data = await res.json();
+    if (data.success && data.users) {
+      ownerSelect.innerHTML = data.users.map(u => `
+        <option value="${u.id}" ${u.id === currentUser.id ? 'selected' : ''}>
+          ${escapeHtml(u.name)} (${escapeHtml(u.email)}) [${u.role.toUpperCase()}]
+        </option>
+      `).join('');
+    } else {
+      ownerSelect.innerHTML = `<option value="${currentUser.id}">${escapeHtml(currentUser.name)} (You)</option>`;
+    }
+  } catch (e) {
+    ownerSelect.innerHTML = `<option value="${currentUser.id}">${escapeHtml(currentUser.name)} (You)</option>`;
+  }
 }
 
 function closeCreateServerModal() {
@@ -621,6 +681,7 @@ function closeCreateServerModal() {
 async function handleCreateServerSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('create-server-name').value;
+  const ownerId = document.getElementById('create-server-owner').value;
   const software = document.getElementById('create-server-software').value;
   const version = document.getElementById('create-server-version').value;
   const ramMb = document.getElementById('create-server-ram').value;
@@ -637,13 +698,13 @@ async function handleCreateServerSubmit(e) {
     const res = await fetch('/api/servers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, software, version, ramMb, eulaAccepted })
+      body: JSON.stringify({ name, software, version, ramMb, eulaAccepted, ownerId })
     });
     const data = await res.json();
 
     if (data.success && data.server) {
-      statusMsg.innerHTML = '<span class="tw-text-emerald-400">✓ Instance deployed successfully! Redirecting...</span>';
-      showToast('Server created successfully!', 'success');
+      statusMsg.innerHTML = '<span class="tw-text-emerald-400">✓ Instance deployed and assigned successfully! Redirecting...</span>';
+      showToast('Server created and assigned successfully!', 'success');
       setTimeout(() => {
         closeCreateServerModal();
         window.location.hash = `server/${data.server.id}`;

@@ -185,9 +185,9 @@
                 <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
                     <div>
                         <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Minecraft Servers</h1>
-                        <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Deploy, monitor, and configure your dedicated gaming nodes.</p>
+                        <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Monitor, configure, and control your active server instances.</p>
                     </div>
-                    <button onclick="openCreateServerModal()" class="btn-primary">
+                    <button onclick="openCreateServerModal()" class="btn-primary admin-only-btn tw-hidden">
                         <i class="bi bi-plus-lg"></i>
                         <span>Create Server</span>
                     </button>
@@ -199,21 +199,9 @@
                     <div class="tw-text-xs tw-font-mono tw-text-neutral-500">Connecting to server daemon...</div>
                 </div>
 
-                <!-- Clean Empty State -->
+                <!-- Clean Empty State Container -->
                 <div id="servers-empty-state" class="tw-hidden kh-panel-card tw-py-16 tw-text-center tw-space-y-4">
-                    <div class="tw-w-12 tw-h-12 tw-rounded-full tw-bg-white/[0.05] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-mx-auto tw-text-neutral-400 tw-text-xl">
-                        <i class="bi bi-server"></i>
-                    </div>
-                    <div>
-                        <h3 class="tw-text-lg tw-font-bold tw-text-white">No servers yet</h3>
-                        <p class="tw-text-sm tw-text-neutral-400 tw-max-w-sm tw-mx-auto tw-mt-1">
-                            Create your first Minecraft server and manage it from one place. High-speed Ryzen compute ready.
-                        </p>
-                    </div>
-                    <button onclick="openCreateServerModal()" class="btn-primary tw-mx-auto tw-mt-2">
-                        <i class="bi bi-plus-lg"></i>
-                        <span>Create Server Now</span>
-                    </button>
+                    <!-- Populated dynamically via js/dashboard.js based on role -->
                 </div>
 
                 <!-- Servers Grid -->
@@ -509,9 +497,15 @@
             <!-- VIEW 6: ADMIN ALL SERVERS -->
             <!-- ================================================================ -->
             <section id="view-admin-servers" class="panel-view tw-hidden tw-space-y-6">
-                <div>
-                    <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">All Platform Instances</h1>
-                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Full cross-user server inventory with administrative oversight.</p>
+                <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
+                    <div>
+                        <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">All Platform Instances</h1>
+                        <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Full cross-user server inventory with administrative oversight.</p>
+                    </div>
+                    <button onclick="openCreateServerModal()" class="btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>Create &amp; Assign Server</span>
+                    </button>
                 </div>
                 <div class="kh-panel-card tw-p-0 tw-overflow-hidden">
                     <div class="tw-overflow-x-auto">
@@ -688,6 +682,14 @@
                 <div class="kh-field-group">
                     <label class="kh-field-label">Server Display Name</label>
                     <input type="text" id="create-server-name" required placeholder="e.g. Survival SMP World" class="kh-field-input">
+                </div>
+
+                <!-- Admin Assign To User Selector -->
+                <div class="kh-field-group" id="create-server-owner-group">
+                    <label class="kh-field-label">Assign Instance to User</label>
+                    <select id="create-server-owner" class="kh-field-input tw-font-mono tw-text-xs">
+                        <!-- Dynamically populated -->
+                    </select>
                 </div>
 
                 <div class="tw-grid tw-grid-cols-2 tw-gap-3">
