@@ -877,6 +877,82 @@ async function loadAdminServers() {
   } catch (err) {}
 }
 
+function initServerSettings(s) {
+  const nameInput = document.getElementById('settings-server-name');
+  const addressInput = document.getElementById('settings-server-address');
+  const ramInput = document.getElementById('settings-server-ram');
+  const ramVal = document.getElementById('settings-server-ram-val');
+  const autostartInput = document.getElementById('settings-server-autostart');
+  const saveBtn = document.getElementById('btn-save-server-settings');
+  const deleteBtn = document.getElementById('btn-delete-server');
+
+  if (nameInput) nameInput.value = s.name;
+  if (addressInput) addressInput.value = s.public_connection || '';
+  if (ramInput) ramInput.value = s.ram_mb || 4096;
+  if (ramVal) ramVal.textContent = `${s.ram_mb || 4096} MB`;
+  if (autostartInput) autostartInput.checked = !!s.auto_start;
+
+  if (ramInput) {
+    ramInput.oninput = (e) => {
+      if (ramVal) ramVal.textContent = `${e.target.value} MB`;
+    };
+  }
+
+  if (saveBtn) {
+    saveBtn.onclick = async () => {
+      saveBtn.disabled = true;
+      try {
+        const payload = {
+          name: nameInput.value.trim(),
+          ramMb: parseInt(ramInput.value, 10),
+          autoStart: autostartInput.checked
+        };
+        const res = await fetch(`/api/servers/${s.id}/settings`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          currentServer = { ...currentServer, ...data.server };
+          renderServerHeader(currentServer);
+        } else {
+          showToast(data.error, 'error');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+      saveBtn.disabled = false;
+    };
+  }
+
+  if (deleteBtn) {
+    deleteBtn.onclick = async () => {
+      const confirmText = prompt(`Type "${s.name}" to confirm permanent deletion of this server instance:`);
+      if (confirmText !== s.name) {
+        showToast('Server deletion cancelled.', 'info');
+        return;
+      }
+      deleteBtn.disabled = true;
+      try {
+        const res = await fetch(`/api/servers/${s.id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          window.location.hash = 'dashboard';
+        } else {
+          showToast(data.error, 'error');
+          deleteBtn.disabled = false;
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+        deleteBtn.disabled = false;
+      }
+    };
+  }
+}
+
 async function loadAdminSettings() {
   const view = document.getElementById('view-admin-settings');
   view.classList.remove('tw-hidden');
@@ -886,17 +962,25 @@ async function loadAdminSettings() {
     const data = await res.json();
     if (data.success && data.settings) {
       const s = data.settings;
-      document.getElementById('setting-panel-name').value = s.panel_name || '';
-      document.getElementById('setting-default-ram').value = s.default_ram_mb || 4096;
-      document.getElementById('setting-max-servers').value = s.max_servers_per_user || 3;
-      document.getElementById('setting-public-host').value = s.public_hostname || '';
+      if (document.getElementById('setting-panel-name')) document.getElementById('setting-panel-name').value = s.panel_name || '';
+      if (document.getElementById('setting-discord-url')) document.getElementById('setting-discord-url').value = s.discord_invite_url || '';
+      if (document.getElementById('setting-billing-url')) document.getElementById('setting-billing-url').value = s.billing_url || '';
+      if (document.getElementById('setting-docs-url')) document.getElementById('setting-docs-url').value = s.documentation_url || '';
+      if (document.getElementById('setting-terms-url')) document.getElementById('setting-terms-url').value = s.terms_url || '';
+      if (document.getElementById('setting-public-host')) document.getElementById('setting-public-host').value = s.public_hostname || '';
+      if (document.getElementById('setting-default-ram')) document.getElementById('setting-default-ram').value = s.default_ram_mb || 4096;
+      if (document.getElementById('setting-max-servers')) document.getElementById('setting-max-servers').value = s.max_servers_per_user || 3;
 
       document.getElementById('btn-save-admin-settings').onclick = async () => {
         const payload = {
           panel_name: document.getElementById('setting-panel-name').value,
+          discord_invite_url: document.getElementById('setting-discord-url').value,
+          billing_url: document.getElementById('setting-billing-url').value,
+          documentation_url: document.getElementById('setting-docs-url').value,
+          terms_url: document.getElementById('setting-terms-url').value,
+          public_hostname: document.getElementById('setting-public-host').value,
           default_ram_mb: document.getElementById('setting-default-ram').value,
-          max_servers_per_user: document.getElementById('setting-max-servers').value,
-          public_hostname: document.getElementById('setting-public-host').value
+          max_servers_per_user: document.getElementById('setting-max-servers').value
         };
 
         const patchRes = await fetch('/api/admin/settings', {

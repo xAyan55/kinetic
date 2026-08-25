@@ -346,19 +346,41 @@
                 </div>
 
                 <!-- Tab: Settings -->
-                <div id="server-tab-settings" class="server-tab-content tw-hidden tw-space-y-6">
-                    <div class="kh-panel-card tw-max-w-2xl tw-space-y-5">
-                        <h3 class="tw-text-base tw-font-bold tw-text-white">Server Configuration</h3>
+                <div id="server-tab-settings" class="server-tab-content tw-hidden tw-max-w-3xl tw-mx-auto tw-space-y-6">
+                    <!-- General Settings Card -->
+                    <div class="kh-panel-card tw-space-y-5">
+                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">General Information</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Basic server identification and public connection links.</p>
+                        </div>
 
                         <div class="kh-field-group">
                             <label class="kh-field-label">Server Display Name</label>
-                            <input type="text" id="settings-server-name" class="kh-field-input">
+                            <input type="text" id="settings-server-name" class="kh-field-input" placeholder="My Minecraft World">
+                        </div>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Public Connection Address</label>
+                            <div class="tw-flex tw-items-center tw-gap-2">
+                                <input type="text" id="settings-server-address" readonly class="kh-field-input tw-font-mono tw-text-xs tw-text-neutral-400 tw-bg-white/[0.02]">
+                                <button type="button" onclick="copyText(document.getElementById('settings-server-address').value)" class="tw-p-2.5 tw-rounded-lg tw-bg-white/[0.05] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-text-neutral-300 hover:tw-text-white tw-transition-colors">
+                                    <i class="bi bi-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resources & Compute Card -->
+                    <div class="kh-panel-card tw-space-y-5">
+                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">Resources &amp; Compute</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Allocate memory and startup parameters for this instance.</p>
                         </div>
 
                         <div class="kh-field-group">
                             <div class="tw-flex tw-items-center tw-justify-between">
                                 <label class="kh-field-label">RAM Allocation</label>
-                                <span id="settings-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white">4096 MB</span>
+                                <span id="settings-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white tw-px-2 tw-py-0.5 tw-rounded tw-bg-white/10 tw-border tw-border-white/20">4096 MB</span>
                             </div>
                             <input type="range" id="settings-server-ram" min="1024" max="8192" step="512" value="4096" class="tw-w-full tw-accent-white">
                         </div>
@@ -366,23 +388,28 @@
                         <div class="tw-flex tw-items-center tw-justify-between tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
                             <div>
                                 <div class="tw-text-xs tw-font-bold tw-text-white">Auto-Start on Boot</div>
-                                <div class="tw-text-[11px] tw-text-neutral-400">Launch instance automatically when Node.js starts</div>
+                                <div class="tw-text-[11px] tw-text-neutral-400">Launch instance automatically whenever the host daemon starts</div>
                             </div>
                             <input type="checkbox" id="settings-server-autostart" class="tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-w-4 tw-h-4 tw-accent-white">
                         </div>
 
-                        <button id="btn-save-server-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                            <span>Save Changes</span>
-                        </button>
+                        <div class="tw-pt-2">
+                            <button id="btn-save-server-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                                <span>Save Changes</span>
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Danger Zone -->
-                    <div class="kh-panel-card tw-max-w-2xl tw-border-red-500/20 tw-space-y-4">
-                        <h3 class="tw-text-base tw-font-bold tw-text-red-400">Danger Zone</h3>
+                    <!-- Danger Zone Card -->
+                    <div class="kh-panel-card tw-border-red-500/20 tw-space-y-4">
+                        <div class="tw-border-b tw-border-red-500/20 tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-red-400">Danger Zone</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Irreversible actions regarding this server instance.</p>
+                        </div>
                         <p class="tw-text-xs tw-text-neutral-400">
                             Permanently delete this instance, including all world saves, plugin configs, and database records.
                         </p>
-                        <button id="btn-delete-server" class="tw-py-2 tw-px-4 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/30 tw-text-red-400 tw-text-xs tw-font-mono tw-font-semibold tw-transition-colors">
+                        <button id="btn-delete-server" class="tw-py-2.5 tw-px-4 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/30 tw-text-red-400 tw-text-xs tw-font-mono tw-font-semibold tw-transition-colors">
                             <i class="bi bi-trash-fill tw-mr-1"></i> Delete Server Instance
                         </button>
                     </div>
@@ -524,43 +551,95 @@
             </section>
 
             <!-- ================================================================ -->
-            <!-- VIEW 7: ADMIN SETTINGS -->
+            <!-- VIEW 7: ADMIN SETTINGS (CENTERED & EDITABLE LINKS) -->
             <!-- ================================================================ -->
-            <section id="view-admin-settings" class="panel-view tw-hidden tw-space-y-6">
-                <div>
+            <section id="view-admin-settings" class="panel-view tw-hidden tw-max-w-3xl tw-mx-auto tw-space-y-6">
+                <div class="tw-text-center tw-mb-6">
                     <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Platform Settings</h1>
-                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Manage global resource limits and default instance parameters.</p>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Configure global resource policies, public connection endpoints, and external support links.</p>
                 </div>
-                <div class="kh-panel-card tw-max-w-2xl tw-space-y-5">
+
+                <!-- Section 1: Brand & External Portal Links -->
+                <div class="kh-panel-card tw-space-y-5">
+                    <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                        <h3 class="tw-text-base tw-font-bold tw-text-white">Brand &amp; Community Links</h3>
+                        <p class="tw-text-xs tw-text-neutral-400">Customizable links used across dashboard empty states, support buttons, and public footers.</p>
+                    </div>
+
                     <div class="kh-field-group">
                         <label class="kh-field-label">Panel Brand Name</label>
-                        <input type="text" id="setting-panel-name" class="kh-field-input">
+                        <input type="text" id="setting-panel-name" placeholder="KineticHost" class="kh-field-input">
                     </div>
+
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Public Connection Hostname</label>
-                        <input type="text" id="setting-public-host" class="kh-field-input">
+                        <label class="kh-field-label">Discord Support &amp; Community Invite URL</label>
+                        <input type="url" id="setting-discord-url" placeholder="https://discord.gg/kinetichost" class="kh-field-input">
                     </div>
+
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Default Server RAM (MB)</label>
-                        <input type="number" id="setting-default-ram" class="kh-field-input">
+                        <label class="kh-field-label">Billing &amp; Upgrade Portal URL</label>
+                        <input type="url" id="setting-billing-url" placeholder="https://billing.kinetichost.pro" class="kh-field-input">
                     </div>
+
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Max Servers Per Normal User</label>
-                        <input type="number" id="setting-max-servers" class="kh-field-input">
+                        <label class="kh-field-label">Documentation &amp; Guides URL</label>
+                        <input type="url" id="setting-docs-url" placeholder="https://docs.kinetichost.pro" class="kh-field-input">
                     </div>
-                    <button id="btn-save-admin-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                        <span>Save Platform Settings</span>
-                    </button>
+
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Terms of Service / EULA URL</label>
+                        <input type="url" id="setting-terms-url" placeholder="https://kinetichost.pro/terms" class="kh-field-input">
+                    </div>
+                </div>
+
+                <!-- Section 2: Network & Connectivity -->
+                <div class="kh-panel-card tw-space-y-5">
+                    <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                        <h3 class="tw-text-base tw-font-bold tw-text-white">Network &amp; Domain</h3>
+                        <p class="tw-text-xs tw-text-neutral-400">Default public connection host displayed to users for Minecraft server connections.</p>
+                    </div>
+
+                    <div class="kh-field-group">
+                        <label class="kh-field-label">Public Minecraft Hostname / Subdomain</label>
+                        <input type="text" id="setting-public-host" placeholder="play.kinetichost.pro" class="kh-field-input">
+                    </div>
+                </div>
+
+                <!-- Section 3: Server Resource Quotas & Defaults -->
+                <div class="kh-panel-card tw-space-y-5">
+                    <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                        <h3 class="tw-text-base tw-font-bold tw-text-white">Default Instance Quotas</h3>
+                        <p class="tw-text-xs tw-text-neutral-400">Default resource boundaries allocated to new instances and regular accounts.</p>
+                    </div>
+
+                    <div class="tw-grid tw-grid-cols-1 sm:tw-grid-cols-2 tw-gap-4">
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Default Instance RAM (MB)</label>
+                            <input type="number" id="setting-default-ram" min="1024" step="512" placeholder="4096" class="kh-field-input">
+                        </div>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label">Max Servers Per Regular User</label>
+                            <input type="number" id="setting-max-servers" min="1" max="50" placeholder="3" class="kh-field-input">
+                        </div>
+                    </div>
+
+                    <div class="tw-pt-2">
+                        <button id="btn-save-admin-settings" class="btn-primary tw-py-2.5 tw-px-6 tw-text-xs">
+                            <i class="bi bi-check-lg tw-mr-1"></i>
+                            <span>Save Platform Settings</span>
+                        </button>
+                    </div>
                 </div>
             </section>
 
             <!-- ================================================================ -->
-            <!-- VIEW 8: USER PROFILE (MAJOR OVERHAUL) -->
+            <!-- VIEW 8: USER PROFILE (MAJOR OVERHAUL & CENTERED) -->
             <!-- ================================================================ -->
-            <section id="view-profile" class="panel-view tw-hidden tw-space-y-8">
-                <div>
+            <section id="view-profile" class="panel-view tw-hidden tw-max-w-4xl tw-mx-auto tw-space-y-8">
+                <div class="tw-text-center sm:tw-text-left">
                     <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Account Profile</h1>
-                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Manage your KineticHost account details and security settings.</p>
+                    <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Manage your KineticHost account details, customizable avatar, and security credentials.</p>
                 </div>
 
                 <!-- Profile Hero Banner Card -->
