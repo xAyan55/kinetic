@@ -5,7 +5,10 @@ module.exports = {
 	content: [
 		"./index.html",
 		"./index.js",
-		"./src/**/*.{html,js}"
+		"./dashboard.html",
+		"./admin.html",
+		"./auth/**/*.html",
+		"./auth/**/*.js"
 	],
 	theme: {
 		extend: {
@@ -23,5 +26,3 @@ module.exports = {
 	},
 	plugins: [],
 }
-
-
