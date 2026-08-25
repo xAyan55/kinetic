@@ -3,347 +3,494 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In | KineticHost — Free Game Servers & VPS</title>
+    <title>Sign In | KineticHost</title>
     <meta name="description" content="Sign in to your KineticHost account to manage your free Minecraft servers and KVM VPS instances.">
-    <link rel="stylesheet" href="/css/tailwind-build.css">
-    <link rel="stylesheet" href="/css/index.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        .auth-container {
-            display: flex;
-            width: 100%;
-            max-width: 1440px;
-            height: calc(100vh - 2.5rem);
-            min-height: 680px;
-            background-color: #050505;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1.75rem;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
-        .auth-form-side {
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+        .page-wrapper {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #030303;
+        }
+        
+        /* Left Side: Form (50%) */
+        .left-panel {
             width: 50%;
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 2.5rem 3.5rem;
-            background-color: #050505;
+            position: relative;
+            background-color: #030303;
             z-index: 10;
         }
-        .auth-visual-side {
-            width: 50%;
-            position: relative;
-            margin: 0.6rem;
-            border-radius: 1.5rem;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .top-brand {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 2.5rem;
-        }
-        @media (max-width: 1024px) {
-            .auth-container {
-                height: auto;
-                min-height: 100vh;
-                border-radius: 0;
-                border: none;
-            }
-            .auth-form-side {
-                width: 100%;
-                padding: 2rem 1.5rem;
-            }
-            .auth-visual-side {
-                display: none;
-            }
-        }
-        .kh-input {
-            width: 100%;
-            background-color: #121212;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 0.875rem;
-            padding: 0.85rem 1rem;
-            font-size: 0.875rem;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
             color: #ffffff;
-            outline: none;
-            transition: all 0.2s ease;
+            width: fit-content;
         }
-        .kh-input:focus {
-            border-color: rgba(255, 255, 255, 0.3);
-            background-color: #161616;
+        .brand-logo {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            object-fit: contain;
+            background: #101010;
+            padding: 0.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .kh-label {
+        .brand-text {
+            font-size: 1.125rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #ffffff;
+        }
+        .brand-text span {
+            font-weight: 300;
+            color: #888888;
+        }
+        .form-container {
+            width: 100%;
+            max-width: 410px;
+            margin: auto;
+        }
+        .form-title {
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        .form-subtitle {
+            font-size: 0.875rem;
+            color: #777777;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+        .input-group {
+            margin-bottom: 1.25rem;
+        }
+        .input-label {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.6875rem;
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: 0.08em;
-            color: #a1a1a1;
+            color: #777777;
             text-transform: uppercase;
             margin-bottom: 0.5rem;
             display: block;
         }
-        .kh-btn-primary {
+        .input-box-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .input-field {
+            width: 100%;
+            background-color: #0e0e0e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 0.875rem;
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            color: #ffffff;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .input-field:focus {
+            border-color: rgba(255, 255, 255, 0.25);
+            background-color: #141414;
+        }
+        .input-field::placeholder {
+            color: #444444;
+        }
+        .eye-toggle-btn {
+            position: absolute;
+            right: 0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1c1c1c;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 0.5rem;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888888;
+            cursor: pointer;
+            transition: color 0.2s, background-color 0.2s;
+        }
+        .eye-toggle-btn:hover {
+            color: #ffffff;
+            background: #252525;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+        .checkbox-row input[type="checkbox"] {
+            accent-color: #ffffff;
+            width: 1rem;
+            height: 1rem;
+            cursor: pointer;
+            border-radius: 0.25rem;
+        }
+        .checkbox-label {
+            font-size: 0.8125rem;
+            color: #888888;
+            cursor: pointer;
+            user-select: none;
+        }
+        .submit-btn {
             width: 100%;
             background-color: #ffffff;
-            color: #050505;
-            font-weight: 700;
-            font-size: 0.875rem;
-            padding: 0.875rem 1.5rem;
-            border-radius: 0.875rem;
+            color: #030303;
             border: none;
+            border-radius: 0.875rem;
+            padding: 0.875rem;
+            font-size: 0.875rem;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1);
+            transition: background-color 0.2s, transform 0.1s;
         }
-        .kh-btn-primary:hover {
+        .submit-btn:hover {
             background-color: #e5e5e5;
-            transform: translateY(-1px);
         }
-        .kh-btn-secondary {
+        .submit-btn:active {
+            transform: scale(0.99);
+        }
+        .divider {
+            position: relative;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .divider::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
             width: 100%;
-            background-color: #121212;
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 0.875rem;
-            padding: 0.75rem 1.25rem;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .divider span {
+            position: relative;
+            background-color: #030303;
+            padding: 0 0.75rem;
+            font-size: 0.75rem;
+            color: #555555;
+        }
+        .google-btn {
+            width: 100%;
+            background-color: #0e0e0e;
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 0.875rem;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #ffffff;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.6rem;
-            transition: all 0.2s ease;
+            text-decoration: none;
+            transition: background-color 0.2s, border-color 0.2s;
         }
-        .kh-btn-secondary:hover {
-            background-color: #181818;
-            border-color: rgba(255, 255, 255, 0.25);
+        .google-btn:hover {
+            background-color: #161616;
+            border-color: rgba(255, 255, 255, 0.15);
         }
-        .kh-eye-btn {
+        .footer-link {
+            text-align: center;
+            font-size: 0.8125rem;
+            color: #777777;
+            margin-top: 1.75rem;
+        }
+        .footer-link a {
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+        .error-banner {
+            display: none;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            font-size: 0.75rem;
+            margin-bottom: 1.25rem;
+        }
+        .error-banner.show {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .status-footer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6875rem;
+            color: #555555;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+        }
+        .status-dot {
+            width: 0.375rem;
+            height: 0.375rem;
+            border-radius: 50%;
+            background-color: #10b981;
+        }
+
+        /* Right Side: Visual Container (50%) */
+        .right-panel {
+            width: 50%;
+            height: 100%;
+            padding: 1.25rem;
+            display: flex;
+        }
+        .visual-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background-image: url('/assets/images/images/auth.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+        }
+        .visual-overlay {
             position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #1f1f1f;
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #a1a1a1;
-            padding: 0.35rem 0.55rem;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            transition: color 0.2s ease;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 100%);
+            z-index: 1;
         }
-        .kh-eye-btn:hover {
+        .testimonials-row {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            gap: 1rem;
+            width: 100%;
+        }
+        .testimonial-card {
+            flex: 1;
+            background: rgba(14, 16, 20, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.25rem;
+            padding: 1.15rem;
+        }
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+        .testimonial-avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .testimonial-name {
+            font-size: 0.8125rem;
+            font-weight: 700;
             color: #ffffff;
         }
-        .kh-testimonial-card {
-            background: rgba(18, 20, 23, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1rem;
-            padding: 1rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+        .testimonial-handle {
+            font-size: 0.6875rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #777777;
+        }
+        .testimonial-quote {
+            font-size: 0.75rem;
+            color: #cccccc;
+            line-height: 1.45;
+        }
+
+        @media (max-width: 1024px) {
+            .page-wrapper {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+            .left-panel {
+                width: 100%;
+                min-height: 100vh;
+                padding: 2rem 1.5rem;
+            }
+            .right-panel {
+                display: none;
+            }
         }
     </style>
 </head>
-<body class="tw-bg-[#050505] tw-text-white tw-font-sans tw-min-h-screen tw-flex tw-items-center tw-justify-center tw-p-0 sm:tw-p-4 tw-antialiased">
+<body>
 
-    <!-- Atmospheric noise & data overlays matching KineticHost landing page -->
-    <div class="kh-data-texture"></div>
-    <div class="kh-noise-overlay"></div>
-
-    <!-- Main Split Screen Container (VertexNodes Style) -->
-    <div class="auth-container">
+    <div class="page-wrapper">
         
-        <!-- Left Side: Form Section -->
-        <div class="auth-form-side">
-            <!-- Header Logo -->
-            <div class="tw-flex tw-items-center tw-justify-between">
-                <a href="/" class="tw-flex tw-items-center tw-gap-3">
-                    <img src="/assets/logo/kinetic.png" alt="KineticHost Logo" class="tw-h-8 tw-w-8 tw-rounded-lg tw-object-contain tw-bg-[#101010] tw-p-1 tw-border tw-border-white/10">
-                    <span class="tw-text-xl tw-font-extrabold tw-tracking-tight tw-text-white">
-                        Kinetic<span class="tw-font-light tw-text-neutral-400">Host</span>
-                    </span>
-                </a>
-                <a href="/" class="tw-text-xs tw-font-mono tw-text-neutral-400 hover:tw-text-white tw-transition-colors tw-flex tw-items-center tw-gap-1">
-                    <i class="bi bi-arrow-left"></i> Back to Home
-                </a>
-            </div>
+        <!-- Left Side: Login Form (50% Width) -->
+        <div class="left-panel">
+            
+            <!-- Top Logo Header -->
+            <a href="/" class="top-brand">
+                <img src="/assets/logo/kinetic.png" alt="KineticHost" class="brand-logo">
+                <span class="brand-text">Kinetic<span>Host</span></span>
+            </a>
 
-            <!-- Form Content Box -->
-            <div class="tw-w-full tw-max-w-[400px] tw-mx-auto tw-my-auto tw-py-6">
-                <!-- Title & Subtitle -->
-                <div class="tw-mb-8">
-                    <h1 class="tw-text-3xl sm:tw-text-4xl tw-font-extrabold tw-tracking-tight tw-text-white tw-mb-2">
-                        Sign In to Kinetic
-                    </h1>
-                    <p class="tw-text-sm tw-text-neutral-400 tw-leading-relaxed">
-                        Access your KVM server infrastructure and client area.
-                    </p>
+            <!-- Form Content (Centered in its 50% area) -->
+            <div class="form-container">
+                <h1 class="form-title">Sign In to Kinetic</h1>
+                <p class="form-subtitle">Access your gameservers and vps via the panel</p>
+
+                <div id="login-error" class="error-banner">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span id="error-msg"></span>
                 </div>
 
-                <!-- Error Container -->
-                <div id="login-error" class="tw-hidden tw-mb-6 tw-p-4 tw-rounded-xl tw-bg-red-500/10 tw-border tw-border-red-500/20 tw-text-red-400 tw-text-xs tw-font-medium tw-leading-relaxed tw-flex tw-items-center tw-gap-3">
-                    <i class="bi bi-exclamation-triangle-fill tw-text-red-400 tw-text-sm"></i>
-                    <span></span>
-                </div>
-
-                <!-- Form -->
-                <form id="login-form" class="tw-flex tw-flex-col tw-gap-5">
+                <form id="login-form">
                     <!-- Email Address -->
-                    <div>
-                        <label for="login-email" class="kh-label">
-                            Email Address
-                        </label>
-                        <input 
-                            type="email" 
-                            id="login-email" 
-                            required
-                            placeholder="Enter your email address"
-                            class="kh-input"
-                        />
+                    <div class="input-group">
+                        <label for="login-email" class="input-label">EMAIL ADDRESS</label>
+                        <div class="input-box-wrapper">
+                            <input 
+                                type="email" 
+                                id="login-email" 
+                                required
+                                placeholder="Enter your email address"
+                                class="input-field"
+                            />
+                        </div>
                     </div>
 
                     <!-- Password -->
-                    <div>
-                        <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
-                            <label for="login-password" class="kh-label" style="margin-bottom:0;">
-                                Password
-                            </label>
-                            <a href="#" class="tw-text-xs tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
-                                Forgot password?
-                            </a>
-                        </div>
-                        <div class="tw-relative">
+                    <div class="input-group">
+                        <label for="login-password" class="input-label">PASSWORD</label>
+                        <div class="input-box-wrapper">
                             <input 
                                 type="password" 
                                 id="login-password" 
                                 required
                                 placeholder="Enter your password"
-                                class="kh-input"
-                                style="padding-right: 3.5rem;"
+                                class="input-field"
+                                style="padding-right: 3.25rem;"
                             />
                             <button 
                                 type="button" 
-                                data-target="login-password"
-                                class="toggle-password kh-eye-btn"
-                                aria-label="Toggle password visibility"
+                                data-target="login-password" 
+                                class="eye-toggle-btn toggle-password" 
+                                aria-label="Toggle Password Visibility"
                             >
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
                     </div>
 
-                    <!-- Keep me signed in -->
-                    <div class="tw-flex tw-items-center tw-gap-2.5 tw-pt-1">
-                        <input 
-                            type="checkbox" 
-                            id="remember-me"
-                            class="tw-w-4 tw-h-4 tw-rounded tw-bg-neutral-900 tw-border-white/10 tw-text-white focus:tw-ring-0"
-                        />
-                        <label for="remember-me" class="tw-text-xs tw-text-neutral-400 tw-select-none">
-                            Keep me signed in
-                        </label>
+                    <!-- Keep Me Signed In -->
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="remember-me" checked>
+                        <label for="remember-me" class="checkbox-label">Keep me signed in</label>
                     </div>
 
-                    <!-- Sign In Button -->
-                    <button 
-                        type="submit" 
-                        id="login-btn"
-                        class="kh-btn-primary tw-mt-2"
-                    >
+                    <!-- Submit Button -->
+                    <button type="submit" id="login-btn" class="submit-btn">
                         <span>Sign In</span>
                     </button>
                 </form>
 
                 <!-- Divider -->
-                <div class="tw-relative tw-my-6 tw-text-center">
-                    <div class="tw-absolute tw-inset-0 tw-flex tw-items-center">
-                        <div class="tw-w-full tw-border-t tw-border-white/10"></div>
-                    </div>
-                    <span class="tw-relative tw-px-3 tw-bg-[#050505] tw-text-xs tw-font-mono tw-text-neutral-500">
-                        Or continue with
-                    </span>
+                <div class="divider">
+                    <span>Or continue with</span>
                 </div>
 
-                <!-- Social/Quick Action Button -->
-                <button type="button" class="kh-btn-secondary" onclick="window.location.href='/auth/register'">
-                    <i class="bi bi-shield-lock tw-text-neutral-400"></i>
+                <!-- Secondary Action -->
+                <a href="/auth/register" class="google-btn">
+                    <i class="bi bi-person-plus"></i>
                     <span>Create New Account</span>
-                </button>
+                </a>
 
                 <!-- Footer Link -->
-                <div class="tw-mt-8 tw-text-center tw-text-xs tw-text-neutral-400">
-                    New to KineticHost? 
-                    <a href="/auth/register" class="tw-text-white tw-font-bold hover:tw-underline tw-ml-1">
-                        Create Account
-                    </a>
+                <div class="footer-link">
+                    New to KineticHost? <a href="/auth/register">Create Account</a>
                 </div>
             </div>
 
-            <!-- Footer Operational Status -->
-            <div class="tw-text-xs tw-font-mono tw-text-neutral-500 tw-flex tw-items-center tw-gap-2">
-                <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-500"></span>
-                <span>System Operational • 100% Free Infrastructure</span>
+            <!-- Status Footer -->
+            <div class="status-footer">
+                <span class="status-dot"></span>
+                <span>System Operational • 100% Free</span>
             </div>
         </div>
 
-        <!-- Right Side: VertexNodes Style Visual Container -->
-        <div class="auth-visual-side">
-            <!-- Background Image -->
-            <div class="tw-absolute tw-inset-0 tw-z-0">
-                <img 
-                    src="/assets/images/images/auth.jpg" 
-                    alt="KineticHost Visual" 
-                    class="tw-w-full tw-h-full tw-object-cover tw-opacity-60 tw-filter tw-contrast-110"
-                />
-                <!-- Gradient Vignette Matching KineticHost Landing Page -->
-                <div class="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-[#050505] tw-via-[#050505]/40 tw-to-transparent"></div>
-            </div>
-
-            <!-- Top Badge -->
-            <div class="tw-relative tw-z-10">
-                <div class="kh-badge">
-                    <span class="kh-dot-active"></span>
-                    <span>100% Free Game Server & VPS</span>
-                </div>
-            </div>
-
-            <!-- Bottom Floating Player Testimonial Cards (VertexNodes Style) -->
-            <div class="tw-relative tw-z-10 tw-mt-auto">
-                <div class="tw-grid tw-grid-cols-2 tw-gap-4">
-                    <!-- Testimonial Card 1 -->
-                    <div class="kh-testimonial-card tw-flex tw-flex-col tw-gap-2">
-                        <div class="tw-flex tw-items-center tw-gap-3">
-                            <img src="/assets/images/people/man.jpg" alt="Alex" class="tw-w-9 tw-h-9 tw-rounded-full tw-object-cover tw-border tw-border-white/20">
+        <!-- Right Side: VertexNodes Style Visual Panel (50% Width) -->
+        <div class="right-panel">
+            <div class="visual-container">
+                <div class="visual-overlay"></div>
+                
+                <div class="testimonials-row">
+                    <!-- Testimonial 1 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <img src="/assets/images/people/man.jpg" alt="Alex Rivera" class="testimonial-avatar">
                             <div>
-                                <h4 class="tw-text-xs tw-font-bold tw-text-white">Alex Rivera</h4>
-                                <span class="tw-text-[10px] tw-font-mono tw-text-neutral-400">@alexcloud</span>
+                                <div class="testimonial-name">Alex Rivera</div>
+                                <div class="testimonial-handle">@alexcloud</div>
                             </div>
                         </div>
-                        <p class="tw-text-[11px] tw-text-neutral-300 tw-leading-relaxed">
-                            "Kinetic panel makes managing our game servers & KVM clusters effortless. Ultra fast deployment!"
+                        <p class="testimonial-quote">
+                            "Kinetic panel makes managing our KVM clusters effortless. Ultra fast deployment and intuitive interface!"
                         </p>
                     </div>
 
-                    <!-- Testimonial Card 2 -->
-                    <div class="kh-testimonial-card tw-flex tw-flex-col tw-gap-2">
-                        <div class="tw-flex tw-items-center tw-gap-3">
-                            <img src="/assets/images/people/man2.jpg" alt="Marcus" class="tw-w-9 tw-h-9 tw-rounded-full tw-object-cover tw-border tw-border-white/20">
+                    <!-- Testimonial 2 -->
+                    <div class="testimonial-card">
+                        <div class="testimonial-header">
+                            <img src="/assets/images/people/man2.jpg" alt="Marcus Chen" class="testimonial-avatar">
                             <div>
-                                <h4 class="tw-text-xs tw-font-bold tw-text-white">Marcus Chen</h4>
-                                <span class="tw-text-[10px] tw-font-mono tw-text-neutral-400">@marcustech</span>
+                                <div class="testimonial-name">Marcus Chen</div>
+                                <div class="testimonial-handle">@marcustech</div>
                             </div>
                         </div>
-                        <p class="tw-text-[11px] tw-text-neutral-300 tw-leading-relaxed">
-                            "The 100% free high-frequency CPUs & instant VPS provisioning are top notch. Highly recommended!"
+                        <p class="testimonial-quote">
+                            "The 100% free high-frequency CPUs and instant VPS provisioning are top notch. Highly recommended!"
                         </p>
                     </div>
                 </div>

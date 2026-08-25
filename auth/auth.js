@@ -21,12 +21,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (input && icon) {
         if (input.type === 'password') {
           input.type = 'text';
-          icon.classList.remove('bi-eye');
-          icon.classList.add('bi-eye-slash');
+          icon.className = 'bi bi-eye-slash';
         } else {
           input.type = 'password';
-          icon.classList.remove('bi-eye-slash');
-          icon.classList.add('bi-eye');
+          icon.className = 'bi bi-eye';
         }
       }
     });
@@ -48,28 +46,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (val.length === 0) {
         strengthBar.style.width = '0%';
-        strengthBar.className = 'tw-h-full tw-rounded-full tw-transition-all tw-duration-300 tw-bg-neutral-700';
+        strengthBar.style.backgroundColor = 'transparent';
         strengthText.textContent = '';
       } else if (score <= 1) {
         strengthBar.style.width = '25%';
-        strengthBar.className = 'tw-h-full tw-rounded-full tw-transition-all tw-duration-300 tw-bg-neutral-500';
+        strengthBar.style.backgroundColor = '#ef4444';
         strengthText.textContent = 'Weak';
-        strengthText.className = 'tw-text-xs tw-text-neutral-400 font-mono';
+        strengthText.style.color = '#ef4444';
       } else if (score === 2) {
         strengthBar.style.width = '50%';
-        strengthBar.className = 'tw-h-full tw-rounded-full tw-transition-all tw-duration-300 tw-bg-neutral-400';
+        strengthBar.style.backgroundColor = '#f59e0b';
         strengthText.textContent = 'Fair';
-        strengthText.className = 'tw-text-xs tw-text-neutral-300 font-mono';
+        strengthText.style.color = '#f59e0b';
       } else if (score === 3) {
         strengthBar.style.width = '75%';
-        strengthBar.className = 'tw-h-full tw-rounded-full tw-transition-all tw-duration-300 tw-bg-neutral-200';
+        strengthBar.style.backgroundColor = '#3b82f6';
         strengthText.textContent = 'Good';
-        strengthText.className = 'tw-text-xs tw-text-neutral-200 font-mono';
+        strengthText.style.color = '#3b82f6';
       } else {
         strengthBar.style.width = '100%';
-        strengthBar.className = 'tw-h-full tw-rounded-full tw-transition-all tw-duration-300 tw-bg-white';
+        strengthBar.style.backgroundColor = '#10b981';
         strengthText.textContent = 'Strong';
-        strengthText.className = 'tw-text-xs tw-text-white font-mono tw-font-semibold';
+        strengthText.style.color = '#10b981';
       }
     });
   }
@@ -78,16 +76,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   function showError(containerId, message) {
     const el = document.getElementById(containerId);
     if (el) {
-      el.textContent = message;
-      el.classList.remove('tw-hidden');
+      const msgSpan = el.querySelector('span');
+      if (msgSpan) {
+        msgSpan.textContent = message;
+      } else {
+        el.textContent = message;
+      }
+      el.style.display = 'flex';
     }
   }
 
   function hideError(containerId) {
     const el = document.getElementById(containerId);
     if (el) {
-      el.textContent = '';
-      el.classList.add('tw-hidden');
+      el.style.display = 'none';
     }
   }
 
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!btn) return;
     if (isLoading) {
       btn.disabled = true;
-      btn.innerHTML = `<span class="tw-inline-block tw-animate-spin tw-mr-2"><i class="bi bi-arrow-repeat"></i></span> Processing...`;
+      btn.innerHTML = `<span style="display:inline-block;animation:spin 1s linear infinite;margin-right:0.5rem;"><i class="bi bi-arrow-repeat"></i></span> Processing...`;
     } else {
       btn.disabled = false;
       btn.innerHTML = originalText;
