@@ -130,6 +130,11 @@ document.addEventListener("DOMContentLoaded", () => {
             switchPanelTab(btn.dataset.tab);
         });
     });
+
+    // Initialize BlurText scroll animations
+    if (typeof initBlurText === 'function') {
+        initBlurText();
+    }
 });
 
 window.addEventListener("resize", responsive)

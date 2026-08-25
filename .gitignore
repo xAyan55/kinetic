@@ -1,6 +1,11 @@
 node_modules/
 .gemini/
 .agents/
-CelestialSaaS.zip
+*.zip
 *.log
 .DS_Store
+.env
+data/
+*.db
+*.db-shm
+*.db-wal
