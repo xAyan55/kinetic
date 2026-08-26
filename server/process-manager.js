@@ -99,6 +99,21 @@ class ProcessManager extends EventEmitter {
   }
 
   /**
+   * Broadcasts a JSON event to all connected SSE clients for a server
+   */
+  broadcastEvent(serverId, eventData) {
+    const session = this.getServerSession(serverId);
+    const eventPayload = `data: ${JSON.stringify(eventData)}\n\n`;
+    for (const client of session.sseClients) {
+      try {
+        client.write(eventPayload);
+      } catch (err) {
+        session.sseClients.delete(client);
+      }
+    }
+  }
+
+  /**
    * Appends log line to memory buffer and broadcasts to SSE clients
    */
   appendLog(serverId, line) {
@@ -114,15 +129,7 @@ class ProcessManager extends EventEmitter {
       session.logBuffer.shift();
     }
 
-    // Broadcast to SSE clients
-    const eventPayload = `data: ${JSON.stringify({ type: 'log', message: formatted })}\n\n`;
-    for (const client of session.sseClients) {
-      try {
-        client.write(eventPayload);
-      } catch (err) {
-        session.sseClients.delete(client);
-      }
-    }
+    this.broadcastEvent(serverId, { type: 'log', message: formatted });
   }
 
   /**
@@ -148,36 +155,52 @@ class ProcessManager extends EventEmitter {
     }
 
     if (!server.eula_accepted) {
-      throw new Error('Minecraft EULA must be accepted before starting the server.');
+      const err = new Error('Minecraft EULA must be accepted before starting the server.');
+      err.code = 'EULA_REQUIRED';
+      err.statusCode = 400;
+      throw err;
     }
 
     const session = this.getServerSession(serverId);
 
-    // Prevent concurrent duplicate start
+    // Prevent concurrent duplicate start / busy actions
     if (session.child && !session.child.killed) {
-      throw new Error('Server process is already running.');
+      const err = new Error('Server process is already running.');
+      err.code = 'SERVER_ALREADY_RUNNING';
+      err.statusCode = 409;
+      throw err;
     }
 
     if (server.pid && this.verifyProcessIdentity(server, server.pid)) {
-      throw new Error('Server process is already alive with verified PID.');
+      const err = new Error('Server process is already active with verified OS PID.');
+      err.code = 'SERVER_ALREADY_RUNNING';
+      err.statusCode = 409;
+      throw err;
     }
 
     const serverDir = path.resolve(server.directory);
     const jarPath = path.join(serverDir, server.server_jar || 'server.jar');
 
     if (!fs.existsSync(jarPath)) {
-      throw new Error(`Server JAR file not found at ${jarPath}. Reinstallation required.`);
+      const err = new Error(`Server JAR file not found at ${jarPath}. Reinstallation required.`);
+      err.code = 'JAR_NOT_FOUND';
+      err.statusCode = 404;
+      throw err;
     }
 
     // Transition state to starting
+    session.isStopping = false;
     db.prepare(`
       UPDATE servers
       SET status = 'starting', status_message = 'Starting Java process...', updated_at = datetime('now')
       WHERE id = ?
     `).run(serverId);
+    this.broadcastEvent(serverId, { type: 'status', status: 'starting', statusMessage: 'Starting Java process...' });
 
     const ramMb = server.ram_mb || 4096;
     const initialHeap = Math.min(1024, Math.round(ramMb / 2));
+    
+    // Core optimized GC arguments
     const args = [
       `-Xms${initialHeap}M`,
       `-Xmx${ramMb}M`,
@@ -186,11 +209,20 @@ class ProcessManager extends EventEmitter {
       '-XX:MaxGCPauseMillis=200',
       '-XX:+UnlockExperimentalVMOptions',
       '-XX:+DisableExplicitGC',
-      '-XX:+AlwaysPreTouch',
-      '-jar',
-      server.server_jar || 'server.jar',
-      'nogui'
+      '-XX:+AlwaysPreTouch'
     ];
+
+    // Append safe user JVM flags if configured
+    if (server.jvm_flags && typeof server.jvm_flags === 'string') {
+      const safeFlags = server.jvm_flags.split(/\s+/).filter(f => {
+        return f.startsWith('-D') || f.startsWith('-XX:') || f.startsWith('-X');
+      });
+      for (const flag of safeFlags) {
+        if (!args.includes(flag)) args.push(flag);
+      }
+    }
+
+    args.push('-jar', server.server_jar || 'server.jar', 'nogui');
 
     this.appendLog(serverId, `[KineticHost] Spawning process: ${runtimePath} ${args.join(' ')}`);
 
@@ -203,6 +235,7 @@ class ProcessManager extends EventEmitter {
     const startTime = Date.now();
     session.child = child;
     session.startTime = startTime;
+    session.isStopping = false;
 
     // Update DB with PID & status
     db.prepare(`
@@ -210,6 +243,7 @@ class ProcessManager extends EventEmitter {
       SET status = 'running', status_message = 'Online', pid = ?, process_start_time = ?, updated_at = datetime('now')
       WHERE id = ?
     `).run(child.pid, startTime, serverId);
+    this.broadcastEvent(serverId, { type: 'status', status: 'running', statusMessage: 'Online', pid: child.pid });
 
     this.appendLog(serverId, `[KineticHost] Server process started with PID ${child.pid}`);
 
@@ -234,12 +268,14 @@ class ProcessManager extends EventEmitter {
     // Exit handler
     child.on('close', (code, signal) => {
       console.log(`[ProcessManager] Server #${serverId} (PID ${child.pid}) exited with code ${code}, signal ${signal}`);
+      const wasStopping = session.isStopping;
       session.child = null;
       session.startTime = null;
+      session.isStopping = false;
 
-      const isClean = code === 0 || signal === 'SIGTERM';
+      const isClean = code === 0 || signal === 'SIGTERM' || wasStopping;
       const newStatus = isClean ? 'offline' : 'crashed';
-      const statusMsg = isClean ? 'Offline' : `Server process terminated unexpectedly (exit code ${code})`;
+      const statusMsg = isClean ? 'Offline' : `Server stopped unexpectedly (exit code ${code})`;
 
       db.prepare(`
         UPDATE servers
@@ -247,19 +283,29 @@ class ProcessManager extends EventEmitter {
         WHERE id = ?
       `).run(newStatus, statusMsg, serverId);
 
+      if (!isClean) {
+        db.prepare(`
+          INSERT INTO activity_logs (server_id, action, details, created_at)
+          VALUES (?, 'server_crash', ?, datetime('now'))
+        `).run(serverId, `Server process terminated unexpectedly (exit code ${code})`);
+      }
+
       this.appendLog(serverId, `[KineticHost] Server stopped (${newStatus.toUpperCase()}).`);
+      this.broadcastEvent(serverId, { type: 'status', status: newStatus, statusMessage: statusMsg, pid: null });
       this.emit('serverStatusChanged', { serverId, status: newStatus });
     });
 
     child.on('error', (err) => {
       console.error(`[ProcessManager] Spawn error on server #${serverId}:`, err);
       session.child = null;
+      session.isStopping = false;
       db.prepare(`
         UPDATE servers
         SET status = 'error', status_message = ?, pid = NULL, updated_at = datetime('now')
         WHERE id = ?
       `).run(err.message, serverId);
       this.appendLog(serverId, `[KineticHost] Fatal Process Error: ${err.message}`);
+      this.broadcastEvent(serverId, { type: 'status', status: 'error', statusMessage: err.message, pid: null });
     });
 
     return {
@@ -278,12 +324,14 @@ class ProcessManager extends EventEmitter {
     if (!server) throw new Error('Server not found');
 
     const session = this.getServerSession(serverId);
+    session.isStopping = true;
 
     db.prepare(`
       UPDATE servers
       SET status = 'stopping', status_message = 'Stopping server...', updated_at = datetime('now')
       WHERE id = ?
     `).run(serverId);
+    this.broadcastEvent(serverId, { type: 'status', status: 'stopping', statusMessage: 'Stopping server...' });
 
     this.appendLog(serverId, `[KineticHost] Stopping server...`);
 

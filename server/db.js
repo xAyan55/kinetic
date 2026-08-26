@@ -262,6 +262,58 @@ function runMigrations() {
           WHERE software_type IS NULL OR software_type = ''
         `);
       }
+    },
+    {
+      version: 6,
+      name: 'server_management_workspace_upgrade',
+      up: (dbInstance) => {
+        // 1. Backups Table
+        dbInstance.exec(`
+          CREATE TABLE IF NOT EXISTS server_backups (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER NOT NULL REFERENCES servers(id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            file_name TEXT NOT NULL,
+            file_path TEXT NOT NULL,
+            size_bytes INTEGER NOT NULL DEFAULT 0,
+            status TEXT NOT NULL DEFAULT 'completed',
+            checksum TEXT,
+            error_message TEXT,
+            created_at TEXT NOT NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_backups_server ON server_backups(server_id);
+          CREATE INDEX IF NOT EXISTS idx_backups_status ON server_backups(status);
+        `);
+
+        // 2. Schedules Table
+        dbInstance.exec(`
+          CREATE TABLE IF NOT EXISTS server_schedules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            server_id INTEGER NOT NULL REFERENCES servers(id) ON DELETE CASCADE,
+            name TEXT NOT NULL,
+            action TEXT NOT NULL,
+            payload TEXT,
+            cron_expression TEXT NOT NULL,
+            is_enabled INTEGER NOT NULL DEFAULT 1,
+            last_run_at TEXT,
+            last_status TEXT,
+            next_run_at TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          );
+          CREATE INDEX IF NOT EXISTS idx_schedules_server ON server_schedules(server_id);
+          CREATE INDEX IF NOT EXISTS idx_schedules_enabled ON server_schedules(is_enabled);
+        `);
+
+        // 3. Add missing columns to servers table
+        const serverCols = dbInstance.prepare("PRAGMA table_info(servers)").all().map(c => c.name);
+        if (!serverCols.includes('description')) {
+          dbInstance.exec("ALTER TABLE servers ADD COLUMN description TEXT DEFAULT ''");
+        }
+        if (!serverCols.includes('jvm_flags')) {
+          dbInstance.exec("ALTER TABLE servers ADD COLUMN jvm_flags TEXT DEFAULT ''");
+        }
+      }
     }
   ];
 

@@ -551,6 +551,9 @@
             <!-- ================================================================ -->
             <!-- VIEW 2: SERVER DETAIL (OVERVIEW, CONSOLE, SETTINGS) -->
             <!-- ================================================================ -->
+            <!-- ================================================================ -->
+            <!-- VIEW 2: SERVER DETAIL WORKSPACE (9 DEDICATED TABS) -->
+            <!-- ================================================================ -->
             <section id="view-server-detail" class="panel-view tw-hidden tw-space-y-6">
                 <!-- Server Header Card -->
                 <div class="kh-panel-card tw-flex tw-flex-col lg:tw-flex-row lg:tw-items-center lg:tw-justify-between tw-gap-6">
@@ -593,23 +596,49 @@
                     </div>
                 </div>
 
-                <!-- Segmented Tab Navigation -->
-                <div class="kh-segmented-nav">
-                    <button onclick="switchServerTab('overview')" class="kh-segmented-btn server-tab-btn active" data-tab="overview">
+                <!-- Segmented 9-Tab Workspace Navigation -->
+                <div class="kh-segmented-nav tw-overflow-x-auto tw-no-scrollbar">
+                    <button onclick="switchServerWorkspaceTab('overview')" class="kh-segmented-btn server-tab-btn active" data-tab="overview">
                         <i class="bi bi-activity"></i>
                         <span>Overview</span>
                     </button>
-                    <button onclick="switchServerTab('console')" class="kh-segmented-btn server-tab-btn" data-tab="console">
+                    <button onclick="switchServerWorkspaceTab('console')" class="kh-segmented-btn server-tab-btn" data-tab="console">
                         <i class="bi bi-terminal"></i>
                         <span>Console</span>
                     </button>
-                    <button onclick="switchServerTab('settings')" class="kh-segmented-btn server-tab-btn" data-tab="settings">
+                    <button onclick="switchServerWorkspaceTab('files')" class="kh-segmented-btn server-tab-btn" data-tab="files">
+                        <i class="bi bi-folder2-open"></i>
+                        <span>Files</span>
+                    </button>
+                    <button onclick="switchServerWorkspaceTab('startup')" class="kh-segmented-btn server-tab-btn" data-tab="startup">
+                        <i class="bi bi-cpu"></i>
+                        <span>Startup</span>
+                    </button>
+                    <button onclick="switchServerWorkspaceTab('players')" class="kh-segmented-btn server-tab-btn" data-tab="players">
+                        <i class="bi bi-people"></i>
+                        <span>Players</span>
+                    </button>
+                    <button onclick="switchServerWorkspaceTab('backups')" class="kh-segmented-btn server-tab-btn" data-tab="backups">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <span>Backups</span>
+                    </button>
+                    <button onclick="switchServerWorkspaceTab('schedules')" class="kh-segmented-btn server-tab-btn" data-tab="schedules">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Schedules</span>
+                    </button>
+                    <button onclick="switchServerWorkspaceTab('activity')" class="kh-segmented-btn server-tab-btn" data-tab="activity">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Activity</span>
+                    </button>
+                    <button onclick="switchServerWorkspaceTab('settings')" class="kh-segmented-btn server-tab-btn" data-tab="settings">
                         <i class="bi bi-gear"></i>
                         <span>Settings</span>
                     </button>
                 </div>
 
-                <!-- Tab: Overview -->
+                <!-- ========================================== -->
+                <!-- 1. Tab: Overview -->
+                <!-- ========================================== -->
                 <div id="server-tab-overview" class="server-tab-content tw-space-y-6">
                     <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-3 tw-gap-6">
                         <!-- Memory Card -->
@@ -648,9 +677,38 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Hardware & Instance Metadata Card -->
+                    <div class="kh-panel-card tw-space-y-4">
+                        <h3 class="tw-text-sm tw-font-bold tw-text-white tw-border-b tw-border-white/[0.08] tw-pb-3">Instance Specifications</h3>
+                        <div class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-5 tw-gap-4">
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">ASSIGNED NODE</div>
+                                <div id="overview-node-name" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">Primary VPS</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">SERVER PORT</div>
+                                <div id="overview-port-val" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">:25565</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">PROCESS PID</div>
+                                <div id="overview-pid-val" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">Offline</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">SOFTWARE ENGINE</div>
+                                <div id="overview-software-val" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">Paper 1.20.4</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">JAVA RUNTIME</div>
+                                <div id="overview-java-val" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">Java 21</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Tab: Console -->
+                <!-- ========================================== -->
+                <!-- 2. Tab: Console -->
+                <!-- ========================================== -->
                 <div id="server-tab-console" class="server-tab-content tw-hidden tw-space-y-3">
                     <div class="kh-terminal-window">
                         <!-- Top Console Toolbar -->
@@ -658,28 +716,29 @@
                             <div class="tw-flex tw-items-center tw-gap-2.5">
                                 <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-400 tw-animate-pulse"></span>
                                 <span class="tw-text-neutral-300 tw-font-semibold">LIVE PROCESS OUTPUT</span>
+                                <span id="console-connection-status" class="tw-text-[11px] tw-font-mono tw-text-neutral-400">Connected</span>
                             </div>
                             <div class="tw-flex tw-items-center tw-gap-4">
                                 <label class="tw-flex tw-items-center tw-gap-1.5 tw-cursor-pointer tw-text-neutral-400 hover:tw-text-neutral-200">
-                                    <input type="checkbox" id="console-autoscroll" checked class="tw-rounded tw-bg-neutral-800 tw-border-white/20">
-                                    <span>Auto-scroll</span>
+                                    <input type="checkbox" id="chk-autoscroll" checked class="tw-rounded tw-bg-neutral-800 tw-border-white/20">
+                                    <span class="tw-text-xs">Auto-scroll</span>
                                 </label>
-                                <button id="console-clear-btn" class="hover:tw-text-white tw-transition-colors">
+                                <button id="btn-clear-console" class="tw-text-xs hover:tw-text-white tw-transition-colors">
                                     <i class="bi bi-trash tw-mr-1"></i> Clear
                                 </button>
                             </div>
                         </div>
 
                         <!-- Terminal Body -->
-                        <div id="console-terminal" class="kh-terminal-body">
-                            <!-- Live SSE lines -->
+                        <div id="console-output" class="kh-terminal-body">
+                            <!-- Live bounded stream entries -->
                         </div>
 
                         <!-- Command Bar -->
                         <div class="tw-p-3 tw-bg-[#080808] tw-border-t tw-border-white/[0.08] tw-flex tw-items-center tw-gap-2">
                             <span class="tw-font-mono tw-text-xs tw-text-neutral-500 tw-pl-1">&gt;</span>
-                            <input type="text" id="console-input" placeholder="Enter Minecraft command (e.g. say Hello, op Player, list)..." class="kh-field-input tw-font-mono tw-text-xs tw-border-none tw-bg-transparent focus:tw-shadow-none">
-                            <button id="console-send-btn" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                            <input type="text" id="console-input" placeholder="Enter Minecraft command (e.g. say Hello, op Player, whitelist add name)..." class="kh-field-input tw-font-mono tw-text-xs tw-border-none tw-bg-transparent focus:tw-shadow-none">
+                            <button id="btn-send-command" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
                                 <span>Send</span>
                                 <i class="bi bi-send-fill"></i>
                             </button>
@@ -687,73 +746,336 @@
                     </div>
                 </div>
 
-                <!-- Tab: Settings -->
-                <div id="server-tab-settings" class="server-tab-content tw-hidden tw-max-w-3xl tw-mx-auto tw-space-y-6">
-                    <!-- General Settings Card -->
-                    <div class="kh-panel-card tw-space-y-5">
-                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
-                            <h3 class="tw-text-base tw-font-bold tw-text-white">General Information</h3>
-                            <p class="tw-text-xs tw-text-neutral-400">Basic server identification and public connection links.</p>
+                <!-- ========================================== -->
+                <!-- 3. Tab: File Manager -->
+                <!-- ========================================== -->
+                <div id="server-tab-files" class="server-tab-content tw-hidden tw-space-y-4">
+                    <!-- Files Toolbar -->
+                    <div class="kh-panel-card tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
+                        <div id="files-breadcrumbs" class="tw-flex tw-items-center tw-gap-1.5 tw-flex-wrap">
+                            <span class="tw-font-mono tw-text-xs tw-text-white tw-font-bold">root</span>
                         </div>
-
-                        <div class="kh-field-group">
-                            <label class="kh-field-label">Server Display Name</label>
-                            <input type="text" id="settings-server-name" class="kh-field-input" placeholder="My Minecraft World">
-                        </div>
-
-                        <div class="kh-field-group">
-                            <label class="kh-field-label">Public Connection Address</label>
-                            <div class="tw-flex tw-items-center tw-gap-2">
-                                <input type="text" id="settings-server-address" readonly class="kh-field-input tw-font-mono tw-text-xs tw-text-neutral-400 tw-bg-white/[0.02]">
-                                <button type="button" onclick="copyText(document.getElementById('settings-server-address').value)" class="tw-p-2.5 tw-rounded-lg tw-bg-white/[0.05] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-text-neutral-300 hover:tw-text-white tw-transition-colors">
-                                    <i class="bi bi-copy"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Resources & Compute Card -->
-                    <div class="kh-panel-card tw-space-y-5">
-                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
-                            <h3 class="tw-text-base tw-font-bold tw-text-white">Resources &amp; Compute</h3>
-                            <p class="tw-text-xs tw-text-neutral-400">Allocate memory and startup parameters for this instance.</p>
-                        </div>
-
-                        <div class="kh-field-group">
-                            <div class="tw-flex tw-items-center tw-justify-between">
-                                <label class="kh-field-label">RAM Allocation</label>
-                                <span id="settings-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white tw-px-2 tw-py-0.5 tw-rounded tw-bg-white/10 tw-border tw-border-white/20">4096 MB</span>
-                            </div>
-                            <input type="range" id="settings-server-ram" min="1024" max="8192" step="512" value="4096" class="tw-w-full tw-accent-white">
-                        </div>
-
-                        <div class="tw-flex tw-items-center tw-justify-between tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
-                            <div>
-                                <div class="tw-text-xs tw-font-bold tw-text-white">Auto-Start on Boot</div>
-                                <div class="tw-text-[11px] tw-text-neutral-400">Launch instance automatically whenever the host daemon starts</div>
-                            </div>
-                            <input type="checkbox" id="settings-server-autostart" class="tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-w-4 tw-h-4 tw-accent-white">
-                        </div>
-
-                        <div class="tw-pt-2">
-                            <button id="btn-save-server-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                                <span>Save Changes</span>
+                        <div class="tw-flex tw-items-center tw-gap-2">
+                            <input type="file" id="file-upload-input" class="tw-hidden" onchange="FilesTabController.handleUploadInput(event)">
+                            <button type="button" onclick="document.getElementById('file-upload-input').click()" class="btn-secondary tw-py-1.5 tw-px-3 tw-text-xs">
+                                <i class="bi bi-upload"></i>
+                                <span>Upload</span>
+                            </button>
+                            <button type="button" onclick="FilesTabController.promptNewFile()" class="btn-secondary tw-py-1.5 tw-px-3 tw-text-xs">
+                                <i class="bi bi-file-earmark-plus"></i>
+                                <span>New File</span>
+                            </button>
+                            <button type="button" onclick="FilesTabController.promptNewFolder()" class="btn-secondary tw-py-1.5 tw-px-3 tw-text-xs">
+                                <i class="bi bi-folder-plus"></i>
+                                <span>New Folder</span>
+                            </button>
+                            <button type="button" onclick="FilesTabController.loadDirectory(FilesTabController.currentPath)" class="tw-p-2 tw-rounded-lg tw-bg-white/[0.04] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-text-neutral-300 hover:tw-text-white tw-text-xs tw-transition-colors" title="Refresh Directory">
+                                <i class="bi bi-arrow-clockwise"></i>
                             </button>
                         </div>
                     </div>
 
+                    <!-- Files Table -->
+                    <div class="kh-panel-card tw-overflow-x-auto">
+                        <table class="kh-table">
+                            <thead>
+                                <tr>
+                                    <th class="tw-w-8"></th>
+                                    <th>Name</th>
+                                    <th>Size</th>
+                                    <th>Modified</th>
+                                    <th class="tw-text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="files-table-body">
+                                <!-- File Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 4. Tab: Startup Configuration -->
+                <!-- ========================================== -->
+                <div id="server-tab-startup" class="server-tab-content tw-hidden tw-max-w-3xl tw-mx-auto tw-space-y-6">
+                    <form id="form-startup-config" class="kh-panel-card tw-space-y-6">
+                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">Startup &amp; Runtime Settings</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Configure Java execution arguments and memory allocation.</p>
+                        </div>
+
+                        <!-- Readonly Architecture Badges -->
+                        <div class="tw-grid tw-grid-cols-2 sm:tw-grid-cols-3 tw-gap-3">
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">SOFTWARE</div>
+                                <div id="startup-software" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">PaperMC</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">MINECRAFT VERSION</div>
+                                <div id="startup-version" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">1.20.4</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">BUILD</div>
+                                <div id="startup-build" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">#latest</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">JAVA RUNTIME</div>
+                                <div id="startup-java-info" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">Java 21</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] sm:tw-col-span-2">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">SERVER JAR</div>
+                                <div id="startup-jar-name" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">server.jar</div>
+                            </div>
+                        </div>
+
+                        <!-- RAM Allocation Slider -->
+                        <div class="kh-field-group">
+                            <div class="tw-flex tw-items-center tw-justify-between">
+                                <label class="kh-field-label">Memory Allocation (RAM)</label>
+                                <span id="startup-ram-val" class="tw-text-xs tw-font-mono tw-text-white tw-px-2 tw-py-0.5 tw-rounded tw-bg-white/10 tw-border tw-border-white/20">4096 MB</span>
+                            </div>
+                            <input type="range" id="startup-ram-input" min="1024" max="16384" step="512" value="4096" class="tw-w-full tw-accent-white">
+                        </div>
+
+                        <!-- JVM Flags -->
+                        <div class="kh-field-group">
+                            <label class="kh-field-label" for="startup-jvm-flags">Custom JVM Arguments (Optional)</label>
+                            <input type="text" id="startup-jvm-flags" placeholder="-Dfile.encoding=UTF-8 -XX:+UseG1GC" class="kh-field-input tw-font-mono tw-text-xs">
+                            <span class="tw-text-[11px] tw-text-neutral-500">Safe VM arguments and system properties passed directly to the Java runtime.</span>
+                        </div>
+
+                        <!-- Auto Start Checkbox -->
+                        <div class="tw-flex tw-items-center tw-justify-between tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                            <div>
+                                <div class="tw-text-xs tw-font-bold tw-text-white">Auto-Start on Host Boot</div>
+                                <div class="tw-text-[11px] tw-text-neutral-400">Launch server process automatically whenever KineticHost starts</div>
+                            </div>
+                            <input type="checkbox" id="startup-auto-start" class="tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-w-4 tw-h-4 tw-accent-white">
+                        </div>
+
+                        <div class="tw-pt-2">
+                            <button type="submit" id="btn-save-startup" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                                <span>Save Startup Configuration</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 5. Tab: Players -->
+                <!-- ========================================== -->
+                <div id="server-tab-players" class="server-tab-content tw-hidden tw-space-y-6">
+                    <div class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 tw-gap-6">
+                        <!-- Whitelist Card -->
+                        <div class="kh-panel-card tw-space-y-4">
+                            <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                <div>
+                                    <h3 class="tw-text-sm tw-font-bold tw-text-white">Server Whitelist</h3>
+                                    <p class="tw-text-xs tw-text-neutral-400">Manage allowed players.</p>
+                                </div>
+                                <div class="tw-flex tw-items-center tw-gap-2">
+                                    <button id="btn-toggle-whitelist" class="tw-px-3 tw-py-1.5 tw-rounded-lg tw-bg-white/[0.05] tw-border tw-border-white/10 tw-text-neutral-400 tw-text-xs tw-font-mono">
+                                        Whitelist: OFF
+                                    </button>
+                                    <button onclick="PlayersTabController.promptAddWhitelist()" class="btn-secondary tw-py-1.5 tw-px-3 tw-text-xs">
+                                        <i class="bi bi-plus-lg"></i> Add
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tw-max-h-64 tw-overflow-y-auto">
+                                <table class="kh-table">
+                                    <tbody id="players-whitelist-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Operators Card -->
+                        <div class="kh-panel-card tw-space-y-4">
+                            <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                <div>
+                                    <h3 class="tw-text-sm tw-font-bold tw-text-white">Server Operators (OPs)</h3>
+                                    <p class="tw-text-xs tw-text-neutral-400">Players with administrative commands.</p>
+                                </div>
+                                <button onclick="PlayersTabController.promptAddOp()" class="btn-secondary tw-py-1.5 tw-px-3 tw-text-xs">
+                                    <i class="bi bi-shield-plus"></i> Add OP
+                                </button>
+                            </div>
+                            <div class="tw-max-h-64 tw-overflow-y-auto">
+                                <table class="kh-table">
+                                    <tbody id="players-ops-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banned Players Card -->
+                    <div class="kh-panel-card tw-space-y-4">
+                        <h3 class="tw-text-sm tw-font-bold tw-text-white tw-border-b tw-border-white/[0.08] tw-pb-3">Banned Players</h3>
+                        <div class="tw-overflow-x-auto">
+                            <table class="kh-table">
+                                <thead>
+                                    <tr>
+                                        <th>Player</th>
+                                        <th>Reason</th>
+                                        <th>Banned On</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="players-bans-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 6. Tab: Backups -->
+                <!-- ========================================== -->
+                <div id="server-tab-backups" class="server-tab-content tw-hidden tw-space-y-4">
+                    <div class="kh-panel-card tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
+                        <div>
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">Backup Archives</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Compressed streaming snapshots of your world, configs, and plugins.</p>
+                        </div>
+                        <button type="button" onclick="BackupsTabController.promptCreateBackup()" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                            <i class="bi bi-plus-lg"></i>
+                            <span>Create Backup</span>
+                        </button>
+                    </div>
+
+                    <div class="kh-panel-card tw-overflow-x-auto">
+                        <table class="kh-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Size</th>
+                                    <th>Status</th>
+                                    <th>Created Date</th>
+                                    <th class="tw-text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backups-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 7. Tab: Schedules -->
+                <!-- ========================================== -->
+                <div id="server-tab-schedules" class="server-tab-content tw-hidden tw-space-y-4">
+                    <div class="kh-panel-card tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
+                        <div>
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">Automation Schedules</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Configure recurring automated restarts, backups, or console broadcasts.</p>
+                        </div>
+                        <button type="button" onclick="SchedulesTabController.promptCreateSchedule()" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                            <i class="bi bi-plus-lg"></i>
+                            <span>Create Schedule</span>
+                        </button>
+                    </div>
+
+                    <div class="kh-panel-card tw-overflow-x-auto">
+                        <table class="kh-table">
+                            <thead>
+                                <tr>
+                                    <th>Name &amp; Cron</th>
+                                    <th>Action</th>
+                                    <th>Next Run</th>
+                                    <th>Last Run</th>
+                                    <th>Status</th>
+                                    <th class="tw-text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="schedules-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 8. Tab: Activity Audit Trail -->
+                <!-- ========================================== -->
+                <div id="server-tab-activity" class="server-tab-content tw-hidden tw-max-w-3xl tw-mx-auto tw-space-y-4">
+                    <div class="kh-panel-card tw-space-y-4">
+                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">Server Audit Activity</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Detailed historical record of server events, crashes, power transitions, and file edits.</p>
+                        </div>
+                        <div id="activity-timeline-container"></div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- 9. Tab: Settings -->
+                <!-- ========================================== -->
+                <div id="server-tab-settings" class="server-tab-content tw-hidden tw-max-w-3xl tw-mx-auto tw-space-y-6">
+                    <!-- General Settings Card -->
+                    <form id="form-server-settings" class="kh-panel-card tw-space-y-5">
+                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">General Information</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Basic server identification and metadata.</p>
+                        </div>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label" for="settings-server-name">Server Display Name</label>
+                            <input type="text" id="settings-server-name" class="kh-field-input" placeholder="My Minecraft World">
+                        </div>
+
+                        <div class="kh-field-group">
+                            <label class="kh-field-label" for="settings-server-desc">Description (Optional)</label>
+                            <input type="text" id="settings-server-desc" class="kh-field-input" placeholder="Vanilla SMP with friends">
+                        </div>
+
+                        <div class="tw-pt-2">
+                            <button type="submit" id="btn-save-settings" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                                <span>Save Settings</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Network Details Card -->
+                    <div class="kh-panel-card tw-space-y-4">
+                        <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                            <h3 class="tw-text-base tw-font-bold tw-text-white">Network Allocations</h3>
+                            <p class="tw-text-xs tw-text-neutral-400">Assigned infrastructure node and connection details.</p>
+                        </div>
+                        <div class="tw-grid tw-grid-cols-2 tw-gap-4">
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">ASSIGNED NODE</div>
+                                <div id="settings-node-display" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">Primary VPS</div>
+                            </div>
+                            <div class="tw-p-3 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06]">
+                                <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500">ASSIGNED PORT</div>
+                                <div id="settings-port-display" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-mt-1">:25565</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Danger Zone Card -->
-                    <div class="kh-panel-card tw-border-red-500/20 tw-space-y-4">
+                    <div class="kh-panel-card tw-border-red-500/20 tw-space-y-5">
                         <div class="tw-border-b tw-border-red-500/20 tw-pb-3">
                             <h3 class="tw-text-base tw-font-bold tw-text-red-400">Danger Zone</h3>
                             <p class="tw-text-xs tw-text-neutral-400">Irreversible actions regarding this server instance.</p>
                         </div>
-                        <p class="tw-text-xs tw-text-neutral-400">
-                            Permanently delete this instance, including all world saves, plugin configs, and database records.
-                        </p>
-                        <button id="btn-delete-server" class="tw-py-2.5 tw-px-4 tw-rounded-xl tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/30 tw-text-red-400 tw-text-xs tw-font-mono tw-font-semibold tw-transition-colors">
-                            <i class="bi bi-trash-fill tw-mr-1"></i> Delete Server Instance
-                        </button>
+
+                        <!-- Reinstall Server -->
+                        <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4 tw-p-3.5 tw-rounded-xl tw-bg-red-500/[0.03] tw-border tw-border-red-500/10">
+                            <div>
+                                <div class="tw-text-xs tw-font-bold tw-text-white">Reinstall Server Software</div>
+                                <div class="tw-text-[11px] tw-text-neutral-400">Re-downloads core JAR files with choice to preserve or wipe worlds</div>
+                            </div>
+                            <button type="button" id="btn-reinstall-server" class="tw-py-2 tw-px-3.5 tw-rounded-lg tw-bg-white/[0.05] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-text-xs tw-font-mono tw-text-neutral-300 hover:tw-text-white tw-transition-colors">
+                                Reinstall
+                            </button>
+                        </div>
+
+                        <!-- Delete Server -->
+                        <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4 tw-p-3.5 tw-rounded-xl tw-bg-red-500/[0.03] tw-border tw-border-red-500/10">
+                            <div>
+                                <div class="tw-text-xs tw-font-bold tw-text-red-400">Permanently Delete Server</div>
+                                <div class="tw-text-[11px] tw-text-neutral-400">Destroys all world saves, plugin configs, and database records</div>
+                            </div>
+                            <button type="button" id="btn-delete-server" class="tw-py-2 tw-px-3.5 tw-rounded-lg tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/30 tw-text-red-400 tw-text-xs tw-font-mono tw-font-semibold tw-transition-colors">
+                                Delete Server
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1370,7 +1692,52 @@
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/dashboard.js?v=1.1.0"></script>
+    <!-- ================================================================ -->
+    <!-- MODAL 4: IN-BROWSER TEXT / CODE FILE EDITOR -->
+    <!-- ================================================================ -->
+    <div id="modal-file-editor" class="kh-modal-backdrop tw-hidden" data-modal data-state="closed" aria-hidden="true" role="dialog" aria-modal="true" tabindex="-1">
+        <div class="kh-modal-card tw-max-w-4xl tw-w-full tw-p-6 tw-space-y-4">
+            <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                <div class="tw-flex tw-items-center tw-gap-3">
+                    <i class="bi bi-file-earmark-code tw-text-lg tw-text-neutral-300"></i>
+                    <div>
+                        <h3 class="tw-text-base tw-font-bold tw-text-white" id="editor-file-title">Editing File</h3>
+                        <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">UTF-8 Encoded • Max 2MB</span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal('modal-file-editor')" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors" aria-label="Close file editor">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="tw-space-y-2">
+                <textarea id="editor-textarea" spellcheck="false" class="tw-w-full tw-h-96 tw-p-4 tw-rounded-xl tw-bg-[#060606] tw-border tw-border-white/10 tw-text-neutral-200 tw-font-mono tw-text-xs tw-leading-relaxed focus:tw-outline-none focus:tw-border-white/30 tw-resize-y"></textarea>
+            </div>
+
+            <div class="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-2">
+                <button type="button" onclick="closeModal('modal-file-editor')" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
+                    Cancel
+                </button>
+                <button type="button" id="btn-save-file" onclick="FilesTabController.saveActiveFile()" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
+                    <i class="bi bi-floppy2-fill tw-mr-1"></i>
+                    <span>Save File</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modular Application Scripts -->
+    <script src="js/api/servers.js?v=1.2.0"></script>
+    <script src="js/server/overview.js?v=1.2.0"></script>
+    <script src="js/server/console.js?v=1.2.0"></script>
+    <script src="js/server/files.js?v=1.2.0"></script>
+    <script src="js/server/startup.js?v=1.2.0"></script>
+    <script src="js/server/players.js?v=1.2.0"></script>
+    <script src="js/server/backups.js?v=1.2.0"></script>
+    <script src="js/server/schedules.js?v=1.2.0"></script>
+    <script src="js/server/activity.js?v=1.2.0"></script>
+    <script src="js/server/settings.js?v=1.2.0"></script>
+    <script src="js/server/server-detail.js?v=1.2.0"></script>
+    <script src="js/dashboard.js?v=1.2.0"></script>
 </body>
 </html>

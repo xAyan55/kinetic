@@ -7,12 +7,16 @@ const SQLiteStore = require('connect-sqlite3')(session);
 const helmet = require('helmet');
 const { db, runMigrations } = require('./server/db');
 const { processManager } = require('./server/process-manager');
+const { scheduler } = require('./server/scheduler');
 
 // Run database migrations and seed local node
 runMigrations();
 
 // Run process reconciliation on boot
 processManager.reconcileOnBoot();
+
+// Start background cron scheduler
+scheduler.start();
 
 const app = express();
 const PORT = process.env.PORT || 3000;

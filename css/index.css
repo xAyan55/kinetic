@@ -1153,3 +1153,42 @@ header.kh-nav-header.kh-header-scrolled {
         min-height: 2.5rem;
     }
 }
+
+/* File Manager Rows & Transitions */
+.kh-file-row {
+    transition: background-color 0.12s ease;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.kh-file-row:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Console Log Line Styles */
+.kh-log-line {
+    font-family: 'JetBrains Mono', 'Consolas', monospace;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #cccccc;
+    padding: 0.1rem 0;
+}
+.kh-log-line.error {
+    color: #f87171;
+}
+.kh-log-line.warn {
+    color: #fbbf24;
+}
+.kh-log-line.cmd {
+    color: #60a5fa;
+    font-weight: 600;
+}
+
+/* Hide scrollbar for clean horizontal tab scrolling */
+.tw-no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.tw-no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

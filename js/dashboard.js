@@ -360,6 +360,7 @@ function handleHashNavigation() {
 
   // Clean active timers, polling intervals, and SSE streams on route change
   if (mainRoute !== 'server') {
+    if (typeof teardownServerWorkspace === 'function') teardownServerWorkspace();
     if (sseSource) { sseSource.close(); sseSource = null; }
     if (statsInterval) { clearInterval(statsInterval); statsInterval = null; }
   }
@@ -375,7 +376,11 @@ function handleHashNavigation() {
   if (mainRoute === 'server-create' || mainRoute === 'create-server') {
     loadServerCreate();
   } else if (mainRoute === 'server' && parts[1]) {
-    loadServerDetail(parts[1]);
+    if (typeof loadServerWorkspace === 'function') {
+      loadServerWorkspace(parts[1]);
+    } else {
+      loadServerDetail(parts[1]);
+    }
   } else if (mainRoute === 'admin-overview') {
     loadAdminOverview();
     // Real-time telemetry polling every 6 seconds on overview
@@ -610,6 +615,10 @@ function renderServerHeader(s) {
 }
 
 function switchServerTab(tab) {
+  if (typeof switchServerWorkspaceTab === 'function') {
+    switchServerWorkspaceTab(tab);
+    return;
+  }
   currentServerTab = tab;
   document.querySelectorAll('.server-tab-btn').forEach(btn => {
     if (btn.dataset.tab === tab) {
