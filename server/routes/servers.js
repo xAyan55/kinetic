@@ -68,20 +68,65 @@ router.get('/', requireAuth, (req, res) => {
     `).all(user.id);
   }
 
-  // Attach live process metrics
+  // Attach live process metrics & real storage info
   const enriched = servers.map(s => {
     const isLive = s.pid && processManager.verifyProcessIdentity(s, s.pid);
     const procMetrics = isLive ? getProcessMetrics(s.pid) : { memoryMb: 0, cpuPercent: 0 };
+    const diskMb = s.directory && fs.existsSync(s.directory) ? getDirectorySizeMb(s.directory) : 0;
     return {
       ...s,
       is_live: !!isLive,
       used_memory_mb: procMetrics.memoryMb,
       used_cpu_percent: procMetrics.cpuPercent,
+      disk_used_mb: diskMb,
+      storage_limit_mb: s.storage_limit_mb || 25600,
       public_connection: `${s.node_public_address || 'play.kinetichost.pro'}:${s.port}`
     };
   });
 
   return res.json({ success: true, servers: enriched });
+});
+
+// GET /api/servers/software — Dynamic Supported Software Engines & Versions
+router.get('/software', requireAuth, async (req, res) => {
+  try {
+    const paperInstaller = getInstaller('paper');
+    const vanillaInstaller = getInstaller('vanilla');
+
+    const [paperVersions, vanillaVersions] = await Promise.all([
+      paperInstaller.getSupportedVersions(),
+      vanillaInstaller.getSupportedVersions()
+    ]);
+
+    return res.json({
+      success: true,
+      software: [
+        {
+          id: 'paper',
+          name: 'PaperMC',
+          tagline: 'High Performance & Plugins',
+          description: 'Optimized Minecraft server software with Spigot/Bukkit plugin compatibility and high tick rate performance.',
+          recommended: true,
+          badge: 'RECOMMENDED',
+          versions: paperVersions,
+          defaultVersion: paperVersions[0]
+        },
+        {
+          id: 'vanilla',
+          name: 'Vanilla Mojang',
+          tagline: 'Official Minecraft Server',
+          description: 'Official Mojang server software for standard pure vanilla gameplay without modifications.',
+          recommended: false,
+          badge: 'OFFICIAL',
+          versions: vanillaVersions,
+          defaultVersion: vanillaVersions[0]
+        }
+      ]
+    });
+  } catch (err) {
+    console.error('[Software Endpoint Error]:', err);
+    return res.status(500).json({ success: false, error: 'Failed to retrieve supported software engines.' });
+  }
 });
 
 // POST /api/servers — Create a new Minecraft server instance (Admin Only)

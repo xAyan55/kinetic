@@ -6,8 +6,8 @@ const path = require('path');
 test('Dashboard HTML has proper modal state and accessibility attributes', () => {
   const html = fs.readFileSync(path.join(__dirname, '../../dashboard.html'), 'utf8');
 
-  // Check all 3 modals
-  const modalIds = ['modal-create-server', 'modal-manage-user', 'modal-delete-server'];
+  // Check remaining active modals
+  const modalIds = ['modal-manage-user', 'modal-delete-server'];
   for (const id of modalIds) {
     assert.match(html, new RegExp(`id="${id}"[^>]*data-modal`), `${id} must have data-modal attribute`);
     assert.match(html, new RegExp(`id="${id}"[^>]*data-state="closed"`), `${id} must have initial data-state="closed"`);
@@ -15,6 +15,9 @@ test('Dashboard HTML has proper modal state and accessibility attributes', () =>
     assert.match(html, new RegExp(`id="${id}"[^>]*role="dialog"`), `${id} must have role="dialog"`);
     assert.match(html, new RegExp(`id="${id}"[^>]*aria-modal="true"`), `${id} must have aria-modal="true"`);
   }
+
+  // Verify modal-create-server was removed in favor of dedicated view
+  assert.doesNotMatch(html, /id="modal-create-server"/, 'modal-create-server must be removed in favor of #view-server-create');
 
   // Delete modal confirm button must be disabled initially
   assert.match(html, /id="delete-modal-confirm-btn"[^>]*disabled/, 'Delete confirm button must have disabled attribute initially');

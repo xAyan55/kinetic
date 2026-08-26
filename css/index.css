@@ -986,3 +986,124 @@ header.kh-nav-header.kh-header-scrolled {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+/* ==========================================================================
+   Full-Page Server Creation Component Styles & Responsive Enhancements
+   ========================================================================== */
+
+.kh-software-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.kh-software-card {
+    background-color: #0b0b0b;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.875rem;
+    padding: 1.25rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kh-software-card:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    background-color: #0e0e0e;
+    transform: translateY(-2px);
+}
+
+.kh-software-card.active {
+    border-color: #ffffff;
+    background-color: #121212;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2), 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.kh-software-card .kh-card-badge {
+    position: absolute;
+    top: 0.875rem;
+    right: 0.875rem;
+    font-size: 0.625rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+}
+
+.kh-software-card.active .kh-card-badge {
+    background-color: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+
+.kh-summary-card {
+    background-color: #080808;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.875rem;
+    padding: 1.5rem;
+    position: sticky;
+    top: 5rem;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+}
+
+.kh-summary-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.75rem;
+}
+
+.kh-summary-item:last-child {
+    border-bottom: none;
+}
+
+.kh-summary-label {
+    font-family: 'JetBrains Mono', monospace;
+    color: #888888;
+    font-size: 0.6875rem;
+    text-transform: uppercase;
+}
+
+.kh-summary-value {
+    font-family: 'JetBrains Mono', monospace;
+    color: #ffffff;
+    font-weight: 600;
+    text-align: right;
+}
+
+/* Icon button normalization */
+.kh-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    border-radius: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #a3a3a3;
+    transition: all 0.15s ease;
+    cursor: pointer;
+}
+
+.kh-icon-btn:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Mobile Touch Target & Layout Adjustments */
+@media (max-width: 768px) {
+    .kh-icon-btn {
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+    }
+}

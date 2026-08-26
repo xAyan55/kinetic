@@ -291,6 +291,18 @@ function initMobileDrawer() {
 // ==========================================================================
 // Hash Router with Active Polling & SSE Memory Cleanup
 // ==========================================================================
+// Utility: Debounce helper for silky-smooth search filtering
+function debounce(func, wait = 150) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+// ==========================================================================
+// Hash Router with Active Polling & SSE Memory Cleanup
+// ==========================================================================
 function handleHashNavigation() {
   closeAllModals(); // Close all open modals on route change
 
@@ -299,7 +311,7 @@ function handleHashNavigation() {
   const mainRoute = parts[0];
 
   // Route security check for normal users
-  if (mainRoute.startsWith('admin-') && (!currentUser || currentUser.role !== 'admin')) {
+  if ((mainRoute.startsWith('admin-') || mainRoute === 'server-create' || mainRoute === 'create-server') && (!currentUser || currentUser.role !== 'admin')) {
     showToast('Administrator privileges required to access the control plane.', 'error');
     window.location.hash = 'dashboard';
     return;
@@ -322,6 +334,8 @@ function handleHashNavigation() {
     const routeTitles = {
       'dashboard': 'My Servers',
       'server': 'Server Console',
+      'server-create': 'Deploy Server',
+      'create-server': 'Deploy Server',
       'admin-overview': 'Overview',
       'admin-users': 'User Directory',
       'admin-nodes': 'Infrastructure Nodes',
@@ -337,6 +351,8 @@ function handleHashNavigation() {
       sectionPrefix.textContent = 'control plane /';
     } else if (mainRoute === 'profile') {
       sectionPrefix.textContent = 'account /';
+    } else if (mainRoute === 'server-create' || mainRoute === 'create-server') {
+      sectionPrefix.textContent = 'provision /';
     } else {
       sectionPrefix.textContent = 'panel /';
     }
@@ -356,7 +372,9 @@ function handleHashNavigation() {
   document.querySelectorAll('.panel-view').forEach(v => v.classList.add('tw-hidden'));
 
   // Dispatch route view loader
-  if (mainRoute === 'server' && parts[1]) {
+  if (mainRoute === 'server-create' || mainRoute === 'create-server') {
+    loadServerCreate();
+  } else if (mainRoute === 'server' && parts[1]) {
     loadServerDetail(parts[1]);
   } else if (mainRoute === 'admin-overview') {
     loadAdminOverview();
@@ -413,10 +431,10 @@ async function loadUserServers() {
               Deploy a Minecraft instance for yourself or manage platform-wide servers from the Control Plane.
             </p>
           </div>
-          <button onclick="openCreateServerModal()" class="btn-primary tw-mx-auto tw-mt-2">
+          <a href="#server-create" class="btn-primary tw-mx-auto tw-mt-2">
             <i class="bi bi-plus-lg"></i>
             <span>Deploy Server</span>
-          </button>
+          </a>
         `;
       } else {
         emptyState.innerHTML = `
@@ -448,6 +466,11 @@ async function loadUserServers() {
       const isCrashed = s.status === 'crashed';
       const statusClass = isOnline ? 'online' : (isStarting ? 'starting' : (isCrashed ? 'crashed' : 'offline'));
 
+      // Real storage format based on calculated usage or DB limit
+      const storageDisplay = s.disk_used_mb > 0 
+        ? `${s.disk_used_mb} MB`
+        : (s.storage_limit_mb ? `${(s.storage_limit_mb / 1024).toFixed(0)} GB Quota` : '25 GB Quota');
+
       return `
         <div class="kh-panel-card interactive tw-flex tw-flex-col tw-justify-between">
           <div>
@@ -473,7 +496,7 @@ async function loadUserServers() {
               </div>
             </div>
 
-            <!-- Resource Allocation Breakdown -->
+            <!-- Resource Allocation Breakdown (100% Real Backend Values) -->
             <div class="tw-grid tw-grid-cols-3 tw-gap-2 tw-py-3 tw-px-3 tw-rounded-lg tw-bg-white/[0.02] tw-border tw-border-white/[0.04] tw-font-mono tw-text-[11px] tw-mb-4">
               <div>
                 <div class="tw-text-neutral-500 tw-text-[10px]">MEMORY</div>
@@ -485,7 +508,7 @@ async function loadUserServers() {
               </div>
               <div>
                 <div class="tw-text-neutral-500 tw-text-[10px]">STORAGE</div>
-                <div class="tw-text-neutral-200 tw-font-semibold">25.6 GB</div>
+                <div class="tw-text-neutral-200 tw-font-semibold">${storageDisplay}</div>
               </div>
             </div>
           </div>
@@ -597,8 +620,14 @@ function switchServerTab(tab) {
 
   if (tab === 'console') {
     initConsoleStream(currentServer.id);
-  } else if (tab === 'settings') {
-    initServerSettings(currentServer);
+  } else {
+    if (sseSource) {
+      sseSource.close();
+      sseSource = null;
+    }
+    if (tab === 'settings') {
+      initServerSettings(currentServer);
+    }
   }
 }
 
@@ -629,7 +658,7 @@ function setupServerPowerButtons(serverId) {
       const res = await fetch(`/api/servers/${serverId}/stop`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        showToast('Graceful stop signal sent', 'info');
+        showToast('Server stopping gracefully...', 'info');
       } else {
         showToast(data.error, 'error');
       }
@@ -644,7 +673,7 @@ function setupServerPowerButtons(serverId) {
       const res = await fetch(`/api/servers/${serverId}/restart`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        showToast('Server restart sequence initiated', 'info');
+        showToast('Server restarting...', 'info');
       } else {
         showToast(data.error, 'error');
       }
@@ -719,6 +748,11 @@ function initConsoleStream(serverId) {
         lineEl.className = 'console-line';
         lineEl.textContent = data.message;
         terminal.appendChild(lineEl);
+
+        // Bound terminal buffer to 1200 lines max to prevent DOM memory bloat
+        while (terminal.childElementCount > 1200) {
+          terminal.removeChild(terminal.firstElementChild);
+        }
 
         if (autoScrollCheckbox && autoScrollCheckbox.checked) {
           terminal.scrollTop = terminal.scrollHeight;
@@ -893,85 +927,322 @@ async function executeServerDeletion(serverId, confirmBtn) {
 }
 
 // ==========================================================================
-// 5. Create & Assign Server Modal
+// 5. Dedicated Full-Page Server Creation Controller
 // ==========================================================================
-async function openCreateServerModal(triggerEl = null) {
-  if (currentUser.role !== 'admin') {
-    showToast('Only administrators can create and assign servers.', 'error');
+let availableSoftwareList = [];
+let selectedSoftwareEngine = 'paper';
+
+async function loadServerCreate() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('Only administrators can deploy and assign new servers.', 'error');
+    window.location.hash = 'dashboard';
     return;
   }
 
-  document.getElementById('create-server-form').reset();
-  document.getElementById('create-server-ram-val').textContent = '4096 MB';
-  document.getElementById('create-server-status-msg').classList.add('tw-hidden');
-  document.getElementById('btn-create-server-submit').disabled = false;
+  const view = document.getElementById('view-server-create');
+  if (view) view.classList.remove('tw-hidden');
 
-  openModal('modal-create-server', triggerEl);
+  // Reset form elements
+  const form = document.getElementById('page-create-server-form');
+  if (form) form.reset();
 
-  // Populate users dropdown
-  const ownerSelect = document.getElementById('create-server-owner');
-  ownerSelect.innerHTML = '<option value="">Loading registered users...</option>';
-  try {
-    const res = await fetch('/api/admin/users');
-    const data = await res.json();
-    if (data.success && data.users) {
-      ownerSelect.innerHTML = data.users.map(u => `
-        <option value="${u.id}" ${u.id === currentUser.id ? 'selected' : ''}>
-          ${escapeHtml(u.name)} (${escapeHtml(u.email)}) [${u.role.toUpperCase()}]
-        </option>
-      `).join('');
-    } else {
+  const statusMsg = document.getElementById('page-create-status-msg');
+  if (statusMsg) {
+    statusMsg.classList.add('tw-hidden');
+    statusMsg.innerHTML = '';
+  }
+
+  const submitBtn = document.getElementById('btn-page-create-submit');
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<span>Deploy Server</span> <i class="bi bi-arrow-right tw-ml-1"></i>';
+  }
+
+  // Initial name summary binding
+  const nameInput = document.getElementById('page-create-name');
+  const nameCount = document.getElementById('page-create-name-count');
+  const nameHint = document.getElementById('page-create-name-hint');
+  const summaryName = document.getElementById('summary-server-name');
+
+  if (nameInput) {
+    nameInput.value = '';
+    if (summaryName) summaryName.textContent = 'Minecraft Server';
+    if (nameCount) nameCount.textContent = '0/32';
+    if (nameHint) {
+      nameHint.textContent = 'Between 2 and 32 characters.';
+      nameHint.className = 'tw-text-[11px] tw-font-mono tw-text-neutral-500';
+    }
+
+    nameInput.oninput = () => {
+      const val = nameInput.value.trim();
+      const len = nameInput.value.length;
+      if (nameCount) nameCount.textContent = `${len}/32`;
+      if (summaryName) summaryName.textContent = val || 'Minecraft Server';
+
+      if (len > 0 && len < 2) {
+        nameHint.textContent = 'Name is too short (min 2 chars).';
+        nameHint.className = 'tw-text-[11px] tw-font-mono tw-text-yellow-400';
+      } else if (len >= 2) {
+        nameHint.textContent = 'Valid server identifier.';
+        nameHint.className = 'tw-text-[11px] tw-font-mono tw-text-emerald-400';
+      } else {
+        nameHint.textContent = 'Between 2 and 32 characters.';
+        nameHint.className = 'tw-text-[11px] tw-font-mono tw-text-neutral-500';
+      }
+    };
+  }
+
+  // Calculate & configure RAM limits based on current user / platform quotas
+  const ramInput = document.getElementById('page-create-ram');
+  const ramVal = document.getElementById('page-create-ram-val');
+  const ramMaxLabel = document.getElementById('page-create-ram-max-label');
+  const quotaBadge = document.getElementById('page-create-quota-badge');
+  const summaryRam = document.getElementById('summary-ram');
+
+  const maxRam = currentUser.max_ram_mb || 16384;
+  const defaultRam = Math.min(4096, maxRam);
+
+  if (ramInput) {
+    ramInput.min = 1024;
+    ramInput.max = maxRam;
+    ramInput.value = defaultRam;
+    if (ramVal) ramVal.textContent = `${defaultRam} MB`;
+    if (summaryRam) summaryRam.textContent = `${defaultRam} MB`;
+    if (ramMaxLabel) ramMaxLabel.textContent = `Max: ${maxRam} MB`;
+    if (quotaBadge) quotaBadge.textContent = `Quota: ${maxRam} MB`;
+
+    ramInput.oninput = (e) => {
+      const v = e.target.value;
+      if (ramVal) ramVal.textContent = `${v} MB`;
+      if (summaryRam) summaryRam.textContent = `${v} MB`;
+    };
+  }
+
+  // Populate registered accounts dropdown
+  const ownerSelect = document.getElementById('page-create-owner');
+  const summaryOwner = document.getElementById('summary-owner-name');
+  if (ownerSelect) {
+    ownerSelect.innerHTML = '<option value="">Loading registered users...</option>';
+    try {
+      const res = await fetch('/api/admin/users');
+      const data = await res.json();
+      if (data.success && data.users) {
+        ownerSelect.innerHTML = data.users.map(u => `
+          <option value="${u.id}" ${u.id === currentUser.id ? 'selected' : ''}>
+            ${escapeHtml(u.name)} (${escapeHtml(u.email)}) [${u.role.toUpperCase()}]
+          </option>
+        `).join('');
+        if (summaryOwner) summaryOwner.textContent = currentUser.name;
+      } else {
+        ownerSelect.innerHTML = `<option value="${currentUser.id}">${escapeHtml(currentUser.name)} (You)</option>`;
+        if (summaryOwner) summaryOwner.textContent = currentUser.name;
+      }
+    } catch (e) {
       ownerSelect.innerHTML = `<option value="${currentUser.id}">${escapeHtml(currentUser.name)} (You)</option>`;
+      if (summaryOwner) summaryOwner.textContent = currentUser.name;
+    }
+
+    ownerSelect.onchange = () => {
+      const selectedOption = ownerSelect.options[ownerSelect.selectedIndex];
+      if (summaryOwner && selectedOption) {
+        const text = selectedOption.text.split('(')[0].trim();
+        summaryOwner.textContent = text || 'Selected User';
+      }
+    };
+  }
+
+  // Fetch supported software engines from backend
+  await loadServerCreationSoftware();
+}
+
+async function loadServerCreationSoftware() {
+  const container = document.getElementById('page-software-selector');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="tw-p-6 tw-text-center tw-text-xs tw-font-mono tw-text-neutral-500 tw-col-span-2">
+      <div class="tw-w-5 tw-h-5 tw-border-2 tw-border-white/20 tw-border-t-white tw-rounded-full tw-animate-spin tw-mx-auto tw-mb-2"></div>
+      Querying daemon installer metadata...
+    </div>
+  `;
+
+  try {
+    const res = await fetch('/api/servers/software');
+    const data = await res.json();
+
+    if (data.success && data.software && data.software.length > 0) {
+      availableSoftwareList = data.software;
+    } else {
+      availableSoftwareList = [
+        {
+          id: 'paper',
+          name: 'PaperMC',
+          tagline: 'High Performance & Plugins',
+          description: 'Optimized Minecraft server software with Spigot/Bukkit plugin compatibility and high tick rate performance.',
+          recommended: true,
+          badge: 'RECOMMENDED',
+          versions: ['1.20.4', '1.20.2', '1.19.4'],
+          defaultVersion: '1.20.4'
+        },
+        {
+          id: 'vanilla',
+          name: 'Vanilla Mojang',
+          tagline: 'Official Minecraft Server',
+          description: 'Official Mojang server software for standard pure vanilla gameplay without modifications.',
+          recommended: false,
+          badge: 'OFFICIAL',
+          versions: ['1.20.4', '1.20.2', '1.19.4'],
+          defaultVersion: '1.20.4'
+        }
+      ];
     }
   } catch (e) {
-    ownerSelect.innerHTML = `<option value="${currentUser.id}">${escapeHtml(currentUser.name)} (You)</option>`;
+    availableSoftwareList = [
+      {
+        id: 'paper',
+        name: 'PaperMC',
+        tagline: 'High Performance & Plugins',
+        description: 'Optimized Minecraft server software with Spigot/Bukkit plugin compatibility and high tick rate performance.',
+        recommended: true,
+        badge: 'RECOMMENDED',
+        versions: ['1.20.4', '1.20.2', '1.19.4'],
+        defaultVersion: '1.20.4'
+      },
+      {
+        id: 'vanilla',
+        name: 'Vanilla Mojang',
+        tagline: 'Official Minecraft Server',
+        description: 'Official Mojang server software for standard pure vanilla gameplay without modifications.',
+        recommended: false,
+        badge: 'OFFICIAL',
+        versions: ['1.20.4', '1.20.2', '1.19.4'],
+        defaultVersion: '1.20.4'
+      }
+    ];
   }
+
+  selectedSoftwareEngine = availableSoftwareList[0].id;
+  renderSoftwareEngineCards();
+  populateVersionOptions();
 }
 
-function closeCreateServerModal() {
-  closeModal('modal-create-server');
+function renderSoftwareEngineCards() {
+  const container = document.getElementById('page-software-selector');
+  if (!container) return;
+
+  container.innerHTML = availableSoftwareList.map(sw => {
+    const isSelected = sw.id === selectedSoftwareEngine;
+    const iconClass = sw.id === 'paper' ? 'bi-lightning-charge-fill' : 'bi-box-seam-fill';
+
+    return `
+      <div class="kh-software-card ${isSelected ? 'active' : ''}" onclick="selectSoftwareEngine('${sw.id}')">
+        ${sw.badge ? `<span class="kh-card-badge">${sw.badge}</span>` : ''}
+        <div>
+          <div class="tw-w-10 tw-h-10 tw-rounded-xl tw-bg-white/[0.06] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-lg tw-text-white tw-mb-3">
+            <i class="bi ${iconClass}"></i>
+          </div>
+          <h4 class="tw-text-base tw-font-bold tw-text-white">${escapeHtml(sw.name)}</h4>
+          <p class="tw-text-xs tw-text-neutral-400 tw-mt-1 tw-leading-relaxed">${escapeHtml(sw.description)}</p>
+        </div>
+        <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-white/[0.06] tw-flex tw-items-center tw-justify-between tw-text-[11px] tw-font-mono">
+          <span class="tw-text-neutral-500">${sw.versions.length} versions</span>
+          <span class="tw-text-white tw-font-semibold">${isSelected ? '✓ Selected' : 'Select'}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
-async function handleCreateServerSubmit(e) {
+function selectSoftwareEngine(engineId) {
+  selectedSoftwareEngine = engineId;
+  const input = document.getElementById('page-create-software');
+  if (input) input.value = engineId;
+
+  const currentSw = availableSoftwareList.find(s => s.id === engineId);
+  const summarySoftware = document.getElementById('summary-software');
+  if (summarySoftware && currentSw) {
+    summarySoftware.textContent = currentSw.name;
+  }
+
+  renderSoftwareEngineCards();
+  populateVersionOptions();
+}
+
+function populateVersionOptions() {
+  const versionSelect = document.getElementById('page-create-version');
+  const summaryVersion = document.getElementById('summary-version');
+  const currentSw = availableSoftwareList.find(s => s.id === selectedSoftwareEngine);
+
+  if (!versionSelect || !currentSw) return;
+
+  versionSelect.innerHTML = currentSw.versions.map((v, i) => `
+    <option value="${v}" ${i === 0 ? 'selected' : ''}>
+      ${v} ${i === 0 ? '(Latest Stable)' : ''}
+    </option>
+  `).join('');
+
+  if (summaryVersion) {
+    summaryVersion.textContent = currentSw.versions[0] || '1.20.4';
+  }
+
+  versionSelect.onchange = () => {
+    if (summaryVersion) summaryVersion.textContent = versionSelect.value;
+  };
+}
+
+async function handleServerCreatePageSubmit(e) {
   e.preventDefault();
-  const name = document.getElementById('create-server-name').value;
-  const ownerId = document.getElementById('create-server-owner').value;
-  const software = document.getElementById('create-server-software').value;
-  const version = document.getElementById('create-server-version').value;
-  const ramMb = document.getElementById('create-server-ram').value;
-  const eulaAccepted = document.getElementById('create-server-eula').checked;
+  const name = document.getElementById('page-create-name').value.trim();
+  const ownerId = document.getElementById('page-create-owner').value;
+  const software = document.getElementById('page-create-software').value || selectedSoftwareEngine;
+  const version = document.getElementById('page-create-version').value;
+  const ramMb = document.getElementById('page-create-ram').value;
+  const eulaAccepted = document.getElementById('page-create-eula').checked;
 
-  const btnSubmit = document.getElementById('btn-create-server-submit');
-  const statusMsg = document.getElementById('create-server-status-msg');
+  const btnSubmit = document.getElementById('btn-page-create-submit');
+  const statusMsg = document.getElementById('page-create-status-msg');
+
+  if (!name || name.length < 2) {
+    showToast('Server name must be at least 2 characters.', 'error');
+    return;
+  }
+
+  if (!eulaAccepted) {
+    showToast('You must agree to the Minecraft EULA to deploy a server.', 'error');
+    return;
+  }
 
   btnSubmit.disabled = true;
+  btnSubmit.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2"><i class="bi bi-arrow-repeat tw-animate-spin"></i> Provisioning...</span>';
+  
   statusMsg.classList.remove('tw-hidden');
-  statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2"><i class="bi bi-arrow-repeat tw-animate-spin"></i> Allocating port, isolated directory, and downloading server binary...</span>';
+  statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2.5 tw-text-neutral-300"><i class="bi bi-arrow-repeat tw-animate-spin tw-text-white"></i> Allocating port, isolated directory, and downloading official JAR binaries...</span>';
 
   try {
     const res = await fetch('/api/servers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, software, version, ramMb, eulaAccepted, ownerId })
+      body: JSON.stringify({ name, software, version, ramMb: parseInt(ramMb, 10), eulaAccepted, ownerId })
     });
     const data = await res.json();
 
     if (data.success && data.server) {
-      statusMsg.innerHTML = '<span class="tw-text-emerald-400">✓ Instance deployed and assigned successfully! Redirecting...</span>';
-      showToast('Server created and assigned successfully!', 'success');
+      statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2 tw-text-emerald-400"><i class="bi bi-check-circle-fill"></i> Instance provisioned successfully! Redirecting to management console...</span>';
+      showToast('Server instance deployed successfully!', 'success');
       setTimeout(() => {
-        closeCreateServerModal();
         window.location.hash = `server/${data.server.id}`;
-      }, 600);
+      }, 500);
     } else {
-      statusMsg.innerHTML = `<span class="tw-text-red-400">✗ ${data.error}</span>`;
-      showToast(data.error || 'Failed to create server', 'error');
+      statusMsg.innerHTML = `<span class="tw-flex tw-items-center tw-gap-2 tw-text-red-400"><i class="bi bi-exclamation-triangle-fill"></i> ${escapeHtml(data.error || 'Deployment failed')}</span>`;
+      showToast(data.error || 'Failed to deploy server', 'error');
       btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '<span>Deploy Server</span> <i class="bi bi-arrow-right tw-ml-1"></i>';
     }
   } catch (err) {
-    statusMsg.innerHTML = `<span class="tw-text-red-400">✗ ${err.message}</span>`;
-    showToast(err.message, 'error');
+    statusMsg.innerHTML = `<span class="tw-flex tw-items-center tw-gap-2 tw-text-red-400"><i class="bi bi-exclamation-triangle-fill"></i> ${escapeHtml(err.message || 'Network error')}</span>`;
+    showToast(err.message || 'Network error during deployment', 'error');
     btnSubmit.disabled = false;
+    btnSubmit.innerHTML = '<span>Deploy Server</span> <i class="bi bi-arrow-right tw-ml-1"></i>';
   }
 }
 
@@ -1130,9 +1401,9 @@ function setUserRoleFilter(role) {
   renderAdminUsersTable();
 }
 
-function filterAdminUsers() {
+const filterAdminUsers = debounce(() => {
   renderAdminUsersTable();
-}
+}, 120);
 
 function renderAdminUsersTable() {
   const tbody = document.getElementById('admin-users-table');
@@ -1316,9 +1587,9 @@ function setServerStatusFilter(status) {
   renderAdminServersTable();
 }
 
-function filterAdminServers() {
+const filterAdminServers = debounce(() => {
   renderAdminServersTable();
-}
+}, 120);
 
 function renderAdminServersTable() {
   const tbody = document.getElementById('admin-servers-table');

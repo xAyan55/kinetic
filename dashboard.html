@@ -199,10 +199,10 @@
                         <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Minecraft Servers</h1>
                         <p class="tw-text-sm tw-text-neutral-400 tw-mt-1">Monitor, configure, and control your active server instances.</p>
                     </div>
-                    <button id="btn-dashboard-create" onclick="openCreateServerModal()" class="btn-primary admin-only-btn" style="display: none;">
+                    <a href="#server-create" id="btn-dashboard-create" class="btn-primary admin-only-btn" style="display: none;">
                         <i class="bi bi-plus-lg"></i>
                         <span>Create Server</span>
-                    </button>
+                    </a>
                 </div>
 
                 <!-- Loading State Skeleton -->
@@ -219,6 +219,253 @@
                 <!-- Servers Grid -->
                 <div id="servers-grid" class="tw-grid tw-grid-cols-1 md:tw-grid-cols-2 lg:tw-grid-cols-3 tw-gap-6 tw-hidden">
                     <!-- Dynamically Rendered via js/dashboard.js -->
+                </div>
+            </section>
+
+            <!-- ================================================================ -->
+            <!-- VIEW: DEDICATED FULL-PAGE SERVER PROVISIONING -->
+            <!-- ================================================================ -->
+            <section id="view-server-create" class="panel-view tw-hidden tw-space-y-8">
+                <!-- Header with Back Navigation -->
+                <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-4">
+                    <div class="tw-flex tw-items-center tw-gap-3.5">
+                        <a href="#dashboard" class="kh-icon-btn hover:tw-text-white tw-transition-colors" title="Back to My Servers">
+                            <i class="bi bi-arrow-left tw-text-base"></i>
+                        </a>
+                        <div>
+                            <h1 class="tw-text-2xl lg:tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white">Create a Minecraft Server</h1>
+                            <p class="tw-text-sm tw-text-neutral-400 tw-mt-0.5">Configure and deploy a new dedicated Minecraft instance on KineticHost.</p>
+                        </div>
+                    </div>
+                    <div class="tw-flex tw-items-center tw-gap-2">
+                        <span class="tw-text-xs tw-font-mono tw-text-neutral-400 tw-px-3 tw-py-1 tw-rounded-full tw-bg-white/[0.04] tw-border tw-border-white/[0.08]">
+                            <i class="bi bi-shield-check tw-text-emerald-400 tw-mr-1"></i> Isolated Container
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 2-Column Responsive Layout (Left Form, Right Sticky Summary) -->
+                <div class="tw-grid tw-grid-cols-1 lg:tw-grid-cols-3 tw-gap-8">
+                    <!-- Left: Configuration Form (2 Cols) -->
+                    <div class="lg:tw-col-span-2 tw-space-y-6">
+                        <form id="page-create-server-form" onsubmit="handleServerCreatePageSubmit(event)" class="tw-space-y-6">
+                            
+                            <!-- SECTION 1: SERVER IDENTITY -->
+                            <div class="kh-panel-card tw-space-y-4">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                    <div class="tw-flex tw-items-center tw-gap-2.5">
+                                        <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">1</span>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Server Identity</h3>
+                                    </div>
+                                    <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Required</span>
+                                </div>
+
+                                <div class="kh-field-group">
+                                    <label class="kh-field-label" for="page-create-name">Server Display Name</label>
+                                    <input type="text" id="page-create-name" required minlength="2" maxlength="32" placeholder="e.g. Kinetic Survival SMP" class="kh-field-input" autocomplete="off">
+                                    <div class="tw-flex tw-items-center tw-justify-between tw-mt-1">
+                                        <span id="page-create-name-hint" class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Between 2 and 32 characters.</span>
+                                        <span id="page-create-name-count" class="tw-text-[11px] tw-font-mono tw-text-neutral-500">0/32</span>
+                                    </div>
+                                </div>
+
+                                <!-- Target Owner (Only shown for Admin users) -->
+                                <div class="kh-field-group" id="page-create-owner-group">
+                                    <label class="kh-field-label" for="page-create-owner">Assign Instance to User Account</label>
+                                    <select id="page-create-owner" class="kh-field-input tw-font-mono tw-text-xs">
+                                        <!-- Dynamically Populated -->
+                                    </select>
+                                    <span class="tw-text-[11px] tw-text-neutral-500">Administrators can assign server instances to any registered account.</span>
+                                </div>
+                            </div>
+
+                            <!-- SECTION 2: SERVER SOFTWARE -->
+                            <div class="kh-panel-card tw-space-y-4">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                    <div class="tw-flex tw-items-center tw-gap-2.5">
+                                        <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">2</span>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Server Software Engine</h3>
+                                    </div>
+                                    <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Supported by Daemon</span>
+                                </div>
+
+                                <div id="page-software-selector" class="kh-software-grid">
+                                    <!-- Dynamically Populated -->
+                                </div>
+                                <input type="hidden" id="page-create-software" value="paper">
+                            </div>
+
+                            <!-- SECTION 3: MINECRAFT VERSION -->
+                            <div class="kh-panel-card tw-space-y-4">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                    <div class="tw-flex tw-items-center tw-gap-2.5">
+                                        <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">3</span>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Minecraft Version</h3>
+                                    </div>
+                                    <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Official Releases</span>
+                                </div>
+
+                                <div class="kh-field-group">
+                                    <label class="kh-field-label" for="page-create-version">Select Target Release</label>
+                                    <select id="page-create-version" class="kh-field-input tw-font-mono tw-text-xs">
+                                        <!-- Dynamically updated based on selected software -->
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- SECTION 4: RESOURCE ALLOCATION -->
+                            <div class="kh-panel-card tw-space-y-4">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                    <div class="tw-flex tw-items-center tw-gap-2.5">
+                                        <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">4</span>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Resource Allocation</h3>
+                                    </div>
+                                    <span id="page-create-quota-badge" class="tw-text-[11px] tw-font-mono tw-text-neutral-400">Available: 8192 MB</span>
+                                </div>
+
+                                <div class="kh-field-group">
+                                    <div class="tw-flex tw-items-center tw-justify-between">
+                                        <label class="kh-field-label" for="page-create-ram">Memory (RAM)</label>
+                                        <span id="page-create-ram-val" class="tw-text-xs tw-font-mono tw-font-bold tw-text-white tw-px-2.5 tw-py-1 tw-rounded tw-bg-white/10 tw-border tw-border-white/20">4096 MB</span>
+                                    </div>
+                                    <input type="range" id="page-create-ram" min="1024" max="16384" step="512" value="4096" class="tw-w-full tw-accent-white">
+                                    <div class="tw-flex tw-items-center tw-justify-between tw-text-[11px] tw-font-mono tw-text-neutral-500 tw-mt-1">
+                                        <span>Min: 1024 MB</span>
+                                        <span>Recommended: 4096 MB</span>
+                                        <span id="page-create-ram-max-label">Max: 8192 MB</span>
+                                    </div>
+                                </div>
+
+                                <!-- Platform Specs Notice -->
+                                <div class="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2">
+                                    <div class="tw-p-3 tw-rounded-lg tw-bg-white/[0.02] tw-border tw-border-white/[0.04]">
+                                        <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500 uppercase">CPU EXECUTION LIMIT</div>
+                                        <div class="tw-text-xs tw-font-mono tw-text-white tw-font-semibold tw-mt-0.5">200% Dedicated Compute</div>
+                                    </div>
+                                    <div class="tw-p-3 tw-rounded-lg tw-bg-white/[0.02] tw-border tw-border-white/[0.04]">
+                                        <div class="tw-text-[10px] tw-font-mono tw-text-neutral-500 uppercase">STORAGE QUOTA</div>
+                                        <div class="tw-text-xs tw-font-mono tw-text-white tw-font-semibold tw-mt-0.5">25 GB High-Speed NVMe</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECTION 5: NETWORK & PORT ALLOCATION -->
+                            <div class="kh-panel-card tw-space-y-4">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                    <div class="tw-flex tw-items-center tw-gap-2.5">
+                                        <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">5</span>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Network &amp; Port Reservation</h3>
+                                    </div>
+                                    <span class="tw-text-[11px] tw-font-mono tw-text-emerald-400">Automatic</span>
+                                </div>
+
+                                <div class="tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] tw-flex tw-items-center tw-gap-3">
+                                    <div class="tw-w-8 tw-h-8 tw-rounded-lg tw-bg-white/[0.05] tw-flex tw-items-center tw-justify-center tw-text-neutral-300">
+                                        <i class="bi bi-hdd-network"></i>
+                                    </div>
+                                    <div>
+                                        <div class="tw-text-xs tw-font-bold tw-text-white">Dynamic Port Allocation</div>
+                                        <div class="tw-text-[11px] tw-text-neutral-400">
+                                            The platform port allocator will assign a verified conflict-free port from the pool (:25565 - :25600) upon deployment.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SECTION 6: MINECRAFT EULA -->
+                            <div class="kh-panel-card tw-space-y-4">
+                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                    <div class="tw-flex tw-items-center tw-gap-2.5">
+                                        <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">6</span>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Minecraft EULA Agreement</h3>
+                                    </div>
+                                    <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Legal</span>
+                                </div>
+
+                                <div class="tw-p-4 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] tw-flex tw-items-start tw-gap-3">
+                                    <input type="checkbox" id="page-create-eula" required class="tw-mt-0.5 tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-accent-white tw-w-4 tw-h-4">
+                                    <label for="page-create-eula" class="tw-text-xs tw-text-neutral-300 tw-leading-relaxed tw-cursor-pointer">
+                                        I acknowledge and agree to the <a href="https://aka.ms/MinecraftEULA" target="_blank" class="tw-text-white tw-underline hover:tw-text-neutral-200">Mojang Minecraft End User License Agreement (EULA)</a> for this server deployment.
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Provisioning Status & Deploy Action -->
+                            <div id="page-create-status-msg" class="tw-hidden tw-p-4 tw-rounded-xl tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-text-xs tw-font-mono tw-text-neutral-300"></div>
+
+                            <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-end tw-gap-3 tw-pt-2">
+                                <a href="#dashboard" class="btn-secondary tw-py-2.5 tw-px-5 tw-text-xs tw-text-center">
+                                    Cancel
+                                </a>
+                                <button type="submit" id="btn-page-create-submit" class="btn-primary tw-py-2.5 tw-px-7 tw-text-xs">
+                                    <span>Deploy Server</span>
+                                    <i class="bi bi-arrow-right tw-ml-1"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Right: Live Deployment Summary (1 Col Sticky) -->
+                    <div class="lg:tw-col-span-1">
+                        <div class="kh-summary-card tw-space-y-5">
+                            <div class="tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                <div class="tw-flex tw-items-center tw-gap-2">
+                                    <span class="tw-w-2 tw-h-2 tw-rounded-full tw-bg-emerald-400 tw-animate-pulse"></span>
+                                    <h3 class="tw-text-sm tw-font-bold tw-text-white">Deployment Summary</h3>
+                                </div>
+                                <p class="tw-text-[11px] tw-text-neutral-400 tw-mt-0.5">Real-time blueprint of your instance.</p>
+                            </div>
+
+                            <div class="tw-space-y-1">
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Server Name</span>
+                                    <span id="summary-server-name" class="kh-summary-value tw-truncate tw-max-w-[140px]">Minecraft Server</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Assigned Owner</span>
+                                    <span id="summary-owner-name" class="kh-summary-value tw-truncate tw-max-w-[140px]">Account</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Software Engine</span>
+                                    <span id="summary-software" class="kh-summary-value">PaperMC</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Version</span>
+                                    <span id="summary-version" class="kh-summary-value">1.20.4</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Allocated RAM</span>
+                                    <span id="summary-ram" class="kh-summary-value">4096 MB</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">CPU Limit</span>
+                                    <span class="kh-summary-value">200% Compute</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Storage Quota</span>
+                                    <span class="kh-summary-value">25 GB NVMe</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Network Port</span>
+                                    <span class="kh-summary-value tw-text-neutral-400">Assigned on deploy</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Target Node</span>
+                                    <span class="kh-summary-value">Node #1 (Primary)</span>
+                                </div>
+                            </div>
+
+                            <div class="tw-p-3 tw-rounded-lg tw-bg-white/[0.02] tw-border tw-border-white/[0.04] tw-text-[11px] tw-font-mono tw-text-neutral-400 tw-space-y-1">
+                                <div class="tw-flex tw-items-center tw-gap-1.5 tw-text-neutral-300">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span class="tw-font-bold">Provisioning Notice</span>
+                                </div>
+                                <p class="tw-text-neutral-500 tw-leading-relaxed">
+                                    During deployment, the daemon will download the clean verified server binary, write standard server properties, accept the EULA, and assign an isolated directory.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -447,10 +694,10 @@
                             <i class="bi bi-arrow-clockwise"></i>
                             <span>Refresh</span>
                         </button>
-                        <button onclick="openCreateServerModal()" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                        <a href="#server-create" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
                             <i class="bi bi-plus-lg"></i>
                             <span>Deploy Server</span>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -652,10 +899,10 @@
                             <i class="bi bi-arrow-clockwise"></i>
                             <span>Refresh</span>
                         </button>
-                        <button onclick="openCreateServerModal()" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
+                        <a href="#server-create" class="btn-primary tw-py-2 tw-px-4 tw-text-xs">
                             <i class="bi bi-plus-lg"></i>
                             <span>Create &amp; Assign Server</span>
-                        </button>
+                        </a>
                     </div>
                 </div>
 
@@ -940,82 +1187,7 @@
     </div>
 
     <!-- ================================================================ -->
-    <!-- MODAL 1: CREATE & ASSIGN SERVER -->
-    <!-- ================================================================ -->
-    <div id="modal-create-server" class="kh-modal-backdrop" data-modal data-state="closed" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-create-title" tabindex="-1">
-        <div class="kh-modal-card tw-max-w-lg tw-p-6 tw-space-y-5">
-            <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
-                <h3 id="modal-create-title" class="tw-text-lg tw-font-bold tw-text-white">Deploy Minecraft Instance</h3>
-                <button type="button" onclick="closeCreateServerModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors" aria-label="Close modal">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <form id="create-server-form" onsubmit="handleCreateServerSubmit(event)" class="tw-space-y-4">
-                <div class="kh-field-group">
-                    <label class="kh-field-label" for="create-server-name">Server Display Name</label>
-                    <input type="text" id="create-server-name" required placeholder="e.g. Survival SMP World" class="kh-field-input">
-                </div>
-
-                <!-- Admin Assign To User Selector -->
-                <div class="kh-field-group" id="create-server-owner-group">
-                    <label class="kh-field-label" for="create-server-owner">Assign Instance to User</label>
-                    <select id="create-server-owner" class="kh-field-input tw-font-mono tw-text-xs">
-                        <!-- Dynamically populated -->
-                    </select>
-                </div>
-
-                <div class="tw-grid tw-grid-cols-2 tw-gap-3">
-                    <div class="kh-field-group">
-                        <label class="kh-field-label" for="create-server-software">Software</label>
-                        <select id="create-server-software" class="kh-field-input tw-font-mono tw-text-xs">
-                            <option value="paper">PaperMC (Recommended)</option>
-                            <option value="vanilla">Vanilla Mojang</option>
-                        </select>
-                    </div>
-                    <div class="kh-field-group">
-                        <label class="kh-field-label" for="create-server-version">Minecraft Version</label>
-                        <select id="create-server-version" class="kh-field-input tw-font-mono tw-text-xs">
-                            <option value="1.20.4">1.20.4 (Latest)</option>
-                            <option value="1.20.2">1.20.2</option>
-                            <option value="1.19.4">1.19.4</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="kh-field-group">
-                    <div class="tw-flex tw-items-center tw-justify-between">
-                        <label class="kh-field-label" for="create-server-ram">RAM Allocation</label>
-                        <span id="create-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white">4096 MB</span>
-                    </div>
-                    <input type="range" id="create-server-ram" min="1024" max="8192" step="512" value="4096" oninput="document.getElementById('create-server-ram-val').textContent = this.value + ' MB'" class="tw-w-full tw-accent-white">
-                </div>
-
-                <!-- EULA Agreement -->
-                <div class="tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] tw-flex tw-items-start tw-gap-2.5">
-                    <input type="checkbox" id="create-server-eula" required class="tw-mt-0.5 tw-rounded tw-bg-neutral-800 tw-border-white/20 tw-accent-white">
-                    <label for="create-server-eula" class="tw-text-[11px] tw-text-neutral-300">
-                        I explicitly agree to the <a href="https://aka.ms/MinecraftEULA" target="_blank" class="tw-text-white tw-underline">Minecraft End User License Agreement (EULA)</a>.
-                    </label>
-                </div>
-
-                <div id="create-server-status-msg" class="tw-hidden tw-p-3 tw-rounded-lg tw-bg-white/[0.03] tw-border tw-border-white/[0.08] tw-text-xs tw-font-mono tw-text-neutral-300"></div>
-
-                <div class="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-2">
-                    <button type="button" onclick="closeCreateServerModal()" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
-                        Cancel
-                    </button>
-                    <button type="submit" id="btn-create-server-submit" class="btn-primary tw-py-2 tw-px-5 tw-text-xs">
-                        <span>Deploy Instance</span>
-                        <i class="bi bi-arrow-right"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ================================================================ -->
-    <!-- MODAL 2: MANAGE USER ROLE & QUOTAS -->
+    <!-- MODAL 1: MANAGE USER ROLE & QUOTAS -->
     <!-- ================================================================ -->
     <div id="modal-manage-user" class="kh-modal-backdrop" data-modal data-state="closed" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-manage-title" tabindex="-1">
         <div class="kh-modal-card tw-max-w-lg tw-p-6 tw-space-y-5">
