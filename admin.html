@@ -3,107 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel | KineticHost</title>
+    <meta http-equiv="refresh" content="0; url=/dashboard#admin-overview">
+    <title>Redirecting to Control Plane | KineticHost</title>
+    <link rel="icon" type="image/png" href="assets/logo/kinetic.png">
     <link rel="stylesheet" href="css/tailwind-build.css">
     <link rel="stylesheet" href="css/index.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-</head>
-<body class="tw-bg-[#050505] tw-text-white tw-font-sans tw-min-h-screen tw-flex tw-flex-col tw-antialiased">
-    <!-- Navbar -->
-    <header class="tw-sticky tw-top-0 tw-z-50 tw-w-full tw-border-b tw-border-white/[0.08] tw-bg-[#050505]/80 tw-backdrop-blur-md">
-        <div class="tw-max-w-[1300px] tw-mx-auto tw-flex tw-items-center tw-justify-between tw-py-4 tw-px-6">
-            <a href="/" class="tw-flex tw-items-center tw-gap-3">
-                <img src="assets/logo/kinetic.png" alt="KineticHost" class="tw-h-8 tw-w-auto">
-                <span class="tw-text-xl tw-font-bold tw-tracking-tight tw-text-white">KineticHost</span>
-                <span class="tw-px-2 tw-py-0.5 tw-rounded tw-bg-white/10 tw-border tw-border-white/20 tw-text-xs tw-font-mono tw-text-white">ADMIN</span>
-            </a>
-
-            <div class="tw-flex tw-items-center tw-gap-4">
-                <a href="/dashboard" class="tw-text-xs tw-font-mono tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
-                    ← Back to Dashboard
-                </a>
-                <button id="admin-logout-btn" class="tw-p-2 tw-rounded-xl tw-bg-white/[0.03] hover:tw-bg-white/[0.08] tw-border tw-border-white/[0.08] tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
-                    <i class="bi bi-box-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Admin Dashboard -->
-    <main class="tw-flex-1 tw-max-w-[1300px] tw-w-full tw-mx-auto tw-py-10 tw-px-6">
-        <div class="tw-mb-8">
-            <h1 class="tw-text-3xl tw-font-extrabold tw-tracking-tight tw-text-white tw-mb-2">
-                Administrator User Directory
-            </h1>
-            <p class="tw-text-sm tw-text-neutral-400">
-                System user accounts registered in KineticHost SQLite database.
-            </p>
-        </div>
-
-        <!-- User Directory Table -->
-        <div class="kh-card tw-p-0 tw-overflow-hidden">
-            <div class="tw-overflow-x-auto">
-                <table class="tw-w-full tw-text-left tw-border-collapse">
-                    <thead>
-                        <tr class="tw-border-b tw-border-white/[0.08] tw-bg-white/[0.02] tw-text-xs tw-font-mono tw-text-neutral-400">
-                            <th class="tw-py-4 tw-px-6">ID</th>
-                            <th class="tw-py-4 tw-px-6">Name</th>
-                            <th class="tw-py-4 tw-px-6">Email</th>
-                            <th class="tw-py-4 tw-px-6">Role</th>
-                            <th class="tw-py-4 tw-px-6">Registered Date</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table-body">
-                        <!-- Populated dynamically via /api/admin/users -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const res = await fetch('/api/admin/users');
-                if (res.status === 403) {
-                    alert('Access denied: Administrator privileges required.');
-                    window.location.href = '/dashboard';
-                    return;
-                }
-                if (res.status === 401) {
-                    window.location.href = '/auth/login';
-                    return;
-                }
-
-                const data = await res.json();
-                if (data.success && data.users) {
-                    const tbody = document.getElementById('users-table-body');
-                    tbody.innerHTML = data.users.map(u => `
-                        <tr class="tw-border-b tw-border-white/[0.04] hover:tw-bg-white/[0.01] tw-text-sm">
-                            <td class="tw-py-4 tw-px-6 tw-font-mono tw-text-neutral-400">#${u.id}</td>
-                            <td class="tw-py-4 tw-px-6 tw-font-semibold tw-text-white">${u.name}</td>
-                            <td class="tw-py-4 tw-px-6 tw-text-neutral-300">${u.email}</td>
-                            <td class="tw-py-4 tw-px-6">
-                                <span class="${u.role === 'admin' ? 'tw-bg-white/10 tw-text-white tw-border-white/20' : 'tw-bg-neutral-800 tw-text-neutral-300 tw-border-white/5'} tw-px-2.5 tw-py-1 tw-rounded-full tw-border tw-text-xs tw-font-mono">
-                                    ${u.role}
-                                </span>
-                            </td>
-                            <td class="tw-py-4 tw-px-6 tw-font-mono tw-text-xs tw-text-neutral-400">${u.created_at}</td>
-                        </tr>
-                    `).join('');
-                }
-
-                document.getElementById('admin-logout-btn').addEventListener('click', async () => {
-                    await fetch('/api/auth/logout', { method: 'POST' });
-                    window.location.href = '/auth/login';
-                });
-            } catch (err) {
-                console.error('Failed to load admin directory:', err);
-            }
-        });
+        window.location.replace('/dashboard#admin-overview');
     </script>
+</head>
+<body class="tw-bg-[#060606] tw-text-neutral-100 tw-min-h-screen tw-flex tw-items-center tw-justify-center tw-p-6">
+    <div class="kh-panel-card tw-max-w-md tw-w-full tw-text-center tw-space-y-4 tw-p-8">
+        <div class="tw-w-10 tw-h-10 tw-border-2 tw-border-white/20 tw-border-t-white tw-rounded-full tw-animate-spin tw-mx-auto"></div>
+        <h1 class="tw-text-lg tw-font-bold tw-text-white">Redirecting to KineticHost Control Plane...</h1>
+        <p class="tw-text-xs tw-text-neutral-400">
+            If you are not redirected automatically, <a href="/dashboard#admin-overview" class="tw-text-white tw-underline hover:tw-text-neutral-200">click here to open the Administrator Control Plane</a>.
+        </p>
+    </div>
 </body>
 </html>

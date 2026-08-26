@@ -285,6 +285,10 @@ router.post('/:id/stop', requireAuth, requireServerAccess, powerLimiter, async (
 router.post('/:id/restart', requireAuth, requireServerAccess, powerLimiter, async (req, res) => {
   try {
     const result = await processManager.restartServer(req.server.id);
+    db.prepare(`
+      INSERT INTO activity_logs (user_id, server_id, action, details, created_at)
+      VALUES (?, ?, 'server_restarted', 'Server process restarted', datetime('now'))
+    `).run(req.session.user.id, req.server.id);
     return res.json({ success: true, message: 'Server restarting...', result });
   } catch (err) {
     return res.status(400).json({ success: false, error: err.message });
@@ -295,6 +299,10 @@ router.post('/:id/restart', requireAuth, requireServerAccess, powerLimiter, asyn
 router.post('/:id/kill', requireAuth, requireServerAccess, powerLimiter, async (req, res) => {
   try {
     const result = await processManager.killServer(req.server.id);
+    db.prepare(`
+      INSERT INTO activity_logs (user_id, server_id, action, details, created_at)
+      VALUES (?, ?, 'server_killed', 'Server process terminated (SIGKILL)', datetime('now'))
+    `).run(req.session.user.id, req.server.id);
     return res.json({ success: true, message: 'Server killed.', result });
   } catch (err) {
     return res.status(400).json({ success: false, error: err.message });
