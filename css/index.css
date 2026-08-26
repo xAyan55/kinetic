@@ -922,6 +922,11 @@ header.kh-nav-header.kh-header-scrolled {
     animation: kh-modal-fade 0.2s ease forwards;
 }
 
+.kh-modal-backdrop.tw-hidden,
+.tw-hidden {
+    display: none !important;
+}
+
 .kh-modal-card {
     background-color: #0b0b0b;
     border: 1px solid rgba(255, 255, 255, 0.12);
