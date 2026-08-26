@@ -4,6 +4,7 @@ const path = require('path');
 const os = require('os');
 const EventEmitter = require('events');
 const { db } = require('./db');
+const { resolveJavaRuntime } = require('./java-runtime');
 
 class ProcessManager extends EventEmitter {
   constructor() {
@@ -131,8 +132,18 @@ class ProcessManager extends EventEmitter {
     const server = db.prepare('SELECT * FROM servers WHERE id = ?').get(serverId);
     if (!server) throw new Error('Server not found');
 
-    const java = this.detectJava();
-    if (!java.path) {
+    // Dynamically resolve appropriate Java runtime for this server's software and version
+    let runtimePath = server.java_path;
+    if (!runtimePath || !fs.existsSync(runtimePath)) {
+      const resolved = resolveJavaRuntime({
+        softwareType: server.software_type || server.software,
+        version: server.version,
+        javaRequirement: server.java_version
+      });
+      runtimePath = resolved.javaPath;
+    }
+
+    if (!runtimePath) {
       throw new Error('Java runtime is not installed on this host. Please contact the administrator.');
     }
 
@@ -181,9 +192,9 @@ class ProcessManager extends EventEmitter {
       'nogui'
     ];
 
-    this.appendLog(serverId, `[KineticHost] Spawning process: ${java.path} ${args.join(' ')}`);
+    this.appendLog(serverId, `[KineticHost] Spawning process: ${runtimePath} ${args.join(' ')}`);
 
-    const child = spawn(java.path, args, {
+    const child = spawn(runtimePath, args, {
       cwd: serverDir,
       stdio: ['pipe', 'pipe', 'pipe'],
       detached: false

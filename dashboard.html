@@ -279,37 +279,108 @@
                                 </div>
                             </div>
 
-                            <!-- SECTION 2: SERVER SOFTWARE -->
+                            <!-- SECTION 2: SERVER SOFTWARE (DYNAMIC MCJARS CATALOG) -->
                             <div class="kh-panel-card tw-space-y-4">
-                                <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
+                                <div class="tw-flex tw-flex-col sm:tw-flex-row sm:tw-items-center sm:tw-justify-between tw-gap-2 tw-border-b tw-border-white/[0.08] tw-pb-3">
                                     <div class="tw-flex tw-items-center tw-gap-2.5">
                                         <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">2</span>
                                         <h3 class="tw-text-base tw-font-bold tw-text-white">Server Software Engine</h3>
                                     </div>
-                                    <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Supported by Daemon</span>
+                                    <span id="software-count-badge" class="tw-text-[11px] tw-font-mono tw-text-neutral-400">Powered by MCJars</span>
                                 </div>
 
-                                <div id="page-software-selector" class="kh-software-grid">
-                                    <!-- Dynamically Populated -->
+                                <!-- Category Filter Pills -->
+                                <div class="tw-flex tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-pb-1" id="software-category-pills">
+                                    <button type="button" class="kh-category-pill active" data-category="ALL" onclick="filterSoftwareCategory('ALL')">All Software</button>
+                                    <button type="button" class="kh-category-pill" data-category="Official / Vanilla" onclick="filterSoftwareCategory('Official / Vanilla')">Official</button>
+                                    <button type="button" class="kh-category-pill" data-category="Performance" onclick="filterSoftwareCategory('Performance')">Performance</button>
+                                    <button type="button" class="kh-category-pill" data-category="Modded" onclick="filterSoftwareCategory('Modded')">Modded</button>
+                                    <button type="button" class="kh-category-pill" data-category="Hybrid" onclick="filterSoftwareCategory('Hybrid')">Hybrid</button>
+                                    <button type="button" class="kh-category-pill" data-category="Proxy" onclick="filterSoftwareCategory('Proxy')">Proxy</button>
+                                    <button type="button" class="kh-category-pill" data-category="Limbo / Special" onclick="filterSoftwareCategory('Limbo / Special')">Limbo</button>
                                 </div>
-                                <input type="hidden" id="page-create-software" value="paper">
+
+                                <!-- Software Search Input -->
+                                <div class="tw-relative">
+                                    <i class="bi bi-search tw-absolute tw-left-3.5 tw-top-1/2 -tw-translate-y-1/2 tw-text-neutral-500 tw-text-xs"></i>
+                                    <input type="text" id="software-search-input" placeholder="Search 28+ server software (e.g. Paper, Fabric, Purpur, Velocity, Forge)..." oninput="handleSoftwareSearch(event)" class="kh-field-input tw-pl-9 tw-text-xs" autocomplete="off">
+                                </div>
+
+                                <!-- Dynamic Software Cards Grid -->
+                                <div id="page-software-selector" class="kh-software-grid">
+                                    <!-- Dynamically Populated via js/dashboard.js -->
+                                </div>
+                                <input type="hidden" id="page-create-software" value="PAPER">
                             </div>
 
-                            <!-- SECTION 3: MINECRAFT VERSION -->
+                            <!-- SECTION 3: MINECRAFT VERSION & BUILD SELECTION -->
                             <div class="kh-panel-card tw-space-y-4">
                                 <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
                                     <div class="tw-flex tw-items-center tw-gap-2.5">
                                         <span class="tw-w-6 tw-h-6 tw-rounded-md tw-bg-white/10 tw-border tw-border-white/20 tw-flex tw-items-center tw-justify-center tw-text-xs tw-font-mono tw-font-bold tw-text-white">3</span>
-                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Minecraft Version</h3>
+                                        <h3 class="tw-text-base tw-font-bold tw-text-white">Minecraft Version &amp; Build</h3>
                                     </div>
-                                    <span class="tw-text-[11px] tw-font-mono tw-text-neutral-500">Official Releases</span>
+                                    <div id="java-runtime-badge" class="tw-text-[11px] tw-font-mono tw-text-emerald-400 tw-px-2 tw-py-0.5 tw-rounded tw-bg-emerald-500/10 tw-border tw-border-emerald-500/20">
+                                        Java 21 Detected
+                                    </div>
                                 </div>
 
+                                <!-- Typable Version Input with Autocomplete Datalist -->
                                 <div class="kh-field-group">
-                                    <label class="kh-field-label" for="page-create-version">Select Target Release</label>
-                                    <select id="page-create-version" class="kh-field-input tw-font-mono tw-text-xs">
-                                        <!-- Dynamically updated based on selected software -->
-                                    </select>
+                                    <div class="tw-flex tw-items-center tw-justify-between">
+                                        <label class="kh-field-label" for="page-create-version">Minecraft Version (Typable / Searchable)</label>
+                                        <span id="version-loading-indicator" class="tw-hidden tw-text-[10px] tw-font-mono tw-text-neutral-500">
+                                            <i class="bi bi-arrow-repeat tw-animate-spin tw-mr-1"></i> Updating builds...
+                                        </span>
+                                    </div>
+                                    <div class="tw-relative">
+                                        <input type="text" id="page-create-version" list="mc-versions-datalist" placeholder="Type or select version (e.g. 1.20.4, 1.16.5, 26.2, latest)..." oninput="handleVersionTyping(event)" class="kh-field-input tw-font-mono tw-text-xs" autocomplete="off" required>
+                                        <datalist id="mc-versions-datalist">
+                                            <!-- Dynamically filled options -->
+                                        </datalist>
+                                    </div>
+                                    <!-- Quick Select Version Pills -->
+                                    <div class="tw-flex tw-flex-wrap tw-items-center tw-gap-1.5 tw-mt-2" id="version-quick-pills">
+                                        <!-- Dynamically Populated -->
+                                    </div>
+                                </div>
+
+                                <!-- Build Selection Mode (Latest vs Specific Build) -->
+                                <div class="kh-field-group tw-pt-2 tw-border-t tw-border-white/[0.06]">
+                                    <div class="tw-flex tw-items-center tw-justify-between tw-mb-2">
+                                        <label class="kh-field-label tw-mb-0">Build Stream</label>
+                                        <div class="tw-flex tw-items-center tw-gap-2">
+                                            <button type="button" id="btn-build-mode-latest" onclick="setBuildMode('latest')" class="tw-text-xs tw-font-mono tw-px-2.5 tw-py-1 tw-rounded-lg tw-bg-white tw-text-black tw-font-bold tw-transition-all">
+                                                Latest Build
+                                            </button>
+                                            <button type="button" id="btn-build-mode-specific" onclick="setBuildMode('specific')" class="tw-text-xs tw-font-mono tw-px-2.5 tw-py-1 tw-rounded-lg tw-bg-white/[0.05] tw-text-neutral-400 hover:tw-text-white tw-border tw-border-white/10 tw-transition-all">
+                                                Specific Build
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Latest Build Preview Box -->
+                                    <div id="latest-build-preview" class="tw-p-3.5 tw-rounded-xl tw-bg-white/[0.02] tw-border tw-border-white/[0.06] tw-flex tw-items-center tw-justify-between">
+                                        <div class="tw-flex tw-items-center tw-gap-3">
+                                            <div class="tw-w-8 tw-h-8 tw-rounded-lg tw-bg-emerald-500/10 tw-border tw-border-emerald-500/20 tw-flex tw-items-center tw-justify-center tw-text-emerald-400">
+                                                <i class="bi bi-check2-circle"></i>
+                                            </div>
+                                            <div>
+                                                <div id="latest-build-name" class="tw-text-xs tw-font-bold tw-text-white">Build #latest</div>
+                                                <div id="latest-build-desc" class="tw-text-[11px] tw-text-neutral-400">Recommended stable release build from upstream.</div>
+                                            </div>
+                                        </div>
+                                        <span class="tw-text-[11px] tw-font-mono tw-text-emerald-400 tw-font-semibold">Recommended</span>
+                                    </div>
+
+                                    <!-- Specific Build Picker Container (Hidden by default) -->
+                                    <div id="specific-build-picker" class="tw-hidden tw-space-y-2 tw-mt-2">
+                                        <div class="tw-max-h-48 tw-overflow-y-auto tw-space-y-1.5 tw-pr-1" id="specific-builds-list">
+                                            <!-- Dynamically populated -->
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="page-create-build-uuid" value="">
                                 </div>
                             </div>
 
@@ -432,6 +503,14 @@
                                 <div class="kh-summary-item">
                                     <span class="kh-summary-label">Version</span>
                                     <span id="summary-version" class="kh-summary-value">1.20.4</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Target Build</span>
+                                    <span id="summary-build" class="kh-summary-value tw-text-emerald-400">#latest</span>
+                                </div>
+                                <div class="kh-summary-item">
+                                    <span class="kh-summary-label">Java Runtime</span>
+                                    <span id="summary-java" class="kh-summary-value">Java 21</span>
                                 </div>
                                 <div class="kh-summary-item">
                                     <span class="kh-summary-label">Allocated RAM</span>

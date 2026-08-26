@@ -74,6 +74,7 @@ function requireAdmin(req, res, next) {
 app.use('/api/auth', require('./server/routes/auth'));
 app.use('/api/account', require('./server/routes/account'));
 app.use('/api/servers', require('./server/routes/servers'));
+app.use('/api/mcjars', require('./server/routes/mcjars'));
 app.use('/api/admin', require('./server/routes/admin'));
 
 // Public Static Assets (CSS, JS, Assets, Auth)

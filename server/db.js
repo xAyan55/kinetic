@@ -223,6 +223,45 @@ function runMigrations() {
           dbInstance.exec("ALTER TABLE users ADD COLUMN avatar_url TEXT DEFAULT 'assets/images/control-panel/avatar-1.png'");
         }
       }
+    },
+    {
+      version: 5,
+      name: 'mcjars_dynamic_software_integration',
+      up: (dbInstance) => {
+        const serverCols = dbInstance.prepare("PRAGMA table_info(servers)").all().map(c => c.name);
+        
+        const newCols = [
+          ['software_type', "TEXT DEFAULT 'PAPER'"],
+          ['software_name', "TEXT DEFAULT 'PaperMC'"],
+          ['build', "TEXT DEFAULT '#latest'"],
+          ['build_uuid', 'TEXT'],
+          ['artifact_url', 'TEXT'],
+          ['artifact_type', "TEXT DEFAULT 'jar'"],
+          ['artifact_sha256', 'TEXT'],
+          ['java_version', 'INTEGER DEFAULT 21'],
+          ['java_path', 'TEXT'],
+          ['installation_status', "TEXT DEFAULT 'completed'"],
+          ['installation_error', 'TEXT']
+        ];
+
+        for (const [colName, colDef] of newCols) {
+          if (!serverCols.includes(colName)) {
+            dbInstance.exec(`ALTER TABLE servers ADD COLUMN ${colName} ${colDef}`);
+          }
+        }
+
+        // Backfill legacy server records
+        dbInstance.exec(`
+          UPDATE servers
+          SET software_type = UPPER(software),
+              software_name = CASE 
+                WHEN LOWER(software) = 'paper' THEN 'PaperMC'
+                WHEN LOWER(software) = 'vanilla' THEN 'Vanilla Mojang'
+                ELSE UPPER(software)
+              END
+          WHERE software_type IS NULL OR software_type = ''
+        `);
+      }
     }
   ];
 

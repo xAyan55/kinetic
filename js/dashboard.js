@@ -471,6 +471,8 @@ async function loadUserServers() {
         ? `${s.disk_used_mb} MB`
         : (s.storage_limit_mb ? `${(s.storage_limit_mb / 1024).toFixed(0)} GB Quota` : '25 GB Quota');
 
+      const softwareLabel = `${s.software_name || s.software} ${s.version}${s.build && s.build !== '#latest' ? ` (${s.build})` : ''}`;
+
       return `
         <div class="kh-panel-card interactive tw-flex tw-flex-col tw-justify-between">
           <div>
@@ -480,8 +482,8 @@ async function loadUserServers() {
                 <span class="kh-status-dot"></span>
                 <span>${s.status.toUpperCase()}</span>
               </span>
-              <span class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-white/[0.04] tw-border tw-border-white/[0.06] tw-text-xs tw-font-mono tw-text-neutral-400">
-                ${escapeHtml(s.software)} ${escapeHtml(s.version)}
+              <span class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-white/[0.04] tw-border tw-border-white/[0.06] tw-text-xs tw-font-mono tw-text-neutral-400" title="Engine: ${escapeHtml(softwareLabel)}">
+                ${escapeHtml(softwareLabel)}
               </span>
             </div>
 
@@ -591,7 +593,10 @@ async function loadServerDetail(serverId) {
 
 function renderServerHeader(s) {
   document.getElementById('detail-server-name').textContent = s.name;
-  document.getElementById('detail-server-software').textContent = `${s.software} ${s.version}`;
+  const swName = s.software_name || s.software || 'Minecraft';
+  const buildInfo = s.build && s.build !== '#latest' ? ` (${s.build})` : '';
+  const javaInfo = s.java_version ? ` • Java ${s.java_version}` : '';
+  document.getElementById('detail-server-software').textContent = `${swName} ${s.version}${buildInfo}${javaInfo}`;
   document.getElementById('detail-server-address').textContent = s.public_connection;
 
   const isOnline = s.status === 'running';
@@ -1055,97 +1060,125 @@ async function loadServerCreate() {
   await loadServerCreationSoftware();
 }
 
+let availableSoftwareList = [];
+let selectedSoftwareCategory = 'ALL';
+let softwareSearchQuery = '';
+let selectedSoftwareEngine = 'PAPER';
+let currentSoftwareVersions = [];
+let currentBuildMode = 'latest'; // 'latest' | 'specific'
+let currentBuildsList = [];
+let selectedBuildUuid = '';
+let mcjarsAbortController = null;
+let versionTypingDebounceTimer = null;
+
 async function loadServerCreationSoftware() {
   const container = document.getElementById('page-software-selector');
+  const countBadge = document.getElementById('software-count-badge');
   if (!container) return;
 
   container.innerHTML = `
-    <div class="tw-p-6 tw-text-center tw-text-xs tw-font-mono tw-text-neutral-500 tw-col-span-2">
-      <div class="tw-w-5 tw-h-5 tw-border-2 tw-border-white/20 tw-border-t-white tw-rounded-full tw-animate-spin tw-mx-auto tw-mb-2"></div>
-      Querying daemon installer metadata...
+    <div class="tw-p-8 tw-text-center tw-text-xs tw-font-mono tw-text-neutral-500 tw-col-span-2 md:tw-col-span-3">
+      <div class="tw-w-6 tw-h-6 tw-border-2 tw-border-white/20 tw-border-t-white tw-rounded-full tw-animate-spin tw-mx-auto tw-mb-2.5"></div>
+      Discovering live server software from MCJars catalog...
     </div>
   `;
 
   try {
-    const res = await fetch('/api/servers/software');
+    const res = await fetch('/api/mcjars/types');
     const data = await res.json();
 
-    if (data.success && data.software && data.software.length > 0) {
-      availableSoftwareList = data.software;
+    if (data.success && Array.isArray(data.types) && data.types.length > 0) {
+      availableSoftwareList = data.types;
     } else {
-      availableSoftwareList = [
-        {
-          id: 'paper',
-          name: 'PaperMC',
-          tagline: 'High Performance & Plugins',
-          description: 'Optimized Minecraft server software with Spigot/Bukkit plugin compatibility and high tick rate performance.',
-          recommended: true,
-          badge: 'RECOMMENDED',
-          versions: ['1.20.4', '1.20.2', '1.19.4'],
-          defaultVersion: '1.20.4'
-        },
-        {
-          id: 'vanilla',
-          name: 'Vanilla Mojang',
-          tagline: 'Official Minecraft Server',
-          description: 'Official Mojang server software for standard pure vanilla gameplay without modifications.',
-          recommended: false,
-          badge: 'OFFICIAL',
-          versions: ['1.20.4', '1.20.2', '1.19.4'],
-          defaultVersion: '1.20.4'
-        }
-      ];
+      throw new Error(data.error || 'No software types returned from MCJars');
     }
   } catch (e) {
-    availableSoftwareList = [
-      {
-        id: 'paper',
-        name: 'PaperMC',
-        tagline: 'High Performance & Plugins',
-        description: 'Optimized Minecraft server software with Spigot/Bukkit plugin compatibility and high tick rate performance.',
-        recommended: true,
-        badge: 'RECOMMENDED',
-        versions: ['1.20.4', '1.20.2', '1.19.4'],
-        defaultVersion: '1.20.4'
-      },
-      {
-        id: 'vanilla',
-        name: 'Vanilla Mojang',
-        tagline: 'Official Minecraft Server',
-        description: 'Official Mojang server software for standard pure vanilla gameplay without modifications.',
-        recommended: false,
-        badge: 'OFFICIAL',
-        versions: ['1.20.4', '1.20.2', '1.19.4'],
-        defaultVersion: '1.20.4'
+    console.warn('[MCJars] Failed to load /api/mcjars/types, attempting fallback:', e.message);
+    try {
+      const fbRes = await fetch('/api/servers/software');
+      const fbData = await fbRes.json();
+      if (fbData.success && fbData.software) {
+        availableSoftwareList = fbData.software;
       }
-    ];
+    } catch (fbErr) {
+      console.error('[MCJars] Fallback failed:', fbErr);
+    }
   }
 
-  selectedSoftwareEngine = availableSoftwareList[0].id;
+  if (countBadge) {
+    countBadge.textContent = `${availableSoftwareList.length} Software Available`;
+  }
+
+  // Pre-select Paper or first available
+  const paper = availableSoftwareList.find(s => s.id === 'PAPER');
+  selectedSoftwareEngine = paper ? 'PAPER' : (availableSoftwareList[0]?.id || 'PAPER');
+
   renderSoftwareEngineCards();
-  populateVersionOptions();
+  await loadSoftwareVersions(selectedSoftwareEngine);
+}
+
+function filterSoftwareCategory(category) {
+  selectedSoftwareCategory = category;
+  document.querySelectorAll('#software-category-pills .kh-category-pill').forEach(btn => {
+    if (btn.dataset.category === category) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+  renderSoftwareEngineCards();
+}
+
+function handleSoftwareSearch(e) {
+  softwareSearchQuery = (e.target.value || '').toLowerCase().trim();
+  renderSoftwareEngineCards();
 }
 
 function renderSoftwareEngineCards() {
   const container = document.getElementById('page-software-selector');
   if (!container) return;
 
-  container.innerHTML = availableSoftwareList.map(sw => {
+  const filtered = availableSoftwareList.filter(sw => {
+    // Category check
+    if (selectedSoftwareCategory !== 'ALL' && sw.category !== selectedSoftwareCategory) {
+      return false;
+    }
+    // Search query check
+    if (softwareSearchQuery) {
+      const matchName = sw.name.toLowerCase().includes(softwareSearchQuery);
+      const matchDesc = (sw.description || '').toLowerCase().includes(softwareSearchQuery);
+      const matchId = sw.id.toLowerCase().includes(softwareSearchQuery);
+      return matchName || matchDesc || matchId;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `
+      <div class="tw-p-8 tw-text-center tw-text-xs tw-font-mono tw-text-neutral-500 tw-col-span-2 md:tw-col-span-3">
+        <i class="bi bi-search tw-text-xl tw-mb-2 tw-block tw-text-neutral-600"></i>
+        No server software found matching "${escapeHtml(softwareSearchQuery)}" in ${escapeHtml(selectedSoftwareCategory)}.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = filtered.map(sw => {
     const isSelected = sw.id === selectedSoftwareEngine;
-    const iconClass = sw.id === 'paper' ? 'bi-lightning-charge-fill' : 'bi-box-seam-fill';
+    const badgeText = sw.badge || (sw.recommended ? 'RECOMMENDED' : (sw.experimental ? 'EXPERIMENTAL' : (sw.deprecated ? 'DEPRECATED' : '')));
 
     return `
       <div class="kh-software-card ${isSelected ? 'active' : ''}" onclick="selectSoftwareEngine('${sw.id}')">
-        ${sw.badge ? `<span class="kh-card-badge">${sw.badge}</span>` : ''}
+        ${badgeText ? `<span class="kh-card-badge">${badgeText}</span>` : ''}
         <div>
-          <div class="tw-w-10 tw-h-10 tw-rounded-xl tw-bg-white/[0.06] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-text-lg tw-text-white tw-mb-3">
-            <i class="bi ${iconClass}"></i>
+          <div class="tw-w-10 tw-h-10 tw-rounded-xl tw-bg-white/[0.06] tw-border tw-border-white/10 tw-flex tw-items-center tw-justify-center tw-p-2 tw-mb-3">
+            <img src="${escapeHtml(sw.icon)}" alt="${escapeHtml(sw.name)}" class="tw-w-full tw-h-full tw-object-contain" onerror="this.onerror=null; this.src='assets/logo/kinetic.png';">
           </div>
-          <h4 class="tw-text-base tw-font-bold tw-text-white">${escapeHtml(sw.name)}</h4>
-          <p class="tw-text-xs tw-text-neutral-400 tw-mt-1 tw-leading-relaxed">${escapeHtml(sw.description)}</p>
+          <h4 class="tw-text-sm tw-font-bold tw-text-white tw-truncate">${escapeHtml(sw.name)}</h4>
+          <p class="tw-text-xs tw-text-neutral-400 tw-mt-1 tw-leading-relaxed tw-line-clamp-2">${escapeHtml(sw.description)}</p>
         </div>
-        <div class="tw-mt-4 tw-pt-3 tw-border-t tw-border-white/[0.06] tw-flex tw-items-center tw-justify-between tw-text-[11px] tw-font-mono">
-          <span class="tw-text-neutral-500">${sw.versions.length} versions</span>
+        <div class="tw-mt-3 tw-pt-2.5 tw-border-t tw-border-white/[0.06] tw-flex tw-items-center tw-justify-between tw-text-[11px] tw-font-mono">
+          <span class="tw-text-neutral-500">${sw.category}</span>
           <span class="tw-text-white tw-font-semibold">${isSelected ? '✓ Selected' : 'Select'}</span>
         </div>
       </div>
@@ -1153,8 +1186,10 @@ function renderSoftwareEngineCards() {
   }).join('');
 }
 
-function selectSoftwareEngine(engineId) {
+async function selectSoftwareEngine(engineId) {
+  if (selectedSoftwareEngine === engineId) return;
   selectedSoftwareEngine = engineId;
+
   const input = document.getElementById('page-create-software');
   if (input) input.value = engineId;
 
@@ -1165,37 +1200,240 @@ function selectSoftwareEngine(engineId) {
   }
 
   renderSoftwareEngineCards();
-  populateVersionOptions();
+  await loadSoftwareVersions(engineId);
 }
 
-function populateVersionOptions() {
-  const versionSelect = document.getElementById('page-create-version');
-  const summaryVersion = document.getElementById('summary-version');
-  const currentSw = availableSoftwareList.find(s => s.id === selectedSoftwareEngine);
+async function loadSoftwareVersions(typeId) {
+  const versionInput = document.getElementById('page-create-version');
+  const datalist = document.getElementById('mc-versions-datalist');
+  const pillsContainer = document.getElementById('version-quick-pills');
+  const indicator = document.getElementById('version-loading-indicator');
 
-  if (!versionSelect || !currentSw) return;
+  if (indicator) indicator.classList.remove('tw-hidden');
 
-  versionSelect.innerHTML = currentSw.versions.map((v, i) => `
-    <option value="${v}" ${i === 0 ? 'selected' : ''}>
-      ${v} ${i === 0 ? '(Latest Stable)' : ''}
-    </option>
-  `).join('');
+  // Cancel previous in-flight request
+  if (mcjarsAbortController) {
+    mcjarsAbortController.abort();
+  }
+  mcjarsAbortController = new AbortController();
 
-  if (summaryVersion) {
-    summaryVersion.textContent = currentSw.versions[0] || '1.20.4';
+  try {
+    const res = await fetch(`/api/mcjars/types/${encodeURIComponent(typeId)}/versions`, {
+      signal: mcjarsAbortController.signal
+    });
+    const data = await res.json();
+
+    if (data.success && Array.isArray(data.versions) && data.versions.length > 0) {
+      currentSoftwareVersions = data.versions;
+    } else {
+      currentSoftwareVersions = [{ id: '1.20.4', version: '1.20.4', java: 17 }];
+    }
+  } catch (err) {
+    if (err.name === 'AbortError') return;
+    console.error('[MCJars] Version fetch error:', err);
+    currentSoftwareVersions = [{ id: '1.20.4', version: '1.20.4', java: 17 }];
+  } finally {
+    if (indicator) indicator.classList.add('tw-hidden');
   }
 
-  versionSelect.onchange = () => {
-    if (summaryVersion) summaryVersion.textContent = versionSelect.value;
-  };
+  // Populate datalist
+  if (datalist) {
+    datalist.innerHTML = currentSoftwareVersions.map(v => `
+      <option value="${v.id}">${v.id} ${v.type ? `(${v.type})` : ''} - Java ${v.java || 21}</option>
+    `).join('');
+  }
+
+  // Populate Quick Select Pills (top 6 releases)
+  if (pillsContainer) {
+    const quickList = currentSoftwareVersions.slice(0, 6);
+    pillsContainer.innerHTML = quickList.map((v, i) => `
+      <button type="button" onclick="setTypedVersion('${v.id}')" class="tw-px-2.5 tw-py-0.5 tw-rounded-full tw-bg-white/[0.04] hover:tw-bg-white/[0.1] tw-border tw-border-white/10 tw-text-[11px] tw-font-mono tw-text-neutral-300 hover:tw-text-white tw-transition-colors">
+        ${v.id} ${i === 0 ? '<span class="tw-text-emerald-400 font-bold">• Latest</span>' : ''}
+      </button>
+    `).join('');
+  }
+
+  // Select initial version: 1.20.4 if available, otherwise first release
+  const defaultVer = currentSoftwareVersions.find(v => v.id === '1.20.4')?.id || currentSoftwareVersions[0]?.id || '1.20.4';
+  if (versionInput) {
+    versionInput.value = defaultVer;
+  }
+
+  await updateVersionAndBuildDetails(typeId, defaultVer);
+}
+
+function setTypedVersion(versionStr) {
+  const versionInput = document.getElementById('page-create-version');
+  if (versionInput) {
+    versionInput.value = versionStr;
+  }
+  updateVersionAndBuildDetails(selectedSoftwareEngine, versionStr);
+}
+
+function handleVersionTyping(e) {
+  const typed = (e.target.value || '').trim();
+  const summaryVersion = document.getElementById('summary-version');
+  if (summaryVersion) summaryVersion.textContent = typed || 'Custom';
+
+  clearTimeout(versionTypingDebounceTimer);
+  versionTypingDebounceTimer = setTimeout(() => {
+    if (typed) {
+      updateVersionAndBuildDetails(selectedSoftwareEngine, typed);
+    }
+  }, 250);
+}
+
+async function updateVersionAndBuildDetails(typeId, version) {
+  const summaryVersion = document.getElementById('summary-version');
+  const summaryBuild = document.getElementById('summary-build');
+  const summaryJava = document.getElementById('summary-java');
+  const javaBadge = document.getElementById('java-runtime-badge');
+  const latestBuildName = document.getElementById('latest-build-name');
+  const latestBuildDesc = document.getElementById('latest-build-desc');
+  const buildUuidInput = document.getElementById('page-create-build-uuid');
+
+  if (summaryVersion) summaryVersion.textContent = version;
+
+  try {
+    const res = await fetch(`/api/mcjars/types/${encodeURIComponent(typeId)}/versions/${encodeURIComponent(version)}/latest`);
+    const data = await res.json();
+
+    if (data.success && data.build) {
+      const buildName = data.build.name || '#latest';
+      const javaInfo = data.java || { requiredVersion: 21, explanation: 'Java 21 Required' };
+
+      if (latestBuildName) latestBuildName.textContent = `Build ${buildName}`;
+      if (latestBuildDesc) {
+        const createdDate = data.build.created ? new Date(data.build.created).toLocaleDateString() : 'Recent';
+        latestBuildDesc.textContent = `Upstream release (${createdDate}) • ${javaInfo.explanation}`;
+      }
+
+      if (currentBuildMode === 'latest') {
+        if (buildUuidInput) buildUuidInput.value = data.build.uuid || '';
+        if (summaryBuild) summaryBuild.textContent = buildName;
+      }
+
+      if (summaryJava) summaryJava.textContent = `Java ${javaInfo.requiredVersion || 21}`;
+      if (javaBadge) {
+        javaBadge.textContent = `Java ${javaInfo.requiredVersion || 21} Required`;
+        javaBadge.className = `tw-text-[11px] tw-font-mono tw-px-2 tw-py-0.5 tw-rounded ${javaInfo.isExactMatch ? 'tw-text-emerald-400 tw-bg-emerald-500/10 tw-border tw-border-emerald-500/20' : 'tw-text-yellow-400 tw-bg-yellow-500/10 tw-border tw-border-yellow-500/20'}`;
+      }
+    }
+  } catch (err) {
+    console.warn('[MCJars] Latest build lookup error:', err);
+  }
+
+  if (currentBuildMode === 'specific') {
+    await loadSpecificBuildsList(typeId, version);
+  }
+}
+
+function setBuildMode(mode) {
+  currentBuildMode = mode;
+  const btnLatest = document.getElementById('btn-build-mode-latest');
+  const btnSpecific = document.getElementById('btn-build-mode-specific');
+  const latestPreview = document.getElementById('latest-build-preview');
+  const specificPicker = document.getElementById('specific-build-picker');
+
+  if (mode === 'latest') {
+    btnLatest.className = 'tw-text-xs tw-font-mono tw-px-2.5 tw-py-1 tw-rounded-lg tw-bg-white tw-text-black tw-font-bold tw-transition-all';
+    btnSpecific.className = 'tw-text-xs tw-font-mono tw-px-2.5 tw-py-1 tw-rounded-lg tw-bg-white/[0.05] tw-text-neutral-400 hover:tw-text-white tw-border tw-border-white/10 tw-transition-all';
+    latestPreview.classList.remove('tw-hidden');
+    specificPicker.classList.add('tw-hidden');
+
+    const version = document.getElementById('page-create-version')?.value || '1.20.4';
+    updateVersionAndBuildDetails(selectedSoftwareEngine, version);
+  } else {
+    btnSpecific.className = 'tw-text-xs tw-font-mono tw-px-2.5 tw-py-1 tw-rounded-lg tw-bg-white tw-text-black tw-font-bold tw-transition-all';
+    btnLatest.className = 'tw-text-xs tw-font-mono tw-px-2.5 tw-py-1 tw-rounded-lg tw-bg-white/[0.05] tw-text-neutral-400 hover:tw-text-white tw-border tw-border-white/10 tw-transition-all';
+    latestPreview.classList.add('tw-hidden');
+    specificPicker.classList.remove('tw-hidden');
+
+    const version = document.getElementById('page-create-version')?.value || '1.20.4';
+    loadSpecificBuildsList(selectedSoftwareEngine, version);
+  }
+}
+
+async function loadSpecificBuildsList(typeId, version) {
+  const container = document.getElementById('specific-builds-list');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div class="tw-p-4 tw-text-center tw-text-xs tw-font-mono tw-text-neutral-500">
+      <div class="tw-w-4 tw-h-4 tw-border-2 tw-border-white/20 tw-border-t-white tw-rounded-full tw-animate-spin tw-mx-auto tw-mb-1.5"></div>
+      Querying builds from MCJars...
+    </div>
+  `;
+
+  try {
+    const res = await fetch(`/api/mcjars/types/${encodeURIComponent(typeId)}/versions/${encodeURIComponent(version)}/builds`);
+    const data = await res.json();
+
+    if (data.success && Array.isArray(data.builds) && data.builds.length > 0) {
+      currentBuildsList = data.builds;
+
+      container.innerHTML = currentBuildsList.map((b, i) => {
+        const isSelected = selectedBuildUuid === b.uuid || (!selectedBuildUuid && i === 0);
+        if (isSelected && !selectedBuildUuid) {
+          selectedBuildUuid = b.uuid;
+          document.getElementById('page-create-build-uuid').value = b.uuid;
+        }
+
+        const dateStr = b.created ? new Date(b.created).toLocaleDateString() : '';
+        const sizeMb = b.jarSize ? `${(b.jarSize / 1048576).toFixed(1)} MB` : '';
+
+        return `
+          <div class="kh-build-card ${isSelected ? 'active' : ''}" onclick="selectSpecificBuild('${b.uuid}', '${escapeHtml(b.name)}')">
+            <div class="tw-flex tw-items-center tw-justify-between">
+              <div class="tw-flex tw-items-center tw-gap-2">
+                <span class="tw-font-mono tw-text-xs tw-font-bold tw-text-white">${escapeHtml(b.name)}</span>
+                ${b.experimental ? '<span class="tw-text-[9px] tw-font-mono tw-px-1.5 tw-py-0.2 tw-rounded tw-bg-purple-500/20 tw-text-purple-300">EXP</span>' : ''}
+              </div>
+              <span class="tw-font-mono tw-text-[10px] tw-text-neutral-400">${dateStr} ${sizeMb ? `• ${sizeMb}` : ''}</span>
+            </div>
+            ${b.changes && b.changes.length > 0 ? `
+              <div class="tw-text-[11px] tw-text-neutral-400 tw-mt-1 tw-truncate font-mono">${escapeHtml(b.changes[0])}</div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    } else {
+      container.innerHTML = `
+        <div class="tw-p-4 tw-text-center tw-text-xs tw-font-mono tw-text-neutral-500">
+          No individual builds list available for this version. Using latest build.
+        </div>
+      `;
+    }
+  } catch (err) {
+    container.innerHTML = `
+      <div class="tw-p-4 tw-text-center tw-text-xs tw-font-mono tw-text-red-400">
+        Failed to fetch builds: ${escapeHtml(err.message)}
+      </div>
+    `;
+  }
+}
+
+function selectSpecificBuild(uuid, buildName) {
+  selectedBuildUuid = uuid;
+  const input = document.getElementById('page-create-build-uuid');
+  if (input) input.value = uuid;
+
+  const summaryBuild = document.getElementById('summary-build');
+  if (summaryBuild) summaryBuild.textContent = buildName;
+
+  document.querySelectorAll('#specific-builds-list .kh-build-card').forEach(card => {
+    card.classList.remove('active');
+  });
+  event?.currentTarget?.classList?.add('active');
 }
 
 async function handleServerCreatePageSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('page-create-name').value.trim();
   const ownerId = document.getElementById('page-create-owner').value;
-  const software = document.getElementById('page-create-software').value || selectedSoftwareEngine;
-  const version = document.getElementById('page-create-version').value;
+  const softwareType = selectedSoftwareEngine;
+  const version = document.getElementById('page-create-version').value.trim();
+  const buildUuid = currentBuildMode === 'specific' ? selectedBuildUuid : '';
   const ramMb = document.getElementById('page-create-ram').value;
   const eulaAccepted = document.getElementById('page-create-eula').checked;
 
@@ -1207,28 +1445,41 @@ async function handleServerCreatePageSubmit(e) {
     return;
   }
 
+  if (!version) {
+    showToast('Please specify a Minecraft version.', 'error');
+    return;
+  }
+
   if (!eulaAccepted) {
     showToast('You must agree to the Minecraft EULA to deploy a server.', 'error');
     return;
   }
 
   btnSubmit.disabled = true;
-  btnSubmit.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2"><i class="bi bi-arrow-repeat tw-animate-spin"></i> Provisioning...</span>';
+  btnSubmit.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2"><i class="bi bi-arrow-repeat tw-animate-spin"></i> Deploying...</span>';
   
   statusMsg.classList.remove('tw-hidden');
-  statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2.5 tw-text-neutral-300"><i class="bi bi-arrow-repeat tw-animate-spin tw-text-white"></i> Allocating port, isolated directory, and downloading official JAR binaries...</span>';
+  statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2.5 tw-text-neutral-300"><i class="bi bi-arrow-repeat tw-animate-spin tw-text-white"></i> Resolving MCJars build, verifying SHA256 checksums, and provisioning container...</span>';
 
   try {
     const res = await fetch('/api/servers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, software, version, ramMb: parseInt(ramMb, 10), eulaAccepted, ownerId })
+      body: JSON.stringify({
+        name,
+        softwareType,
+        version,
+        buildUuid: buildUuid || undefined,
+        ramMb: parseInt(ramMb, 10),
+        eulaAccepted,
+        ownerId
+      })
     });
     const data = await res.json();
 
     if (data.success && data.server) {
-      statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2 tw-text-emerald-400"><i class="bi bi-check-circle-fill"></i> Instance provisioned successfully! Redirecting to management console...</span>';
-      showToast('Server instance deployed successfully!', 'success');
+      statusMsg.innerHTML = '<span class="tw-flex tw-items-center tw-gap-2 tw-text-emerald-400"><i class="bi bi-check-circle-fill"></i> Server provisioned & verified! Opening management console...</span>';
+      showToast('Minecraft server deployed successfully!', 'success');
       setTimeout(() => {
         window.location.hash = `server/${data.server.id}`;
       }, 500);
@@ -1638,7 +1889,8 @@ function renderAdminServersTable() {
           <div class="tw-text-[11px] tw-font-mono tw-text-neutral-500">${escapeHtml(s.owner_email)}</div>
         </td>
         <td class="tw-font-mono tw-text-xs tw-text-neutral-300">
-          ${escapeHtml(s.software)} ${escapeHtml(s.version)}
+          <div>${escapeHtml(s.software_name || s.software)} ${escapeHtml(s.version)}</div>
+          <div class="tw-text-[10px] tw-text-neutral-500">${escapeHtml(s.build || '#latest')}</div>
         </td>
         <td class="tw-font-mono tw-text-xs text-white">:${s.port}</td>
         <td>

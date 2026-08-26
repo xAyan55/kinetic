@@ -5,7 +5,8 @@ const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 const { db } = require('../db');
 const { processManager } = require('../process-manager');
-const { getInstaller } = require('../installer');
+const { installMCJarsServer, getInstaller } = require('../installer');
+const { mcjars } = require('../mcjars-client');
 const { allocatePort } = require('../port-allocator');
 const { getProcessMetrics, getDirectorySizeMb } = require('../resource-monitor');
 
@@ -38,14 +39,14 @@ function requireServerAccess(req, res, next) {
 
   const user = req.session.user;
   if (server.owner_id !== user.id && user.role !== 'admin') {
-    return res.status(403).json({ success: false, error: 'Access denied: You do not own this server' });
+    return res.status(403).json({ success: false, error: 'Access forbidden: You do not own this server' });
   }
 
   req.server = server;
   next();
 }
 
-// GET /api/servers — List all servers belonging to current user
+// GET /api/servers — Get all servers owned by user (or all servers for admin overview)
 router.get('/', requireAuth, (req, res) => {
   const user = req.session.user;
   let servers;
@@ -90,38 +91,10 @@ router.get('/', requireAuth, (req, res) => {
 // GET /api/servers/software — Dynamic Supported Software Engines & Versions
 router.get('/software', requireAuth, async (req, res) => {
   try {
-    const paperInstaller = getInstaller('paper');
-    const vanillaInstaller = getInstaller('vanilla');
-
-    const [paperVersions, vanillaVersions] = await Promise.all([
-      paperInstaller.getSupportedVersions(),
-      vanillaInstaller.getSupportedVersions()
-    ]);
-
+    const types = await mcjars.getTypes();
     return res.json({
       success: true,
-      software: [
-        {
-          id: 'paper',
-          name: 'PaperMC',
-          tagline: 'High Performance & Plugins',
-          description: 'Optimized Minecraft server software with Spigot/Bukkit plugin compatibility and high tick rate performance.',
-          recommended: true,
-          badge: 'RECOMMENDED',
-          versions: paperVersions,
-          defaultVersion: paperVersions[0]
-        },
-        {
-          id: 'vanilla',
-          name: 'Vanilla Mojang',
-          tagline: 'Official Minecraft Server',
-          description: 'Official Mojang server software for standard pure vanilla gameplay without modifications.',
-          recommended: false,
-          badge: 'OFFICIAL',
-          versions: vanillaVersions,
-          defaultVersion: vanillaVersions[0]
-        }
-      ]
+      software: types
     });
   } catch (err) {
     console.error('[Software Endpoint Error]:', err);
@@ -141,7 +114,18 @@ router.post('/', requireAuth, async (req, res) => {
     });
   }
 
-  const { name, software = 'paper', version = '1.20.4', ramMb = 4096, eulaAccepted, ownerId } = req.body;
+  const {
+    name,
+    softwareType = 'PAPER',
+    software, // legacy fallback
+    version = '1.20.4',
+    buildUuid,
+    ramMb = 4096,
+    eulaAccepted,
+    ownerId
+  } = req.body;
+
+  const targetSoftwareType = (softwareType || software || 'PAPER').toUpperCase();
 
   try {
     // 1. Validate basic input
@@ -165,19 +149,9 @@ router.post('/', requireAuth, async (req, res) => {
       }
     }
 
-    // 3. Validate software & version
-    const installer = getInstaller(software);
-    const supportedVersions = await installer.getSupportedVersions();
-    if (!supportedVersions.includes(version)) {
-      return res.status(400).json({
-        success: false,
-        error: `Version ${version} is not supported for ${software}. Supported: ${supportedVersions.join(', ')}`
-      });
-    }
-
     const requestedRam = Math.max(1024, Math.min(16384, parseInt(ramMb, 10) || 4096));
 
-    // 4. Determine base directory & allocate port
+    // 3. Determine base directory & allocate port
     const settingsDir = db.prepare("SELECT value FROM platform_settings WHERE key = 'servers_base_dir'").get();
     const baseDir = settingsDir ? settingsDir.value : path.join(__dirname, '..', '..', 'data', 'servers');
 
@@ -190,18 +164,18 @@ router.post('/', requireAuth, async (req, res) => {
     const uniqueSlug = `${cleanSlug}-${Date.now().toString(36)}`;
     const eulaTimestamp = new Date().toISOString();
 
-    // 5. Reserve server record in SQLite
+    // 4. Reserve server record in SQLite
     const reserveStmt = db.prepare(`
       INSERT INTO servers (
-        owner_id, node_id, name, slug, software, version, directory,
-        server_jar, port, ram_mb, cpu_limit_percent, storage_limit_mb,
-        auto_start, eula_accepted, eula_accepted_at, status, status_message,
-        created_at, updated_at
+        owner_id, node_id, name, slug, software, software_type, software_name,
+        version, build, directory, server_jar, port, ram_mb, cpu_limit_percent,
+        storage_limit_mb, auto_start, eula_accepted, eula_accepted_at, status,
+        status_message, created_at, updated_at
       ) VALUES (
-        ?, 1, ?, ?, ?, ?, '',
-        'server.jar', ?, ?, 200, 25600,
-        0, 1, ?, 'installing', 'Downloading and installing server files...',
-        datetime('now'), datetime('now')
+        ?, 1, ?, ?, ?, ?, ?,
+        ?, '#latest', '', 'server.jar', ?, ?, 200,
+        25600, 0, 1, ?, 'installing',
+        'Downloading and installing server files...', datetime('now'), datetime('now')
       )
     `);
 
@@ -209,7 +183,9 @@ router.post('/', requireAuth, async (req, res) => {
       targetOwnerId,
       name.trim(),
       uniqueSlug,
-      software.toLowerCase(),
+      targetSoftwareType.toLowerCase(),
+      targetSoftwareType,
+      targetSoftwareType,
       version,
       port,
       requestedRam,
@@ -222,26 +198,58 @@ router.post('/', requireAuth, async (req, res) => {
     // Update directory path in DB
     db.prepare(`UPDATE servers SET directory = ? WHERE id = ?`).run(serverDir, serverId);
 
-    // 6. Perform Installation Workflow
+    // 5. Perform Atomic MCJars Installation
     try {
-      await installer.install(serverDir, version, {
+      const installResult = await installMCJarsServer({
+        serverId,
+        baseDir,
+        finalServerDir: serverDir,
+        softwareType: targetSoftwareType,
+        version,
+        buildUuid,
         port,
         name: name.trim(),
         eulaAcceptedAt: eulaTimestamp
       });
 
-      // Mark as ready / offline
+      // Update server with full MCJars metadata and mark as ready
       db.prepare(`
         UPDATE servers
-        SET status = 'offline', status_message = 'Ready to start', updated_at = datetime('now')
+        SET software_type = ?,
+            software_name = ?,
+            version = ?,
+            build = ?,
+            build_uuid = ?,
+            artifact_url = ?,
+            artifact_type = ?,
+            artifact_sha256 = ?,
+            java_version = ?,
+            java_path = ?,
+            server_jar = ?,
+            status = 'offline',
+            status_message = 'Ready to start',
+            updated_at = datetime('now')
         WHERE id = ?
-      `).run(serverId);
+      `).run(
+        installResult.softwareType,
+        installResult.softwareName,
+        installResult.version,
+        installResult.build,
+        installResult.buildUuid || null,
+        installResult.artifactUrl || null,
+        installResult.artifactType || 'jar',
+        installResult.artifactSha256 || null,
+        installResult.javaVersion || 21,
+        installResult.javaPath || null,
+        installResult.serverJar || 'server.jar',
+        serverId
+      );
 
       // Log audit activity
       db.prepare(`
         INSERT INTO activity_logs (user_id, server_id, action, details, created_at)
         VALUES (?, ?, 'server_created', ?, datetime('now'))
-      `).run(user.id, serverId, `Created ${software} ${version} server "${name}" on port ${port}`);
+      `).run(user.id, serverId, `Created ${installResult.softwareName} ${version} server "${name}" on port ${port}`);
 
       const createdServer = db.prepare('SELECT * FROM servers WHERE id = ?').get(serverId);
       return res.status(201).json({
@@ -251,6 +259,7 @@ router.post('/', requireAuth, async (req, res) => {
       });
     } catch (installErr) {
       console.error(`[Server Creation] Installation failed for Server #${serverId}:`, installErr);
+      
       // Clean rollback
       try {
         if (fs.existsSync(serverDir)) {

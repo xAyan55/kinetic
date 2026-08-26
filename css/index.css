@@ -1042,6 +1042,52 @@ header.kh-nav-header.kh-header-scrolled {
     border-color: #ffffff;
 }
 
+.kh-category-pill {
+    padding: 0.35rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #888888;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+}
+
+.kh-category-pill:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+}
+
+.kh-category-pill.active {
+    color: #000000;
+    background-color: #ffffff;
+    border-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.15);
+}
+
+.kh-build-card {
+    padding: 0.75rem 1rem;
+    border-radius: 0.625rem;
+    background-color: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.kh-build-card:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.kh-build-card.active {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: #ffffff;
+    box-shadow: 0 0 0 1px #ffffff;
+}
+
 .kh-summary-card {
     background-color: #080808;
     border: 1px solid rgba(255, 255, 255, 0.1);
