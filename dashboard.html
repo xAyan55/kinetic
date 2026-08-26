@@ -70,7 +70,9 @@
         }
     </style>
 </head>
-<body class="tw-bg-[#060606] tw-text-neutral-100 tw-font-sans tw-min-h-screen tw-flex tw-antialiased">
+<body class="kh-bg-system tw-bg-[#050505] tw-text-neutral-100 tw-font-sans tw-min-h-screen tw-flex tw-antialiased tw-relative">
+    <div class="kh-data-texture"></div>
+    <div class="kh-noise-overlay"></div>
 
     <!-- Mobile Drawer Backdrop -->
     <div id="drawer-backdrop" class="kh-drawer-backdrop"></div>
@@ -940,24 +942,24 @@
     <!-- ================================================================ -->
     <!-- MODAL 1: CREATE & ASSIGN SERVER -->
     <!-- ================================================================ -->
-    <div id="modal-create-server" class="kh-modal-backdrop tw-hidden">
+    <div id="modal-create-server" class="kh-modal-backdrop" data-modal data-state="closed" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-create-title" tabindex="-1">
         <div class="kh-modal-card tw-max-w-lg tw-p-6 tw-space-y-5">
             <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
-                <h3 class="tw-text-lg tw-font-bold tw-text-white">Deploy Minecraft Instance</h3>
-                <button onclick="closeCreateServerModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
+                <h3 id="modal-create-title" class="tw-text-lg tw-font-bold tw-text-white">Deploy Minecraft Instance</h3>
+                <button type="button" onclick="closeCreateServerModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors" aria-label="Close modal">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
 
             <form id="create-server-form" onsubmit="handleCreateServerSubmit(event)" class="tw-space-y-4">
                 <div class="kh-field-group">
-                    <label class="kh-field-label">Server Display Name</label>
+                    <label class="kh-field-label" for="create-server-name">Server Display Name</label>
                     <input type="text" id="create-server-name" required placeholder="e.g. Survival SMP World" class="kh-field-input">
                 </div>
 
                 <!-- Admin Assign To User Selector -->
                 <div class="kh-field-group" id="create-server-owner-group">
-                    <label class="kh-field-label">Assign Instance to User</label>
+                    <label class="kh-field-label" for="create-server-owner">Assign Instance to User</label>
                     <select id="create-server-owner" class="kh-field-input tw-font-mono tw-text-xs">
                         <!-- Dynamically populated -->
                     </select>
@@ -965,14 +967,14 @@
 
                 <div class="tw-grid tw-grid-cols-2 tw-gap-3">
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Software</label>
+                        <label class="kh-field-label" for="create-server-software">Software</label>
                         <select id="create-server-software" class="kh-field-input tw-font-mono tw-text-xs">
                             <option value="paper">PaperMC (Recommended)</option>
                             <option value="vanilla">Vanilla Mojang</option>
                         </select>
                     </div>
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Minecraft Version</label>
+                        <label class="kh-field-label" for="create-server-version">Minecraft Version</label>
                         <select id="create-server-version" class="kh-field-input tw-font-mono tw-text-xs">
                             <option value="1.20.4">1.20.4 (Latest)</option>
                             <option value="1.20.2">1.20.2</option>
@@ -983,7 +985,7 @@
 
                 <div class="kh-field-group">
                     <div class="tw-flex tw-items-center tw-justify-between">
-                        <label class="kh-field-label">RAM Allocation</label>
+                        <label class="kh-field-label" for="create-server-ram">RAM Allocation</label>
                         <span id="create-server-ram-val" class="tw-text-xs tw-font-mono tw-text-white">4096 MB</span>
                     </div>
                     <input type="range" id="create-server-ram" min="1024" max="8192" step="512" value="4096" oninput="document.getElementById('create-server-ram-val').textContent = this.value + ' MB'" class="tw-w-full tw-accent-white">
@@ -1015,14 +1017,14 @@
     <!-- ================================================================ -->
     <!-- MODAL 2: MANAGE USER ROLE & QUOTAS -->
     <!-- ================================================================ -->
-    <div id="modal-manage-user" class="kh-modal-backdrop tw-hidden">
+    <div id="modal-manage-user" class="kh-modal-backdrop" data-modal data-state="closed" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="modal-manage-title" tabindex="-1">
         <div class="kh-modal-card tw-max-w-lg tw-p-6 tw-space-y-5">
             <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-white/[0.08] tw-pb-3">
                 <div>
-                    <h3 class="tw-text-lg tw-font-bold tw-text-white">Manage User Account</h3>
+                    <h3 id="modal-manage-title" class="tw-text-lg tw-font-bold tw-text-white">Manage User Account</h3>
                     <p id="manage-user-subheading" class="tw-text-xs tw-font-mono tw-text-neutral-400 tw-mt-0.5">User #0</p>
                 </div>
-                <button onclick="closeManageUserModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
+                <button type="button" onclick="closeManageUserModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors" aria-label="Close modal">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
@@ -1041,7 +1043,7 @@
                 </div>
 
                 <div class="kh-field-group">
-                    <label class="kh-field-label">Account Role</label>
+                    <label class="kh-field-label" for="manage-user-role">Account Role</label>
                     <select id="manage-user-role" class="kh-field-input tw-font-mono tw-text-xs">
                         <option value="user">USER — Standard Customer Account</option>
                         <option value="admin">ADMIN — Full Platform Control Plane Access</option>
@@ -1050,12 +1052,12 @@
 
                 <div class="tw-grid tw-grid-cols-2 tw-gap-3">
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Max Allowed Servers</label>
+                        <label class="kh-field-label" for="manage-user-max-servers">Max Allowed Servers</label>
                         <input type="number" id="manage-user-max-servers" min="1" max="50" required class="kh-field-input tw-font-mono">
                     </div>
 
                     <div class="kh-field-group">
-                        <label class="kh-field-label">Max Allowed RAM (MB)</label>
+                        <label class="kh-field-label" for="manage-user-max-ram">Max Allowed RAM (MB)</label>
                         <input type="number" id="manage-user-max-ram" min="1024" max="65536" step="512" required class="kh-field-input tw-font-mono">
                     </div>
                 </div>
@@ -1080,14 +1082,14 @@
     <!-- ================================================================ -->
     <!-- MODAL 3: IN-APP CONFIRMATION SERVER DELETION -->
     <!-- ================================================================ -->
-    <div id="modal-delete-server" class="kh-modal-backdrop tw-hidden">
+    <div id="modal-delete-server" class="kh-modal-backdrop" data-modal data-state="closed" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" tabindex="-1">
         <div class="kh-modal-card tw-max-w-md tw-p-6 tw-space-y-4 tw-border-red-500/30">
             <div class="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-red-500/20 tw-pb-3">
                 <div class="tw-flex tw-items-center tw-gap-2 tw-text-red-400">
                     <i class="bi bi-exclamation-triangle-fill tw-text-lg"></i>
-                    <h3 class="tw-text-base tw-font-bold">Delete Server Instance</h3>
+                    <h3 id="delete-modal-title" class="tw-text-base tw-font-bold">Delete Server Instance</h3>
                 </div>
-                <button onclick="closeDeleteServerModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors">
+                <button type="button" onclick="closeDeleteServerModal()" class="tw-text-neutral-400 hover:tw-text-white tw-transition-colors" aria-label="Close delete modal">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
@@ -1102,15 +1104,15 @@
             </div>
 
             <div class="kh-field-group">
-                <label class="kh-field-label">Type the exact server name to confirm:</label>
-                <input type="text" id="delete-modal-input" placeholder="Type exact name here..." class="kh-field-input tw-font-mono tw-text-xs">
+                <label class="kh-field-label" for="delete-modal-input">Type the exact server name to confirm:</label>
+                <input type="text" id="delete-modal-input" placeholder="Type exact name here..." autocomplete="off" class="kh-field-input tw-font-mono tw-text-xs">
             </div>
 
             <div class="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-2">
                 <button type="button" onclick="closeDeleteServerModal()" class="btn-secondary tw-py-2 tw-px-4 tw-text-xs">
                     Cancel
                 </button>
-                <button type="button" id="delete-modal-confirm-btn" class="tw-py-2 tw-px-4 tw-rounded-full tw-bg-red-500 hover:tw-bg-red-600 tw-text-white tw-font-semibold tw-text-xs tw-transition-colors">
+                <button type="button" id="delete-modal-confirm-btn" disabled class="tw-py-2 tw-px-4 tw-rounded-full tw-bg-red-500/30 tw-text-white/40 tw-font-semibold tw-text-xs tw-cursor-not-allowed tw-transition-all">
                     Permanently Delete
                 </button>
             </div>
@@ -1118,6 +1120,6 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/dashboard.js?v=1.0.6"></script>
+    <script src="js/dashboard.js?v=1.0.7"></script>
 </body>
 </html>

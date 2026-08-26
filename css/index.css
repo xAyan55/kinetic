@@ -908,32 +908,39 @@ header.kh-nav-header.kh-header-scrolled {
     100% { background-position: -200% 0; }
 }
 
-/* Modal Animations */
+/* Modal Animations & Authoritative State Engine */
 .kh-modal-backdrop {
     position: fixed;
     inset: 0;
     z-index: 60;
-    background-color: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(8px);
-    display: flex;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: none !important;
     align-items: center;
     justify-content: center;
     padding: 1rem;
+    overflow-y: auto;
+}
+
+.kh-modal-backdrop[data-state="open"] {
+    display: flex !important;
     animation: kh-modal-fade 0.2s ease forwards;
 }
 
-.kh-modal-backdrop.tw-hidden,
-.tw-hidden {
+.kh-modal-backdrop[data-state="closed"],
+.kh-modal-backdrop[aria-hidden="true"],
+.kh-modal-backdrop:not([data-state="open"]) {
     display: none !important;
 }
 
 .kh-modal-card {
-    background-color: #0b0b0b;
+    background-color: #0c0c0c;
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 1rem;
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.05);
     width: 100%;
-    animation: kh-modal-scale 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: kh-modal-scale 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes kh-modal-fade {

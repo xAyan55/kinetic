@@ -53,10 +53,162 @@ function showToast(message, type = 'info') {
 }
 
 // ==========================================================================
+// Authoritative Modal State Management System
+// ==========================================================================
+let activeModalTrigger = null;
+
+function initModals() {
+  const modals = document.querySelectorAll('[data-modal]');
+  modals.forEach(modal => {
+    modal.setAttribute('data-state', 'closed');
+    modal.setAttribute('aria-hidden', 'true');
+    modal.classList.add('tw-hidden');
+
+    // Backdrop click: close modal only if clicking directly on backdrop
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal(modal);
+      }
+    });
+
+    // Trap keyboard focus inside modal
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        trapModalFocus(modal, e);
+      }
+    });
+  });
+
+  // Global Escape key listener to close topmost active modal
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const openModalEl = document.querySelector('.kh-modal-backdrop[data-state="open"]');
+      if (openModalEl) {
+        closeModal(openModalEl);
+      }
+    }
+  });
+
+  // Setup Delete Modal Input Validation (registered once)
+  const deleteInput = document.getElementById('delete-modal-input');
+  const deleteConfirmBtn = document.getElementById('delete-modal-confirm-btn');
+  if (deleteInput && deleteConfirmBtn) {
+    deleteInput.addEventListener('input', () => {
+      if (!pendingDeleteServer) {
+        setDeleteConfirmBtnEnabled(false);
+        return;
+      }
+      const targetName = pendingDeleteServer.name || '';
+      const inputVal = deleteInput.value.trim();
+      const isMatch = inputVal === targetName;
+      setDeleteConfirmBtnEnabled(isMatch);
+    });
+
+    deleteConfirmBtn.addEventListener('click', async () => {
+      if (!pendingDeleteServer) return;
+      const targetName = pendingDeleteServer.name || '';
+      const inputVal = deleteInput.value.trim();
+      if (inputVal !== targetName) {
+        showToast('Confirmation name did not match. Deletion aborted.', 'error');
+        return;
+      }
+      await executeServerDeletion(pendingDeleteServer.id, deleteConfirmBtn);
+    });
+  }
+}
+
+function setDeleteConfirmBtnEnabled(enabled) {
+  const btn = document.getElementById('delete-modal-confirm-btn');
+  if (!btn) return;
+  btn.disabled = !enabled;
+  if (enabled) {
+    btn.className = 'tw-py-2 tw-px-4 tw-rounded-full tw-bg-red-500 hover:tw-bg-red-600 tw-text-white tw-font-semibold tw-text-xs tw-cursor-pointer tw-transition-all tw-shadow-lg tw-shadow-red-500/20';
+  } else {
+    btn.className = 'tw-py-2 tw-px-4 tw-rounded-full tw-bg-red-500/30 tw-text-white/40 tw-font-semibold tw-text-xs tw-cursor-not-allowed tw-transition-all';
+  }
+}
+
+function trapModalFocus(modal, e) {
+  const focusable = modal.querySelectorAll('button:not([disabled]), [href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+
+  if (e.shiftKey) {
+    if (document.activeElement === first) {
+      last.focus();
+      e.preventDefault();
+    }
+  } else {
+    if (document.activeElement === last) {
+      first.focus();
+      e.preventDefault();
+    }
+  }
+}
+
+function openModal(modalOrId, triggerEl = null) {
+  const modal = typeof modalOrId === 'string' ? document.getElementById(modalOrId) : modalOrId;
+  if (!modal) return;
+
+  if (triggerEl) activeModalTrigger = triggerEl;
+
+  modal.setAttribute('data-state', 'open');
+  modal.setAttribute('aria-hidden', 'false');
+  modal.classList.remove('tw-hidden');
+  document.body.style.overflow = 'hidden';
+
+  // Focus first focusable input or button inside modal
+  setTimeout(() => {
+    const focusTarget = modal.querySelector('input:not([type="hidden"]):not([disabled]), select:not([disabled]), button:not([disabled])');
+    if (focusTarget) focusTarget.focus();
+  }, 50);
+}
+
+function closeModal(modalOrId) {
+  const modal = typeof modalOrId === 'string' ? document.getElementById(modalOrId) : modalOrId;
+  if (!modal) return;
+
+  modal.setAttribute('data-state', 'closed');
+  modal.setAttribute('aria-hidden', 'true');
+  modal.classList.add('tw-hidden');
+
+  // Check if any other modal is still open before restoring scroll
+  const anyOpen = document.querySelector('.kh-modal-backdrop[data-state="open"]');
+  if (!anyOpen) {
+    document.body.style.overflow = '';
+  }
+
+  // If this was delete modal, reset its state
+  if (modal.id === 'modal-delete-server') {
+    pendingDeleteServer = null;
+    const input = document.getElementById('delete-modal-input');
+    if (input) input.value = '';
+    setDeleteConfirmBtnEnabled(false);
+    const confirmBtn = document.getElementById('delete-modal-confirm-btn');
+    if (confirmBtn) {
+      confirmBtn.textContent = 'Permanently Delete';
+    }
+  }
+
+  // Restore focus to trigger
+  if (activeModalTrigger && typeof activeModalTrigger.focus === 'function') {
+    activeModalTrigger.focus();
+    activeModalTrigger = null;
+  }
+}
+
+function closeAllModals() {
+  document.querySelectorAll('[data-modal]').forEach(m => closeModal(m));
+}
+
+// ==========================================================================
 // Dashboard Initialization & Authentication
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', async () => {
   try {
+    initModals(); // Guarantee all modals closed immediately
+
     const authRes = await fetch('/api/auth/me');
     const authData = await authRes.json();
 
@@ -70,15 +222,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     initMobileDrawer();
     handleHashNavigation();
     window.addEventListener('hashchange', handleHashNavigation);
-
-    // Escape key closes modals
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeCreateServerModal();
-        closeManageUserModal();
-        closeDeleteServerModal();
-      }
-    });
 
     // Global logout buttons
     document.querySelectorAll('.btn-logout').forEach(btn => {
@@ -149,6 +292,8 @@ function initMobileDrawer() {
 // Hash Router with Active Polling & SSE Memory Cleanup
 // ==========================================================================
 function handleHashNavigation() {
+  closeAllModals(); // Close all open modals on route change
+
   const hash = window.location.hash.replace('#', '') || 'dashboard';
   const parts = hash.split('/');
   const mainRoute = parts[0];
@@ -690,70 +835,78 @@ function initServerSettings(s) {
 
   if (deleteBtn) {
     deleteBtn.onclick = () => {
-      openDeleteServerModal(s.id, s.name);
+      openDeleteServerModal(s.id, s.name, deleteBtn);
     };
   }
 }
 
 // In-App Deletion Modal Engine
-function openDeleteServerModal(serverId, serverName) {
+function openDeleteServerModal(serverId, serverName, triggerEl = null) {
   pendingDeleteServer = { id: serverId, name: serverName };
-  document.getElementById('delete-modal-server-target').textContent = serverName;
-  document.getElementById('delete-modal-input').value = '';
-  document.getElementById('modal-delete-server').classList.remove('tw-hidden');
-
-  const confirmBtn = document.getElementById('delete-modal-confirm-btn');
-  confirmBtn.onclick = async () => {
-    const inputVal = document.getElementById('delete-modal-input').value.trim();
-    if (inputVal !== serverName) {
-      showToast('Confirmation name did not match. Deletion aborted.', 'error');
-      return;
-    }
-
-    confirmBtn.disabled = true;
-    confirmBtn.textContent = 'Deleting...';
-
-    try {
-      const res = await fetch(`/api/servers/${serverId}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
-        showToast(data.message, 'success');
-        closeDeleteServerModal();
-        if (window.location.hash.startsWith('#server/')) {
-          window.location.hash = 'dashboard';
-        } else if (window.location.hash === '#admin-servers') {
-          loadAdminServers(true);
-        }
-      } else {
-        showToast(data.error, 'error');
-      }
-    } catch (err) {
-      showToast(err.message, 'error');
-    }
-    confirmBtn.disabled = false;
-    confirmBtn.textContent = 'Permanently Delete';
-  };
+  const targetEl = document.getElementById('delete-modal-server-target');
+  const inputEl = document.getElementById('delete-modal-input');
+  
+  if (targetEl) targetEl.textContent = serverName;
+  if (inputEl) inputEl.value = '';
+  
+  setDeleteConfirmBtnEnabled(false);
+  openModal('modal-delete-server', triggerEl);
 }
 
 function closeDeleteServerModal() {
-  pendingDeleteServer = null;
-  document.getElementById('modal-delete-server').classList.add('tw-hidden');
+  closeModal('modal-delete-server');
+}
+
+async function executeServerDeletion(serverId, confirmBtn) {
+  if (confirmBtn) {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Deleting...';
+  }
+
+  try {
+    const res = await fetch(`/api/servers/${serverId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      closeDeleteServerModal();
+      if (window.location.hash.startsWith('#server/')) {
+        window.location.hash = 'dashboard';
+      } else if (window.location.hash === '#admin-servers') {
+        loadAdminServers(true);
+      } else {
+        loadUserServers();
+      }
+    } else {
+      showToast(data.error || 'Failed to delete server', 'error');
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Permanently Delete';
+      }
+    }
+  } catch (err) {
+    showToast(err.message || 'Network error during deletion', 'error');
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.textContent = 'Permanently Delete';
+    }
+  }
 }
 
 // ==========================================================================
 // 5. Create & Assign Server Modal
 // ==========================================================================
-async function openCreateServerModal() {
+async function openCreateServerModal(triggerEl = null) {
   if (currentUser.role !== 'admin') {
     showToast('Only administrators can create and assign servers.', 'error');
     return;
   }
 
-  document.getElementById('modal-create-server').classList.remove('tw-hidden');
   document.getElementById('create-server-form').reset();
   document.getElementById('create-server-ram-val').textContent = '4096 MB';
   document.getElementById('create-server-status-msg').classList.add('tw-hidden');
   document.getElementById('btn-create-server-submit').disabled = false;
+
+  openModal('modal-create-server', triggerEl);
 
   // Populate users dropdown
   const ownerSelect = document.getElementById('create-server-owner');
@@ -776,7 +929,7 @@ async function openCreateServerModal() {
 }
 
 function closeCreateServerModal() {
-  document.getElementById('modal-create-server').classList.add('tw-hidden');
+  closeModal('modal-create-server');
 }
 
 async function handleCreateServerSubmit(e) {
@@ -1044,7 +1197,7 @@ function renderAdminUsersTable() {
 }
 
 // Manage User Quotas Modal Engine
-function openManageUserModal(userId) {
+function openManageUserModal(userId, triggerEl = null) {
   const user = allAdminUsers.find(u => u.id === userId);
   if (!user) return;
 
@@ -1064,11 +1217,11 @@ function openManageUserModal(userId) {
     warningEl.classList.add('tw-hidden');
   }
 
-  document.getElementById('modal-manage-user').classList.remove('tw-hidden');
+  openModal('modal-manage-user', triggerEl);
 }
 
 function closeManageUserModal() {
-  document.getElementById('modal-manage-user').classList.add('tw-hidden');
+  closeModal('modal-manage-user');
 }
 
 async function handleManageUserSubmit(e) {
@@ -1238,7 +1391,7 @@ function renderAdminServersTable() {
                 <i class="bi bi-play-fill"></i>
               </button>
             `}
-            <button onclick="openDeleteServerModal(${s.id}, '${escapeHtml(s.name)}')" class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/25 tw-text-xs tw-font-mono tw-text-red-400 tw-transition-colors" title="Delete Instance">
+            <button type="button" data-server-id="${s.id}" data-server-name="${escapeHtml(s.name)}" onclick="handleAdminDeleteClick(this)" class="tw-px-2.5 tw-py-1 tw-rounded-md tw-bg-red-500/10 hover:tw-bg-red-500/20 tw-border tw-border-red-500/25 tw-text-xs tw-font-mono tw-text-red-400 tw-transition-colors" title="Delete Instance">
               <i class="bi bi-trash-fill"></i>
             </button>
           </div>
@@ -1246,6 +1399,13 @@ function renderAdminServersTable() {
       </tr>
     `;
   }).join('');
+}
+
+function handleAdminDeleteClick(btn) {
+  if (!btn) return;
+  const serverId = parseInt(btn.dataset.serverId, 10);
+  const serverName = btn.dataset.serverName || 'Server';
+  openDeleteServerModal(serverId, serverName, btn);
 }
 
 async function adminQuickStartServer(serverId) {

@@ -8,7 +8,8 @@ module.exports = {
 		"./dashboard.html",
 		"./admin.html",
 		"./auth/**/*.html",
-		"./auth/**/*.js"
+		"./auth/**/*.js",
+		"./js/**/*.js"
 	],
 	theme: {
 		extend: {
