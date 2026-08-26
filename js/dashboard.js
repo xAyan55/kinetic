@@ -935,7 +935,15 @@ async function executeServerDeletion(serverId, confirmBtn) {
 // 5. Dedicated Full-Page Server Creation Controller
 // ==========================================================================
 let availableSoftwareList = [];
-let selectedSoftwareEngine = 'paper';
+let selectedSoftwareCategory = 'ALL';
+let softwareSearchQuery = '';
+let selectedSoftwareEngine = 'PAPER';
+let currentSoftwareVersions = [];
+let currentBuildMode = 'latest'; // 'latest' | 'specific'
+let currentBuildsList = [];
+let selectedBuildUuid = '';
+let mcjarsAbortController = null;
+let versionTypingDebounceTimer = null;
 
 async function loadServerCreate() {
   if (!currentUser || currentUser.role !== 'admin') {
@@ -1059,17 +1067,6 @@ async function loadServerCreate() {
   // Fetch supported software engines from backend
   await loadServerCreationSoftware();
 }
-
-let availableSoftwareList = [];
-let selectedSoftwareCategory = 'ALL';
-let softwareSearchQuery = '';
-let selectedSoftwareEngine = 'PAPER';
-let currentSoftwareVersions = [];
-let currentBuildMode = 'latest'; // 'latest' | 'specific'
-let currentBuildsList = [];
-let selectedBuildUuid = '';
-let mcjarsAbortController = null;
-let versionTypingDebounceTimer = null;
 
 async function loadServerCreationSoftware() {
   const container = document.getElementById('page-software-selector');
